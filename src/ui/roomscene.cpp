@@ -2884,7 +2884,14 @@ void RoomScene::onSkillActivated()
         dashboard->startPending(skill);
         //ok_button->setEnabled(false);
         cancel_button->setEnabled(true);
-        if (Sanguosha->translate("^"+skill->objectName()) != "^"+skill->objectName()) {
+        bool isResponding = false;
+        QString pattern = Sanguosha->currentRoomState()->getCurrentCardUsePattern();
+        if (!pattern.isEmpty()) {
+            QRegExp rx("@@?([_A-Za-z]+)(\\d+)?!?");
+            if (rx.exactMatch(pattern))
+                isResponding = true;
+        }
+        if (!isResponding && Sanguosha->translate("^"+skill->objectName()) != "^"+skill->objectName()) {
             ClientInstance->setPromptList(QStringList() << "^"+skill->objectName());
             prompt_box->appear();
         }
