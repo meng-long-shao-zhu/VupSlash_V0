@@ -63,6 +63,9 @@ public:
     }
     void setHidden(bool val);
     void setTotallyHidden(bool val);
+    bool isBonus() const;
+    void setBonus(bool val);
+
 
 public slots:
     void lastWord() const;
@@ -78,6 +81,7 @@ private:
     bool hidden;
     bool never_shown;
     int start_hp;
+    bool is_bonus;
 };
 
 #endif

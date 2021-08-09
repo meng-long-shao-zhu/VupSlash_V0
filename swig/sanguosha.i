@@ -69,6 +69,8 @@ public:
     QString getBriefName() const;
     void setHidden(bool val);
     void setTotallyHidden(bool val);
+    bool isBonus() const;
+    void setBonus(bool val);
 
     void lastWord() const;
 };

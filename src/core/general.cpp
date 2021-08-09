@@ -20,6 +20,7 @@ General::General(Package *package, const QString &name, const QString &kingdom,
         lord = false;
         setObjectName(name);
     }
+    is_bonus = false;
 }
 
 int General::getMaxHp() const
@@ -279,5 +280,16 @@ void General::setHidden(bool val)
 void General::setTotallyHidden(bool val)
 {
     never_shown = val;
+    return;
+}
+
+bool General::isBonus() const
+{
+    return is_bonus;
+}
+
+void General::setBonus(bool val)
+{
+    is_bonus = val;
     return;
 }
