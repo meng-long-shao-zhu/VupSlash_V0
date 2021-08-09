@@ -315,6 +315,7 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool 
     ui->tableWidget->setRowCount(copy_generals.length());
     ui->tableWidget->setIconSize(QSize(20, 20));
     QIcon lord_icon("image/system/roles/lord.png");
+    QIcon bonus_star_icon("image/system/bonus_star.png");
 
     for (int i = 0; i < copy_generals.length(); i++) {
         const General *general = copy_generals[i];
@@ -357,10 +358,15 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool 
             nickname_item = new QTableWidgetItem(Sanguosha->translate("UnknowNick"));
         nickname_item->setData(Qt::UserRole, general_name);
         nickname_item->setTextAlignment(Qt::AlignCenter);
-
         if (Sanguosha->isGeneralHidden(general_name)) {
             nickname_item->setBackgroundColor(Qt::gray);
-            nickname_item->setToolTip(tr("This general is hidden"));
+            nickname_item->setToolTip(Sanguosha->translate("This general is hidden"));
+        }
+
+        if (general->isBonus()) {
+            nickname_item->setIcon(bonus_star_icon);
+            nickname_item->setTextAlignment(Qt::AlignCenter);
+            nickname_item->setToolTip(Sanguosha->translate("bonus_unlocked"));
         }
 
         QTableWidgetItem *name_item = new QTableWidgetItem(name);
@@ -373,7 +379,7 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool 
 
         if (Sanguosha->isGeneralHidden(general_name)) {
             name_item->setBackgroundColor(Qt::gray);
-            name_item->setToolTip(tr("This general is hidden"));
+            name_item->setToolTip(Sanguosha->translate("This general is hidden"));
         }
 
         QTableWidgetItem *kingdom_item = new QTableWidgetItem(kingdom);
