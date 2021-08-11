@@ -276,7 +276,7 @@ GeneralOverview::GeneralOverview(QWidget *parent)
     button_layout = new QVBoxLayout;
 
     QGroupBox *group_box = new QGroupBox;
-    group_box->setTitle(Sanguosha->translate("character_state"));
+    group_box->setTitle(tr("Effects"));
     group_box->setLayout(button_layout);
     ui->scrollArea->setWidget(group_box);
     ui->skillTextEdit->setProperty("description", true);
