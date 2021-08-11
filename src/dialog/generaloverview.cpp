@@ -276,7 +276,7 @@ GeneralOverview::GeneralOverview(QWidget *parent)
     button_layout = new QVBoxLayout;
 
     QGroupBox *group_box = new QGroupBox;
-    group_box->setTitle(tr("Effects"));
+    group_box->setTitle(Sanguosha->translate("character_state"));
     group_box->setLayout(button_layout);
     ui->scrollArea->setWidget(group_box);
     ui->skillTextEdit->setProperty("description", true);
@@ -301,9 +301,12 @@ GeneralOverview::GeneralOverview(QWidget *parent)
 void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool init)
 {
     QList<const General *> copy_generals;
+    //QList<const General *> bonus_generals;
     foreach (const General *general, generals) {
-        if (!general->isTotallyHidden())
+        if (!general->isTotallyHidden() || general->isBonus())
             copy_generals.append(general);
+        //else if (general->isBonus())
+            //bonus_generals.append(general);
     }
     if (init) {
         ui->returnButton->hide();
@@ -322,92 +325,147 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool 
         QString general_name = general->objectName();
         QString name, kingdom, gender, max_hp, difficulty, package;
 
-        name = Sanguosha->translate(general_name);
-        kingdom = Sanguosha->translate(general->getKingdom());
-        if (general->isMale())
-            gender = tr("Male");
-        else if (general->isFemale())
-            gender = tr("Female");
-        else if (general->isNeuter())
-            gender = tr("Neuter");
-        else if (general->isSexless())
-            gender = tr("Sexless");
-        else
-            gender = tr("NoGender");
-        int start_hp = general->getStartHp();
-        int maxhp = general->getMaxHp();
-        /*if (start_hp > maxhp)
-            start_hp = maxhp;*/
-        if (start_hp != maxhp)
-            max_hp = QString::number(start_hp) + "/" + QString::number(maxhp);
-        else
-            max_hp = QString::number(maxhp);
-        difficulty = Sanguosha->translate("$" + general_name);
-        if (difficulty == "$" + general_name) {
-            difficulty = Sanguosha->translate("default_difficulty");     //default difficulty word
-        }
-        package = Sanguosha->translate(general->getPackage());
+        if (general->isBonus() && general->isTotallyHidden()) {
+            QString nickname = Sanguosha->translate("bonus_character");
+            QString name = "???";
+            QString kingdom = Sanguosha->translate(general->getKingdom());;
+            QString gender = "--";
+            QString max_hp = "--";
+            QString difficulty = "--";
+            QString package = "--";
 
-        QString nickname = Sanguosha->translate("#" + general_name);
-        if (nickname.startsWith("#") && general_name.contains("_"))
-            nickname = Sanguosha->translate("#" + general_name.split("_").last());
-        QTableWidgetItem *nickname_item;
-        if (!nickname.startsWith("#"))
-            nickname_item = new QTableWidgetItem(nickname);
-        else
-            nickname_item = new QTableWidgetItem(Sanguosha->translate("UnknowNick"));
-        nickname_item->setData(Qt::UserRole, general_name);
-        nickname_item->setTextAlignment(Qt::AlignCenter);
-        if (Sanguosha->isGeneralHidden(general_name)) {
-            nickname_item->setBackgroundColor(Qt::gray);
-            nickname_item->setToolTip(Sanguosha->translate("This general is hidden"));
-        }
-
-        if (general->isBonus()) {
-            nickname_item->setIcon(bonus_star_icon);
+            QTableWidgetItem *nickname_item = new QTableWidgetItem(nickname);
             nickname_item->setTextAlignment(Qt::AlignCenter);
-            nickname_item->setToolTip(Sanguosha->translate("bonus_unlocked"));
-        }
+            nickname_item->setData(Qt::UserRole, general_name);
+            nickname_item->setBackgroundColor(Qt::gray);
+            nickname_item->setToolTip(Sanguosha->translate("bonus_locking"));
 
-        QTableWidgetItem *name_item = new QTableWidgetItem(name);
-        name_item->setTextAlignment(Qt::AlignCenter);
-        name_item->setData(Qt::UserRole, general_name);
-        if (general->isLord()) {
-            name_item->setIcon(lord_icon);
+            QTableWidgetItem *name_item = new QTableWidgetItem(name);
             name_item->setTextAlignment(Qt::AlignCenter);
-        }
-
-        if (Sanguosha->isGeneralHidden(general_name)) {
+            name_item->setData(Qt::UserRole, general_name);
             name_item->setBackgroundColor(Qt::gray);
-            name_item->setToolTip(Sanguosha->translate("This general is hidden"));
+            name_item->setToolTip(Sanguosha->translate("bonus_locking"));
+
+            QTableWidgetItem *kingdom_item = new QTableWidgetItem(kingdom);
+            kingdom_item->setTextAlignment(Qt::AlignCenter);
+            kingdom_item->setBackgroundColor(Qt::gray);
+            kingdom_item->setToolTip(Sanguosha->translate("bonus_locking"));
+
+            QTableWidgetItem *gender_item = new QTableWidgetItem(gender);
+            gender_item->setTextAlignment(Qt::AlignCenter);
+            gender_item->setBackgroundColor(Qt::gray);
+            gender_item->setToolTip(Sanguosha->translate("bonus_locking"));
+
+            QTableWidgetItem *max_hp_item = new QTableWidgetItem(max_hp);
+            max_hp_item->setTextAlignment(Qt::AlignCenter);
+            max_hp_item->setBackgroundColor(Qt::gray);
+            max_hp_item->setToolTip(Sanguosha->translate("bonus_locking"));
+
+            QTableWidgetItem *difficulty_item = new QTableWidgetItem(difficulty);
+            difficulty_item->setTextAlignment(Qt::AlignCenter);
+            difficulty_item->setBackgroundColor(Qt::gray);
+            difficulty_item->setToolTip(Sanguosha->translate("bonus_locking"));
+
+            QTableWidgetItem *package_item = new QTableWidgetItem(package);
+            package_item->setTextAlignment(Qt::AlignCenter);
+            package_item->setBackgroundColor(Qt::gray);
+            package_item->setToolTip(Sanguosha->translate("bonus_locking"));
+
+
+            ui->tableWidget->setItem(i, 0, nickname_item);
+            ui->tableWidget->setItem(i, 1, name_item);
+            ui->tableWidget->setItem(i, 2, kingdom_item);
+            ui->tableWidget->setItem(i, 3, gender_item);
+            ui->tableWidget->setItem(i, 4, max_hp_item);
+            ui->tableWidget->setItem(i, 5, difficulty_item);
+            ui->tableWidget->setItem(i, 6, package_item);
+        } else {
+            name = Sanguosha->translate(general_name);
+            kingdom = Sanguosha->translate(general->getKingdom());
+            if (general->isMale())
+                gender = tr("Male");
+            else if (general->isFemale())
+                gender = tr("Female");
+            else if (general->isNeuter())
+                gender = tr("Neuter");
+            else if (general->isSexless())
+                gender = tr("Sexless");
+            else
+                gender = tr("NoGender");
+            int start_hp = general->getStartHp();
+            int maxhp = general->getMaxHp();
+            /*if (start_hp > maxhp)
+                start_hp = maxhp;*/
+            if (start_hp != maxhp)
+                max_hp = QString::number(start_hp) + "/" + QString::number(maxhp);
+            else
+                max_hp = QString::number(maxhp);
+            difficulty = Sanguosha->translate("$" + general_name);
+            if (difficulty == "$" + general_name) {
+                difficulty = Sanguosha->translate("default_difficulty");     //default difficulty word
+            }
+            package = Sanguosha->translate(general->getPackage());
+
+            QString nickname = Sanguosha->translate("#" + general_name);
+            if (nickname.startsWith("#") && general_name.contains("_"))
+                nickname = Sanguosha->translate("#" + general_name.split("_").last());
+            QTableWidgetItem *nickname_item;
+            if (!nickname.startsWith("#"))
+                nickname_item = new QTableWidgetItem(nickname);
+            else
+                nickname_item = new QTableWidgetItem(Sanguosha->translate("UnknowNick"));
+            nickname_item->setData(Qt::UserRole, general_name);
+            nickname_item->setTextAlignment(Qt::AlignCenter);
+            if (Sanguosha->isGeneralHidden(general_name)) {
+                nickname_item->setBackgroundColor(Qt::gray);
+                nickname_item->setToolTip(Sanguosha->translate("This general is hidden"));
+            }
+
+            if (general->isBonus()) {
+                nickname_item->setIcon(bonus_star_icon);
+                nickname_item->setTextAlignment(Qt::AlignCenter);
+                nickname_item->setToolTip(Sanguosha->translate("bonus_unlocked"));
+            }
+
+            QTableWidgetItem *name_item = new QTableWidgetItem(name);
+            name_item->setTextAlignment(Qt::AlignCenter);
+            name_item->setData(Qt::UserRole, general_name);
+            if (general->isLord()) {
+                name_item->setIcon(lord_icon);
+                name_item->setTextAlignment(Qt::AlignCenter);
+            }
+
+            if (Sanguosha->isGeneralHidden(general_name)) {
+                name_item->setBackgroundColor(Qt::gray);
+                name_item->setToolTip(Sanguosha->translate("This general is hidden"));
+            }
+
+            QTableWidgetItem *kingdom_item = new QTableWidgetItem(kingdom);
+            kingdom_item->setTextAlignment(Qt::AlignCenter);
+
+            QTableWidgetItem *gender_item = new QTableWidgetItem(gender);
+            gender_item->setTextAlignment(Qt::AlignCenter);
+
+            QTableWidgetItem *max_hp_item = new QTableWidgetItem(max_hp);
+            max_hp_item->setTextAlignment(Qt::AlignCenter);
+
+            QTableWidgetItem *difficulty_item = new QTableWidgetItem(difficulty);
+            difficulty_item->setTextAlignment(Qt::AlignCenter);
+
+            QTableWidgetItem *package_item = new QTableWidgetItem(package);
+            package_item->setTextAlignment(Qt::AlignCenter);
+            if (Config.value("LuaPackages", QString()).toString().split("+").contains(general->getPackage())) {
+                package_item->setBackgroundColor(QColor(0x66, 0xCC, 0xFF));
+                package_item->setToolTip(tr("This is an Lua extension"));
+            }
+            ui->tableWidget->setItem(i, 0, nickname_item);
+            ui->tableWidget->setItem(i, 1, name_item);
+            ui->tableWidget->setItem(i, 2, kingdom_item);
+            ui->tableWidget->setItem(i, 3, gender_item);
+            ui->tableWidget->setItem(i, 4, max_hp_item);
+            ui->tableWidget->setItem(i, 5, difficulty_item);
+            ui->tableWidget->setItem(i, 6, package_item);
         }
-
-        QTableWidgetItem *kingdom_item = new QTableWidgetItem(kingdom);
-        kingdom_item->setTextAlignment(Qt::AlignCenter);
-
-        QTableWidgetItem *gender_item = new QTableWidgetItem(gender);
-        gender_item->setTextAlignment(Qt::AlignCenter);
-
-        QTableWidgetItem *max_hp_item = new QTableWidgetItem(max_hp);
-        max_hp_item->setTextAlignment(Qt::AlignCenter);
-
-        QTableWidgetItem *difficulty_item = new QTableWidgetItem(difficulty);
-        difficulty_item->setTextAlignment(Qt::AlignCenter);
-
-        QTableWidgetItem *package_item = new QTableWidgetItem(package);
-        package_item->setTextAlignment(Qt::AlignCenter);
-        if (Config.value("LuaPackages", QString()).toString().split("+").contains(general->getPackage())) {
-            package_item->setBackgroundColor(QColor(0x66, 0xCC, 0xFF));
-            package_item->setToolTip(tr("This is an Lua extension"));
-        }
-
-        ui->tableWidget->setItem(i, 0, nickname_item);
-        ui->tableWidget->setItem(i, 1, name_item);
-        ui->tableWidget->setItem(i, 2, kingdom_item);
-        ui->tableWidget->setItem(i, 3, gender_item);
-        ui->tableWidget->setItem(i, 4, max_hp_item);
-        ui->tableWidget->setItem(i, 5, difficulty_item);
-        ui->tableWidget->setItem(i, 6, package_item);
     }
 
     ui->tableWidget->setColumnWidth(0, 85);
@@ -533,82 +591,100 @@ void GeneralOverview::on_tableWidget_itemSelectionChanged()
     int row = ui->tableWidget->currentRow();
     QString general_name = ui->tableWidget->item(row, 0)->data(Qt::UserRole).toString();
     const General *general = Sanguosha->getGeneral(general_name);
-    ui->generalPhoto->setPixmap(G_ROOM_SKIN.getCardMainPixmap(general->objectName()));
-    ui->changeHeroSkinButton->setVisible(hasSkin(general_name));
+    if (general->isBonus() && general->isTotallyHidden()) {
+        ui->generalPhoto->setPixmap(G_ROOM_SKIN.getCardMainPixmap(general->objectName() + "_hide"));
+    } else {
+        ui->generalPhoto->setPixmap(G_ROOM_SKIN.getCardMainPixmap(general->objectName()));
+        ui->changeHeroSkinButton->setVisible(hasSkin(general_name));
 
-    QList<const Skill *> skills = general->getVisibleSkillList();
-    foreach (QString skill_name, general->getRelatedSkillNames()) {
-        const Skill *skill = Sanguosha->getSkill(skill_name);
-        if (skill && skill->isVisible() && !skill_name.startsWith("characteristic")) skills << skill;    //hide characteristic skills
+        QList<const Skill *> skills = general->getVisibleSkillList();
+        foreach (QString skill_name, general->getRelatedSkillNames()) {
+            const Skill *skill = Sanguosha->getSkill(skill_name);
+            if (skill && skill->isVisible() && !skill_name.startsWith("characteristic")) skills << skill;    //hide characteristic skills
+        }
+
+        ui->skillTextEdit->clear();
+
+        resetButtons();
+
+        foreach(const Skill *skill, skills)
+            addLines(skill);
+
+        QString last_word = Sanguosha->translate("~" + general->objectName());
+        if (last_word.startsWith("~") && general->objectName().contains("_"))
+            last_word = Sanguosha->translate(("~") + general->objectName().split("_").last());
+
+        if (!last_word.startsWith("~")) {
+            if (last_word == " ")
+                last_word = tr("Translation missing.");
+            QCommandLinkButton *death_button = new QCommandLinkButton(tr("Death"), last_word);
+            button_layout->addWidget(death_button);
+
+            connect(death_button, SIGNAL(clicked()), general, SLOT(lastWord()));
+
+            addCopyAction(death_button);
+        }
+
+        if (general_name.contains("caocao")) {
+            QCommandLinkButton *win_button = new QCommandLinkButton(tr("Victory"),
+                tr("Six dragons lead my chariot, "
+                "I will ride the wind with the greatest speed."
+                "With all of the feudal lords under my command,"
+                "to rule the world with one name!"));
+
+            button_layout->addWidget(win_button);
+            addCopyAction(win_button);
+
+            win_button->setObjectName("audio/system/win-cc.ogg");
+            connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
+        }
+
+        if (general_name == "shenlvbu1" || general_name == "shenlvbu2") {
+            QCommandLinkButton *stage_change_button = new QCommandLinkButton(tr("Stage Change"),
+                tr("Trashes, the real fun is just beginning!"));
+
+            button_layout->addWidget(stage_change_button);
+            addCopyAction(stage_change_button);
+
+            stage_change_button->setObjectName("audio/system/stagechange.ogg");
+            connect(stage_change_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
+        }
+
+        QString designer_text = Sanguosha->translate("designer:" + general->objectName());
+        if (!designer_text.startsWith("designer:"))
+            ui->designerLineEdit->setText(designer_text);
+        else
+            ui->designerLineEdit->setText(tr("Official"));
+
+        QString cv_text = Sanguosha->translate("cv:" + general->objectName());
+        if (cv_text.startsWith("cv:"))
+            cv_text = Sanguosha->translate("cv:" + general->objectName().split("_").last());
+        if (!cv_text.startsWith("cv:"))
+            ui->cvLineEdit->setText(cv_text);
+        else
+            ui->cvLineEdit->setText(tr("Official"));
+
+        ui->illustratorLineEdit->setText(getIllustratorInfo(general->objectName()));
+
+        button_layout->addStretch();
     }
 
-    ui->skillTextEdit->clear();
-
-    resetButtons();
-
-    foreach(const Skill *skill, skills)
-        addLines(skill);
-
-    QString last_word = Sanguosha->translate("~" + general->objectName());
-    if (last_word.startsWith("~") && general->objectName().contains("_"))
-        last_word = Sanguosha->translate(("~") + general->objectName().split("_").last());
-
-    if (!last_word.startsWith("~")) {
-        if (last_word == " ")
-            last_word = tr("Translation missing.");
-        QCommandLinkButton *death_button = new QCommandLinkButton(tr("Death"), last_word);
-        button_layout->addWidget(death_button);
-
-        connect(death_button, SIGNAL(clicked()), general, SLOT(lastWord()));
-
-        addCopyAction(death_button);
+    if (general->isBonus() && general->isTotallyHidden()) {
+        ui->designerLineEdit->setText("");
+        ui->cvLineEdit->setText("");
+        ui->illustratorLineEdit->setText("");
+        resetButtons();
+        button_layout->addStretch();
+        ui->skillTextEdit->clear();
+        QString unlock_log = (Sanguosha->translate("unlock:" + general->objectName()) == "unlock:" + general->objectName()) ? Sanguosha->translate("unlock:default") : Sanguosha->translate("unlock:" + general->objectName());
+        ui->skillTextEdit->append("<strong>" + Sanguosha->translate("unlock_condition:") + "</strong><br/>" + unlock_log);
+        ui->changeGeneralButton->setEnabled(false);
+        ui->changeGeneral2Button->setEnabled(false);
+    } else {
+        ui->skillTextEdit->append(general->getSkillDescription(true));
+        ui->changeGeneralButton->setEnabled(Self && Self->getGeneralName() != general->objectName());
+        ui->changeGeneral2Button->setEnabled(Self && Self->getGeneral2Name() != general->objectName());
     }
-
-    if (general_name.contains("caocao")) {
-        QCommandLinkButton *win_button = new QCommandLinkButton(tr("Victory"),
-            tr("Six dragons lead my chariot, "
-            "I will ride the wind with the greatest speed."
-            "With all of the feudal lords under my command,"
-            "to rule the world with one name!"));
-
-        button_layout->addWidget(win_button);
-        addCopyAction(win_button);
-
-        win_button->setObjectName("audio/system/win-cc.ogg");
-        connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
-
-    if (general_name == "shenlvbu1" || general_name == "shenlvbu2") {
-        QCommandLinkButton *stage_change_button = new QCommandLinkButton(tr("Stage Change"),
-            tr("Trashes, the real fun is just beginning!"));
-
-        button_layout->addWidget(stage_change_button);
-        addCopyAction(stage_change_button);
-
-        stage_change_button->setObjectName("audio/system/stagechange.ogg");
-        connect(stage_change_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
-
-    QString designer_text = Sanguosha->translate("designer:" + general->objectName());
-    if (!designer_text.startsWith("designer:"))
-        ui->designerLineEdit->setText(designer_text);
-    else
-        ui->designerLineEdit->setText(tr("Official"));
-
-    QString cv_text = Sanguosha->translate("cv:" + general->objectName());
-    if (cv_text.startsWith("cv:"))
-        cv_text = Sanguosha->translate("cv:" + general->objectName().split("_").last());
-    if (!cv_text.startsWith("cv:"))
-        ui->cvLineEdit->setText(cv_text);
-    else
-        ui->cvLineEdit->setText(tr("Official"));
-
-    ui->illustratorLineEdit->setText(getIllustratorInfo(general->objectName()));
-
-    button_layout->addStretch();
-    ui->skillTextEdit->append(general->getSkillDescription(true));
-    ui->changeGeneralButton->setEnabled(Self && Self->getGeneralName() != general->objectName());
-    ui->changeGeneral2Button->setEnabled(Self && Self->getGeneral2Name() != general->objectName());
 }
 
 void GeneralOverview::playAudioEffect()
@@ -632,7 +708,9 @@ void GeneralOverview::askTransfiguration()
             ui->changeGeneralButton->setEnabled(false);
         int row = ui->tableWidget->currentRow();
         QString general_name = ui->tableWidget->item(row, 0)->data(Qt::UserRole).toString();
-        ClientInstance->requestCheatChangeGeneral(general_name, isSecondaryHero);
+        const General *general = Sanguosha->getGeneral(general_name);
+        if (!general->isBonus() || !general->isTotallyHidden())
+            ClientInstance->requestCheatChangeGeneral(general_name, isSecondaryHero);
     }
 }
 

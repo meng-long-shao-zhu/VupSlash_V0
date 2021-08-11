@@ -460,6 +460,7 @@ void RoomScene::handleGameEvent(const QVariant &args)
     case S_GAME_EVENT_DETACH_SKILL: {
         QString player_name = arg[1].toString();
         QString skill_name = arg[2].toString();
+        bool stop_huashen = arg[3].toBool();
 
         ClientPlayer *player = ClientInstance->getPlayer(player_name);
         player->detachSkill(skill_name);
@@ -467,7 +468,7 @@ void RoomScene::handleGameEvent(const QVariant &args)
 
         // stop huashen animation
         PlayerCardContainer *container = (PlayerCardContainer *)_getGenericCardContainer(Player::PlaceHand, player);
-        if (!player->hasSkill("huashen"))
+        if (stop_huashen || !player->hasSkills("huashen|luajiantui"))
             container->stopHuaShen();
         container->updateAvatarTooltip();
         break;
@@ -553,10 +554,10 @@ void RoomScene::handleGameEvent(const QVariant &args)
         if (oldHero) {
             foreach(const Skill *skill, oldHero->getVisibleSkills())
                 detachSkill(skill->objectName());
-            if (oldHero->hasSkill("huashen")) {
+            //if (oldHero->hasSkill("huashen")) {
                 PlayerCardContainer *container = (PlayerCardContainer *)_getGenericCardContainer(Player::PlaceHand, player);
                 container->stopHuaShen();
-            }
+            //}
         }
 
         if (newHero) {

@@ -72,9 +72,9 @@ public:
     void slashEffect(const SlashEffectStruct &effect);
     void slashResult(const SlashEffectStruct &effect, const Card *jink);
     void attachSkillToPlayer(ServerPlayer *player, const QString &skill_name);
-    void detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name, bool is_equip = false, bool acquire_only = false, bool event_and_log = true);
-    void handleAcquireDetachSkills(ServerPlayer *player, const QStringList &skill_names, bool acquire_only = false, bool getmark = true, bool event_and_log = true);
-    void handleAcquireDetachSkills(ServerPlayer *player, const QString &skill_names, bool acquire_only = false, bool getmark = true, bool event_and_log = true);
+    void detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name, bool is_equip = false, bool acquire_only = false, bool event_and_log = true, bool stop_huashen = false);
+    void handleAcquireDetachSkills(ServerPlayer *player, const QStringList &skill_names, bool acquire_only = false, bool getmark = true, bool event_and_log = true, bool stop_huashen = false);
+    void handleAcquireDetachSkills(ServerPlayer *player, const QString &skill_names, bool acquire_only = false, bool getmark = true, bool event_and_log = true, bool stop_huashen = false);
     void acquireOneTurnSkills(ServerPlayer *player,const QString &skill_name, const QStringList &skill_names);
     void acquireOneTurnSkills(ServerPlayer *player, const QString &skill_name, const QString &skill_names);
     void acquireNextTurnSkills(ServerPlayer *player,const QString &skill_name, const QStringList &skill_names);

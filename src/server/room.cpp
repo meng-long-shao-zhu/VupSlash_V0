@@ -622,7 +622,7 @@ void Room::attachSkillToPlayer(ServerPlayer *player, const QString &skill_name)
     doNotify(player, S_COMMAND_ATTACH_SKILL, QVariant(skill_name));
 }
 
-void Room::detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name, bool is_equip, bool acquire_only, bool event_and_log)
+void Room::detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name, bool is_equip, bool acquire_only, bool event_and_log, bool stop_huashen)
 {
     const Skill *skill = Sanguosha->getSkill(skill_name);
     if (!skill) return;
@@ -641,7 +641,7 @@ void Room::detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name
 
     if (skill->isVisible()) {
         JsonArray args;
-        args << QSanProtocol::S_GAME_EVENT_DETACH_SKILL << player->objectName() << skill_name;
+        args << QSanProtocol::S_GAME_EVENT_DETACH_SKILL << player->objectName() << skill_name << stop_huashen;
         doBroadcastNotify(QSanProtocol::S_COMMAND_LOG_EVENT, args);
 
         if (!is_equip && event_and_log) {
@@ -662,7 +662,7 @@ void Room::detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name
     }
 }
 
-void Room::handleAcquireDetachSkills(ServerPlayer *player, const QStringList &skill_names, bool acquire_only, bool getmark, bool event_and_log)
+void Room::handleAcquireDetachSkills(ServerPlayer *player, const QStringList &skill_names, bool acquire_only, bool getmark, bool event_and_log, bool stop_huashen)
 {
     if (skill_names.isEmpty()) return;
     QList<bool> isLost;
@@ -685,7 +685,7 @@ void Room::handleAcquireDetachSkills(ServerPlayer *player, const QStringList &sk
                 continue;
             if (skill->isVisible()) {
                 JsonArray args;
-                args << QSanProtocol::S_GAME_EVENT_DETACH_SKILL << player->objectName() << actual_skill;
+                args << QSanProtocol::S_GAME_EVENT_DETACH_SKILL << player->objectName() << actual_skill << stop_huashen;
                 doBroadcastNotify(QSanProtocol::S_COMMAND_LOG_EVENT, args);
 
                 if (event_and_log) {
@@ -754,9 +754,9 @@ void Room::handleAcquireDetachSkills(ServerPlayer *player, const QStringList &sk
     }
 }
 
-void Room::handleAcquireDetachSkills(ServerPlayer *player, const QString &skill_names, bool acquire_only, bool getmark, bool event_and_log)
+void Room::handleAcquireDetachSkills(ServerPlayer *player, const QString &skill_names, bool acquire_only, bool getmark, bool event_and_log, bool stop_huashen)
 {
-    handleAcquireDetachSkills(player, skill_names.split("|"), acquire_only, getmark, event_and_log);
+    handleAcquireDetachSkills(player, skill_names.split("|"), acquire_only, getmark, event_and_log, stop_huashen);
 }
 
 void Room::acquireOneTurnSkills(ServerPlayer *player,const QString &skill_name, const QStringList &skill_names)

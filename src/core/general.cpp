@@ -198,6 +198,8 @@ QString General::getSkillDescription(bool include_name, bool include_difficulty)
     if (include_name) {
         QString color_str = Sanguosha->getKingdomColor(kingdom).name();
         QString name = QString("<font color=%1><b>%2</b></font>     ").arg(color_str).arg(Sanguosha->translate(objectName()));
+        if (isBonus())
+            name.prepend("<img src='image/system/bonus_star.png' height = 17/>");
         name.prepend(QString("<img src='image/kingdom/icon/%1.png' height=32/>    ").arg(kingdom));
 
         int start_hp = getStartHp();

@@ -1207,8 +1207,8 @@ public:
     void slashEffect(const SlashEffectStruct &effect);
     void slashResult(const SlashEffectStruct &effect, const Card *jink);
     void attachSkillToPlayer(ServerPlayer *player, const char *skill_name);
-    void detachSkillFromPlayer(ServerPlayer *player, const char *skill_name, bool is_equip = false, bool acquire_only = false, bool event_and_log = true);
-	void handleAcquireDetachSkills(ServerPlayer *player, const char *skill_names, bool acquire_only = false, bool getmark = true, bool event_and_log = true);
+    void detachSkillFromPlayer(ServerPlayer *player, const char *skill_name, bool is_equip = false, bool acquire_only = false, bool event_and_log = true, bool stop_huashen = false);
+	void handleAcquireDetachSkills(ServerPlayer *player, const char *skill_names, bool acquire_only = false, bool getmark = true, bool event_and_log = true, bool stop_huashen = false);
     void acquireOneTurnSkills(ServerPlayer *player, const char *skill_name, const char *skill_names);
     void acquireNextTurnSkills(ServerPlayer *player, const char *skill_name, const char *skill_names);
     void acquireTurnEndSkills(ServerPlayer *player, const char *skill_name, const char *skill_names);
