@@ -63,9 +63,9 @@ public:
     QList<ServerPlayer *> getAlivePlayers() const;
     void output(const QString &message);
     void outputEventStack();
-    void enterDying(ServerPlayer *player, DamageStruct *reason);
+    void enterDying(ServerPlayer *player, DamageStruct *reason = NULL, HpLostStruct *lost_reason = NULL);
     ServerPlayer *getCurrentDyingPlayer() const;
-    void killPlayer(ServerPlayer *victim, DamageStruct *reason = NULL);
+    void killPlayer(ServerPlayer *victim, DamageStruct *reason = NULL, HpLostStruct *lost_reason = NULL);
     void revivePlayer(ServerPlayer *player, bool sendlog = true, bool throw_mark = true, bool visible_only = false);
     QStringList aliveRoles(ServerPlayer *except = NULL) const;
     void gameOver(const QString &winner);
@@ -97,7 +97,7 @@ public:
     void clearCardFlag(int card_id, ServerPlayer *who = NULL);
     bool useCard(const CardUseStruct &card_use, bool add_history = false);
     void damage(const DamageStruct &data);
-    void loseHp(ServerPlayer *victim, int lose = 1);
+    void loseHp(ServerPlayer *victim, int lose = 1, ServerPlayer *from = NULL, QString reason = "");
     void loseMaxHp(ServerPlayer *victim, int lose = 1);
     void gainMaxHp(ServerPlayer *player, int gain = 1);
     bool changeMaxHpForAwakenSkill(ServerPlayer *player, int magnitude = -1);

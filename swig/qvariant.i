@@ -63,6 +63,14 @@ public:
         return $self->value<ServerPlayer *>();
     }
 
+    void setValue(HpLostStruct *hplost) {
+        $self->setValue(QVariant::fromValue(*hplost));
+    }
+
+    HpLostStruct toHpLost() const{
+        return $self->value<HpLostStruct>();
+    }
+
     void setValue(DyingStruct *dying) {
         $self->setValue(QVariant::fromValue(*dying));
     }

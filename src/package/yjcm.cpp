@@ -1195,7 +1195,7 @@ public:
         if (damage.from == zhangchunhua) {
             room->broadcastSkillInvoke(objectName());
             room->sendCompulsoryTriggerLog(zhangchunhua, objectName());
-            room->loseHp(damage.to, damage.damage);
+            room->loseHp(damage.to, damage.damage, damage.from, "jueqing");
 
             return true;
         }

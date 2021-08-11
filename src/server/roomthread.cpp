@@ -78,12 +78,12 @@ SlashEffectStruct::SlashEffectStruct()
 }
 
 DyingStruct::DyingStruct()
-    : who(NULL), damage(NULL)
+    : who(NULL), damage(NULL), hplost(NULL)
 {
 }
 
 DeathStruct::DeathStruct()
-    : who(NULL), damage(NULL)
+    : who(NULL), damage(NULL), hplost(NULL)
 {
 }
 
@@ -99,6 +99,11 @@ PindianStruct::PindianStruct()
 
 MarkStruct::MarkStruct()
     : who(NULL), name(QString()), count(1), gain(-1)
+{
+}
+
+HpLostStruct::HpLostStruct()
+    : from(NULL), to(NULL), lose(1), reason(QString())
 {
 }
 

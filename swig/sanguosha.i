@@ -638,11 +638,21 @@ struct CardsMoveOneTimeStruct {
     void removeCardIds(const QList<int> &to_remove);
 };
 
+struct HpLostStruct
+{
+    HpLostStruct();
+    ServerPlayer *from;
+    ServerPlayer *to;
+    int lose;
+    QString reason;
+};
+
 struct DyingStruct {
     DyingStruct();
 
     ServerPlayer *who; // who is ask for help
     DamageStruct *damage; // if it is NULL that means the dying is caused by losing hp
+    HpLostStruct *hplost;
 };
 
 struct DeathStruct {
@@ -650,6 +660,7 @@ struct DeathStruct {
 
     ServerPlayer *who; // who is ask for help
     DamageStruct *damage; // if it is NULL that means the dying is caused by losing hp
+    HpLostStruct *hplost;
 };
 
 struct RecoverStruct {
@@ -1198,9 +1209,9 @@ public:
     QList<ServerPlayer *> getPlayers() const;
     QList<ServerPlayer *> getAllPlayers(bool include_dead = false) const;
     QList<ServerPlayer *> getAlivePlayers() const;
-    void enterDying(ServerPlayer *player, DamageStruct *reason);
+    void enterDying(ServerPlayer *player, DamageStruct *reason, HpLostStruct *lost_reason);
     ServerPlayer *getCurrentDyingPlayer() const;
-    void killPlayer(ServerPlayer *victim, DamageStruct *reason = NULL);
+    void killPlayer(ServerPlayer *victim, DamageStruct *reason = NULL, HpLostStruct *lost_reason = NULL);
     void revivePlayer(ServerPlayer *player, bool sendlog = true, bool throw_mark = true, bool visible_only = false);
     QStringList aliveRoles(ServerPlayer *except = NULL) const;
     void gameOver(const char *winner);
@@ -1226,7 +1237,7 @@ public:
     void clearCardFlag(int card_id, ServerPlayer *who = NULL);
     void useCard(const CardUseStruct &card_use, bool add_history = false);
     void damage(const DamageStruct &data);
-    void loseHp(ServerPlayer *victim, int lose = 1);
+	void loseHp(ServerPlayer *victim, int lose = 1, ServerPlayer *from = NULL, const char *reason = "");
     void loseMaxHp(ServerPlayer *victim, int lose = 1);
 	void gainMaxHp(ServerPlayer *player, int gain = 1);
     bool changeMaxHpForAwakenSkill(ServerPlayer *player, int magnitude = -1);

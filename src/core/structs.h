@@ -330,12 +330,24 @@ struct CardsMoveStruct
     }
 };
 
+struct HpLostStruct
+{
+    HpLostStruct();
+    //HpLostStruct(ServerPlayer *to, ServerPlayer *from, int lose = 1, const QString &reason);
+
+    ServerPlayer *from;
+    ServerPlayer *to;
+    int lose;
+    QString reason;
+};
+
 struct DyingStruct
 {
     DyingStruct();
 
     ServerPlayer *who; // who is ask for help
     DamageStruct *damage; // if it is NULL that means the dying is caused by losing hp
+    HpLostStruct *hplost;
 };
 
 struct DeathStruct
@@ -344,6 +356,7 @@ struct DeathStruct
 
     ServerPlayer *who; // who is dead
     DamageStruct *damage; // if it is NULL that means the dying is caused by losing hp
+    HpLostStruct *hplost;
 };
 
 struct RecoverStruct
@@ -623,5 +636,6 @@ Q_DECLARE_METATYPE(ServerPlayer *)
 Q_DECLARE_METATYPE(JudgeStruct *)
 Q_DECLARE_METATYPE(PindianStruct *)
 Q_DECLARE_METATYPE(MarkStruct)
+Q_DECLARE_METATYPE(HpLostStruct)
 #endif
 

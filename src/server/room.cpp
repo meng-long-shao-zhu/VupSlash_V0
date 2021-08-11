@@ -199,7 +199,7 @@ void Room::outputEventStack()
     output(msg);
 }
 
-void Room::enterDying(ServerPlayer *player, DamageStruct *reason)
+void Room::enterDying(ServerPlayer *player, DamageStruct *reason, HpLostStruct *lost_reason)
 {
     setPlayerFlag(player, "Global_Dying");
     QStringList currentdying = getTag("CurrentDying").toStringList();
@@ -213,6 +213,7 @@ void Room::enterDying(ServerPlayer *player, DamageStruct *reason)
     DyingStruct dying;
     dying.who = player;
     dying.damage = reason;
+    dying.hplost = lost_reason;
     QVariant dying_data = QVariant::fromValue(dying);
 
     bool enterdying = thread->trigger(EnterDying, this, player, dying_data);
@@ -353,7 +354,7 @@ void Room::updateStateItem()
     doBroadcastNotify(S_COMMAND_UPDATE_STATE_ITEM, QVariant(roles));
 }
 
-void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason)
+void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason, HpLostStruct *lost_reason)
 {
     ServerPlayer *killer = reason ? reason->from : NULL;
     QList<ServerPlayer *> players_with_victim = getAllPlayers();
@@ -372,6 +373,7 @@ void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason)
     DeathStruct death;
     death.who = victim;
     death.damage = reason;
+    death.hplost = lost_reason;
     QVariant data = QVariant::fromValue(death);
     thread->trigger(BeforeGameOverJudge, this, victim, data);
 
@@ -3918,15 +3920,24 @@ bool Room::useCard(const CardUseStruct &use, bool add_history)
     return true;
 }
 
-void Room::loseHp(ServerPlayer *victim, int lose)
+void Room::loseHp(ServerPlayer *victim, int lose, ServerPlayer *from, QString reason)
 {
     if (victim->isDead())
         return;
-    QVariant data = lose;
+    //QVariant data = lose;
+    //HpLostStruct data = HpLostStruct(victim, from, lose, reason);
+    HpLostStruct hplost;
+    hplost.to = victim;
+    hplost.from = from;
+    hplost.lose = lose;
+    hplost.reason = reason;
+    QVariant data = QVariant::fromValue(hplost);
+
     if (thread->trigger(PreHpLost, this, victim, data))
         return;
 
-    int new_lose = data.toInt();
+    //int new_lose = data.toInt();
+    int new_lose = data.value<HpLostStruct>().lose;
     if (new_lose <= 0 || victim->isDead()) return;
 
     LogMessage log;
@@ -3941,6 +3952,7 @@ void Room::loseHp(ServerPlayer *victim, int lose)
     arg << -1;
     doBroadcastNotify(S_COMMAND_CHANGE_HP, arg);
 
+    //QVariant data_num = lose;
     setTag("HpChangedData", data);
     setPlayerProperty(victim, "hp", victim->getHp() - new_lose);
 
@@ -6614,7 +6626,7 @@ void Room::makeDamage(const QString &source, const QString &target, QSanProtocol
     if (targetPlayer == NULL) return;
 
     if (nature == S_CHEAT_HP_LOSE) {
-        loseHp(targetPlayer, point);
+        loseHp(targetPlayer, point, sourcePlayer, "cheat");
         return;
     } else if (nature == S_CHEAT_MAX_HP_LOSE) {
         loseMaxHp(targetPlayer, point);

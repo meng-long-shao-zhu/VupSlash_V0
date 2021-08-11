@@ -605,9 +605,12 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
             break;
         if (data.canConvert<DamageStruct>()) {
             DamageStruct damage = data.value<DamageStruct>();
-            room->enterDying(player, &damage);
+            room->enterDying(player, &damage, NULL);
+        } else if (data.canConvert<HpLostStruct>()) {
+            HpLostStruct hplost = data.value<HpLostStruct>();
+            room->enterDying(player, NULL, &hplost);
         } else {
-            room->enterDying(player, NULL);
+            room->enterDying(player, NULL, NULL);
         }
 
         break;
@@ -654,7 +657,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
     case AskForPeachesDone: {
         if (player->getHp() <= 0 && player->isAlive()) {
             DyingStruct dying = data.value<DyingStruct>();
-            room->killPlayer(player, dying.damage);
+            room->killPlayer(player, dying.damage, dying.hplost);
         }
 
         break;
