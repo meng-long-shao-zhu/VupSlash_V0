@@ -635,8 +635,8 @@ void Client::startGame(const QVariant &)
 void Client::hpChange(const QVariant &change_str)
 {
     JsonArray change = change_str.value<JsonArray>();
-    if (change.size() != 3) return;
-    if (!JsonUtils::isString(change[0]) || !JsonUtils::isNumber(change[1]) || !JsonUtils::isNumber(change[2])) return;
+    if (change.size() != 4) return;
+    if (!JsonUtils::isString(change[0]) || !JsonUtils::isNumber(change[1]) || !JsonUtils::isNumber(change[2]) || !JsonUtils::isString(change[3])) return;
 
     QString who = change[0].toString();
     int delta = change[1].toInt();
@@ -645,7 +645,9 @@ void Client::hpChange(const QVariant &change_str)
     DamageStruct::Nature nature = DamageStruct::Normal;
     if (nature_index > 0) nature = (DamageStruct::Nature)nature_index;
 
-    emit hp_changed(who, delta, nature, nature_index == -1);
+    QString audio_name = change[3].toString();
+
+    emit hp_changed(who, delta, nature, nature_index == -1, audio_name);
 }
 
 void Client::maxhpChange(const QVariant &change_str)

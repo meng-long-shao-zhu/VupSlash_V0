@@ -720,8 +720,11 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
         default: break;
         }
 
+        QString audio_name = "";
+        if (damage.reason == "shengqiang")
+            audio_name = "shengqiang";
         JsonArray arg;
-        arg << damage.to->objectName() << -damage.damage << damage.nature;
+        arg << damage.to->objectName() << -damage.damage << damage.nature << audio_name;
         room->doBroadcastNotify(QSanProtocol::S_COMMAND_CHANGE_HP, arg);
 
         room->setTag("HpChangedData", data);

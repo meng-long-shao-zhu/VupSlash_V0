@@ -141,7 +141,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     connect(ClientInstance, SIGNAL(seats_arranged(QList<const ClientPlayer *>)), SLOT(arrangeSeats(QList<const ClientPlayer *>)));
     connect(ClientInstance, SIGNAL(status_changed(Client::Status, Client::Status)), this, SLOT(updateStatus(Client::Status, Client::Status)));
     connect(ClientInstance, SIGNAL(avatars_hiden()), this, SLOT(hideAvatars()));
-    connect(ClientInstance, SIGNAL(hp_changed(QString, int, DamageStruct::Nature, bool)), SLOT(changeHp(QString, int, DamageStruct::Nature, bool)));
+    connect(ClientInstance, SIGNAL(hp_changed(QString, int, DamageStruct::Nature, bool, QString)), SLOT(changeHp(QString, int, DamageStruct::Nature, bool, QString)));
     connect(ClientInstance, SIGNAL(maxhp_changed(QString, int)), SLOT(changeMaxHp(QString, int)));
     connect(ClientInstance, SIGNAL(pile_reset()), this, SLOT(resetPiles()));
     //connect(ClientInstance, SIGNAL(round_add()), this, SLOT(addRound()));
@@ -3039,7 +3039,7 @@ void RoomScene::startInXs()
     if (return_to_main_menu) return_to_main_menu->hide();
 }
 
-void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nature, bool losthp)
+void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nature, bool losthp, const QString &audio_name)
 {
     // update
     Photo *photo = name2photo.value(who, NULL);
@@ -3053,7 +3053,7 @@ void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nat
     QString maxhp = QString::number(player->getMaxHp());
     if (delta < 0) {
         if (losthp) {
-            Sanguosha->playSystemAudioEffect("hplost");
+            Sanguosha->playSystemAudioEffect(audio_name != "" ? audio_name : "hplost");
             QString from_general = ClientInstance->getPlayer(who)->objectName();
             log_box->appendLog("#GetHp", from_general, QStringList(), QString(), hp, maxhp);
             return;
@@ -3069,19 +3069,23 @@ void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nat
         default: damage_effect = "injure3"; break;
         }
 
-        Sanguosha->playSystemAudioEffect(damage_effect);
+        Sanguosha->playSystemAudioEffect(audio_name != "" ? audio_name : damage_effect);
 
         if (photo) {
             setEmotion(who, "damage");
             photo->tremble();
         }
 
-        if (nature == DamageStruct::Fire)
-            doAnimation(S_ANIMATE_FIRE, QStringList() << who);
-        else if (nature == DamageStruct::Thunder)
-            doAnimation(S_ANIMATE_LIGHTNING, QStringList() << who);
-        else if (nature == DamageStruct::Ice){
-            doAnimation(S_ANIMATE_ICE, QStringList() << who);
+        if (audio_name == "shengqiang")
+            doAnimation(S_ANIMATE_SHOT, QStringList() << who);
+        else {
+            if (nature == DamageStruct::Fire)
+                doAnimation(S_ANIMATE_FIRE, QStringList() << who);
+            else if (nature == DamageStruct::Thunder)
+                doAnimation(S_ANIMATE_LIGHTNING, QStringList() << who);
+            else if (nature == DamageStruct::Ice){
+                doAnimation(S_ANIMATE_ICE, QStringList() << who);
+            }
         }
     } else {
         QString type = "#Recover";
@@ -4349,6 +4353,7 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         map[S_ANIMATE_FIRE] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_LIGHTNING] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_ICE] = &RoomScene::doAppearingAnimation;
+        map[S_ANIMATE_SHOT] = &RoomScene::doAppearingAnimation;
 
         map[S_ANIMATE_LIGHTBOX] = &RoomScene::doLightboxAnimation;
         map[S_ANIMATE_HUASHEN] = &RoomScene::doHuashen;
@@ -4362,6 +4367,7 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         anim_name[S_ANIMATE_FIRE] = "fire";
         anim_name[S_ANIMATE_LIGHTNING] = "lightning";
         anim_name[S_ANIMATE_ICE] = "ice";
+        anim_name[S_ANIMATE_SHOT] = "shot";
 
         anim_name[S_ANIMATE_LIGHTBOX] = "lightbox";
         anim_name[S_ANIMATE_HUASHEN] = "huashen";

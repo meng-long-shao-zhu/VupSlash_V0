@@ -175,7 +175,8 @@ namespace QSanProtocol {
         S_ANIMATE_HUASHEN,
         S_ANIMATE_FIRE,
         S_ANIMATE_LIGHTNING,
-        S_ANIMATE_ICE
+        S_ANIMATE_ICE,
+        S_ANIMATE_SHOT
     };
 
     enum Game3v3ChooseOrderCommand

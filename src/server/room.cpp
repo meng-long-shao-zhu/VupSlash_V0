@@ -3950,6 +3950,8 @@ void Room::loseHp(ServerPlayer *victim, int lose, ServerPlayer *from, QString re
     arg << victim->objectName();
     arg << -new_lose;
     arg << -1;
+    QString audio_name = "";
+    arg << audio_name;
     doBroadcastNotify(S_COMMAND_CHANGE_HP, arg);
 
     //QVariant data_num = lose;
@@ -4075,6 +4077,8 @@ void Room::recover(ServerPlayer *player, const RecoverStruct &recover, bool set_
         arg << player->objectName();
         arg << recover_num;
         arg << 0;
+        QString audio_name = "";
+        arg << audio_name;
         doBroadcastNotify(S_COMMAND_CHANGE_HP, arg);
 
         int new_hp = qMin(player->getHp() + recover_num, max_recover);

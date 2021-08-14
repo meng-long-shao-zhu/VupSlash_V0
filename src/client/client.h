@@ -309,7 +309,7 @@ signals:
     void orders_got(QSanProtocol::Game3v3ChooseOrderCommand reason);
 
     void seats_arranged(const QList<const ClientPlayer *> &seats);
-    void hp_changed(const QString &who, int delta, DamageStruct::Nature nature, bool losthp);
+    void hp_changed(const QString &who, int delta, DamageStruct::Nature nature, bool losthp, const QString &audio_name = NULL);
     void maxhp_changed(const QString &who, int delta);
     void status_changed(Client::Status oldStatus, Client::Status newStatus);
     void avatars_hiden();

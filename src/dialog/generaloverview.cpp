@@ -677,7 +677,7 @@ void GeneralOverview::on_tableWidget_itemSelectionChanged()
         button_layout->addStretch();
         ui->skillTextEdit->clear();
         QString unlock_log = (Sanguosha->translate("unlock:" + general->objectName()) == "unlock:" + general->objectName()) ? Sanguosha->translate("unlock:default") : Sanguosha->translate("unlock:" + general->objectName());
-        ui->skillTextEdit->append("<strong>" + Sanguosha->translate("unlock_condition:") + "</strong><br/>" + unlock_log);
+        ui->skillTextEdit->append("<i><font color='#FF8C00'>"+Sanguosha->translate("how_to_unlock")+"</font></i><br/><br/><strong>" + Sanguosha->translate("unlock_condition:") + "</strong><br/>" + unlock_log);
         ui->changeGeneralButton->setEnabled(false);
         ui->changeGeneral2Button->setEnabled(false);
     } else {
