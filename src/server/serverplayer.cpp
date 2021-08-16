@@ -1550,11 +1550,13 @@ void ServerPlayer::addToPile(const QString &pile_name, QList<int> card_ids,
 void ServerPlayer::exchangeFreelyFromPrivatePile(const QString &skill_name, const QString &pile_name, int upperlimit, bool include_equip, bool unhide)
 {
     QList<int> pile = getPile(pile_name);
-    if (pile.isEmpty() || upperlimit == 0) return;
+    if (pile.isEmpty()) return;
 
     if (upperlimit > this->getCardCount(include_equip)) {
         upperlimit = this->getCardCount(include_equip);
     }
+
+    if (upperlimit == 0) return;
 
     QString tempMovingFlag = QString("%1_InTempMoving").arg(skill_name);
     room->setPlayerFlag(this, tempMovingFlag);
