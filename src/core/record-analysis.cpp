@@ -169,7 +169,7 @@ void RecAnalysis::initialize(QString dir)
 
         if (packet.getCommandType() == S_COMMAND_CHANGE_HP) {
             JsonArray change = packet.getMessageBody().value<JsonArray>();
-            if (change.size() != 3 || !JsonUtils::isString(change[0])
+            if (change.size() != 4 || !JsonUtils::isString(change[0])
                 || !JsonUtils::isNumber(change[1]) || !JsonUtils::isNumber(change[2]))
                 continue;
 
