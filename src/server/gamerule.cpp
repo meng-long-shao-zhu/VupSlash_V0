@@ -722,7 +722,9 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
 
         QString audio_name = "";
         if (damage.reason == "shengqiang")
-            audio_name = "shengqiang";
+            audio_name = "shot";
+        else if (damage.card && damage.card->hasFlag("xingyao_hit"))
+            audio_name = "earth_hit";
         JsonArray arg;
         arg << damage.to->objectName() << -damage.damage << damage.nature << audio_name;
         room->doBroadcastNotify(QSanProtocol::S_COMMAND_CHANGE_HP, arg);

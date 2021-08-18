@@ -3074,10 +3074,13 @@ void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nat
         if (photo) {
             setEmotion(who, "damage");
             photo->tremble();
+            //photo->flip(0, 180);
         }
 
-        if (audio_name == "shengqiang")
+        if (audio_name == "shot")
             doAnimation(S_ANIMATE_SHOT, QStringList() << who);
+        else if (audio_name == "earth_hit")
+                doAnimation(S_ANIMATE_EARTH_HIT, QStringList() << who);
         else {
             if (nature == DamageStruct::Fire)
                 doAnimation(S_ANIMATE_FIRE, QStringList() << who);
@@ -4344,6 +4347,56 @@ void RoomScene::doIndicate(const QString &, const QStringList &args)
     showIndicator(args.first(), args.last());
 }
 
+void RoomScene::showFlip(const QString &who, const QString &type)
+{
+    Photo *photo = name2photo.value(who, NULL);
+    if (photo) {
+        QStringList type_nums = type.split("|");
+        double from = type_nums[0].toDouble();
+        double to = type_nums[1].toDouble();
+        int time = type_nums[2].toInt();
+        photo->flip(from, to, time);
+    }
+}
+
+void RoomScene::doFlip(const QString &, const QStringList &args)
+{
+    showFlip(args.first(), args.last());
+}
+
+void RoomScene::showDieThrow(const QString &who, const QString &type)
+{
+    Photo *photo = name2photo.value(who, NULL);
+    if (photo) {
+        //QStringList type_nums = type.split("|");
+        //double off_x = type_nums[0].toDouble();
+        //double off_y = type_nums[1].toDouble();
+        double vector_x = photo->x() - this->width()/2;
+        double vector_y = photo->y() - this->height()/2;
+        double vector_length = sqrt(pow(vector_x,2)+pow(vector_y,2));
+        vector_x /= vector_length;
+        vector_y /= vector_length;
+
+        int off = 100;
+        double off_x = vector_x * off;
+        double off_y = vector_y * off;
+        photo->die_throw(off_x, off_y);
+    }
+}
+
+void RoomScene::doDieThrow(const QString &, const QStringList &args)
+{
+    showDieThrow(args.first(), args.last());
+}
+
+void RoomScene::doRevive(const QString &, const QStringList &args)
+{
+    Photo *photo = name2photo.value(args.first(), NULL);
+    if (photo) {
+        photo->revive();
+    }
+}
+
 void RoomScene::doAnimation(int name, const QStringList &args)
 {
     static QMap<AnimateType, AnimationFunc> map;
@@ -4354,10 +4407,14 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         map[S_ANIMATE_LIGHTNING] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_ICE] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_SHOT] = &RoomScene::doAppearingAnimation;
+        map[S_ANIMATE_EARTH_HIT] = &RoomScene::doAppearingAnimation;
 
         map[S_ANIMATE_LIGHTBOX] = &RoomScene::doLightboxAnimation;
         map[S_ANIMATE_HUASHEN] = &RoomScene::doHuashen;
         map[S_ANIMATE_INDICATE] = &RoomScene::doIndicate;
+        map[S_ANIMATE_FLIP] = &RoomScene::doFlip;
+        map[S_ANIMATE_DIE_THROW] = &RoomScene::doDieThrow;
+        map[S_ANIMATE_REVIVE] = &RoomScene::doRevive;
     }
 
     static QMap<AnimateType, QString> anim_name;
@@ -4368,6 +4425,7 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         anim_name[S_ANIMATE_LIGHTNING] = "lightning";
         anim_name[S_ANIMATE_ICE] = "ice";
         anim_name[S_ANIMATE_SHOT] = "shot";
+        anim_name[S_ANIMATE_EARTH_HIT] = "earth_hit";
 
         anim_name[S_ANIMATE_LIGHTBOX] = "lightbox";
         anim_name[S_ANIMATE_HUASHEN] = "huashen";

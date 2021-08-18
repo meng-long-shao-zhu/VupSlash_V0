@@ -312,6 +312,7 @@ void Room::revivePlayer(ServerPlayer *player, bool sendlog, bool throw_mark, boo
     }
 
     doBroadcastNotify(S_COMMAND_REVIVE_PLAYER, QVariant(player->objectName()));
+    //doAnimate(S_ANIMATE_REVIVE, player->objectName(), "");
     updateStateItem();
 
     if (sendlog) {
@@ -390,6 +391,7 @@ void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason, HpLostStruct *
     broadcastProperty(victim, "role");
 
     doBroadcastNotify(S_COMMAND_KILL_PLAYER, QVariant(victim->objectName()));
+    //doAnimate(S_ANIMATE_DIE_THROW, victim->objectName(), "");
 
     thread->trigger(GameOverJudge, this, victim, data);
 

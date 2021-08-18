@@ -141,6 +141,8 @@ public:
     void changeTextEditBackground();
     void adjustItems();
     void showIndicator(const QString &from, const QString &to);
+    void showFlip(const QString &who, const QString &type);
+    void showDieThrow(const QString &who, const QString &type);
     void showPromptBox();
     static void FillPlayerNames(QComboBox *ComboBox, bool add_none);
     void updateTable();
@@ -363,6 +365,9 @@ private:
     void doLightboxAnimation(const QString &name, const QStringList &args);
     void doHuashen(const QString &name, const QStringList &args);
     void doIndicate(const QString &name, const QStringList &args);
+    void doFlip(const QString &name, const QStringList &args);
+    void doDieThrow(const QString &name, const QStringList &args);
+    void doRevive(const QString &name, const QStringList &args);
     EffectAnimation *animations;
     bool pindian_success;
     bool pindian_other_success;

@@ -989,8 +989,15 @@ PindianStruct *ServerPlayer::PinDian(ServerPlayer *target, const QString &reason
 void ServerPlayer::turnOver()
 {
     if (room->getThread()->trigger(TurnOver, room, this)) return;
+
+    room->doAnimate(QSanProtocol::S_ANIMATE_FLIP, objectName(), "0|90|250");
+    room->getThread()->delay(250);
+
     setFaceUp(!faceUp());
     room->broadcastProperty(this, "faceup");
+
+    room->doAnimate(QSanProtocol::S_ANIMATE_FLIP, objectName(), "-90|0|250");
+    room->getThread()->delay(300);
 
     LogMessage log;
     log.type = "#TurnOver";

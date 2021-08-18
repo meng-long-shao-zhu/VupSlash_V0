@@ -18,6 +18,8 @@ class Sprite;
 class Photo : public PlayerCardContainer
 {
     Q_OBJECT
+    Q_PROPERTY(qreal Y_rotate READ Y_rotate WRITE setY_rotate)
+    Q_PROPERTY(qreal Z_rotate READ Z_rotate WRITE setZ_rotate)
 
 public:
     explicit Photo();
@@ -29,6 +31,9 @@ public:
 
     void setEmotion(const QString &emotion, bool permanent = false);
     void tremble();
+    void flip(double from, double to, int time);
+    void die_throw(double off_x, double off_y);
+    void revive();
     void showSkillName(const QString &skill_name);
 
     enum FrameType
@@ -42,6 +47,14 @@ public:
     void setFrame(FrameType type);
     virtual QRectF boundingRect() const;
     QGraphicsItem *getMouseClickReceiver();
+    qreal y_rotate = 0;
+    void setY_rotate(qreal val);
+    qreal Y_rotate() const;
+    qreal z_rotate = 0;
+    void setZ_rotate(qreal val);
+    qreal Z_rotate() const;
+    qreal m_x;
+    qreal m_y;
 
 public slots:
     void updatePhase();

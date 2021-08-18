@@ -176,7 +176,11 @@ namespace QSanProtocol {
         S_ANIMATE_FIRE,
         S_ANIMATE_LIGHTNING,
         S_ANIMATE_ICE,
-        S_ANIMATE_SHOT
+        S_ANIMATE_SHOT,
+        S_ANIMATE_EARTH_HIT,
+        S_ANIMATE_FLIP,
+        S_ANIMATE_DIE_THROW,
+        S_ANIMATE_REVIVE
     };
 
     enum Game3v3ChooseOrderCommand

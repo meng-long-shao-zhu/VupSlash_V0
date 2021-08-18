@@ -107,6 +107,44 @@ void Photo::_adjustComponentZValues(bool killed)
     _m_progressBarItem->setZValue(_m_groupMain->zValue() + 1);
 }
 
+void Photo::setY_rotate(qreal val)
+{
+    QRectF rect = this->boundingRect();
+    y_rotate = val;
+    //以y轴进行旋转
+    QTransform transform;
+    //transform.translate(rect.x(), rect.y() - rect.height()/4);
+    //transform.translate(rect.width()/2, -rect.height()/2);
+    transform.rotate(y_rotate, Qt::YAxis);
+    transform.translate(-rect.width()/2, -rect.height()/2);
+    //transform.translate(-rect.x(), -rect.y() + rect.height()/4);
+    this->setTransform(transform);
+}
+
+qreal Photo::Y_rotate() const
+{
+    return y_rotate;
+}
+
+void Photo::setZ_rotate(qreal val)
+{
+    QRectF rect = this->boundingRect();
+    z_rotate = val;
+    //以z轴进行旋转
+    QTransform transform;
+    //transform.translate(rect.x(), rect.y() - rect.height()/4);
+    //transform.translate(rect.width()/2, -rect.height()/2);
+    transform.rotate(z_rotate, Qt::ZAxis);
+    transform.translate(-rect.width()/2, -rect.height()/2);
+    //transform.translate(-rect.x(), -rect.y() + rect.height()/4);
+    this->setTransform(transform);
+}
+
+qreal Photo::Z_rotate() const
+{
+    return z_rotate;
+}
+
 void Photo::setEmotion(const QString &emotion, bool permanent)
 {
     if (emotion == ".") {
@@ -150,6 +188,54 @@ void Photo::tremble()
     vibrate->setEasingCurve(QEasingCurve::OutInBounce);
 
     vibrate->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void Photo::flip(double from, double to, int time)
+{
+    QPropertyAnimation *anim = new QPropertyAnimation(this, "Y_rotate");
+
+    //anim->setKeyValueAt(0.5, 90);
+    anim->setStartValue(from);
+    anim->setEndValue(to);
+    anim->setDuration(time);
+
+    anim->setEasingCurve(QEasingCurve::OutQuad);
+
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void Photo::die_throw(double off_x, double off_y)
+{
+    QPropertyAnimation *anim_x = new QPropertyAnimation(this, "x");
+    QPropertyAnimation *anim_y = new QPropertyAnimation(this, "y");
+    QPropertyAnimation *anim_r = new QPropertyAnimation(this, "Z_rotate");
+
+    m_x = x();
+    m_y = y();
+
+    anim_x->setEndValue(x() + off_x);
+    anim_y->setEndValue(y() + off_y);
+    anim_r->setEndValue(qrand() % 120 - 60);
+
+    anim_x->setDuration(500);
+    anim_y->setDuration(500);
+    anim_r->setDuration(500);
+
+    anim_x->setEasingCurve(QEasingCurve::OutQuad);
+    anim_y->setEasingCurve(QEasingCurve::OutQuad);
+    anim_r->setEasingCurve(QEasingCurve::OutQuad);
+
+    anim_x->start(QAbstractAnimation::DeleteWhenStopped);
+    anim_y->start(QAbstractAnimation::DeleteWhenStopped);
+    anim_r->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void Photo::revive()
+{
+    this->setProperty("x", m_x);
+    this->setProperty("y", m_y);
+    this->setProperty("Z_rotate", 0);
+    this->setProperty("Y_rotate", 0);
 }
 
 void Photo::showSkillName(const QString &skill_name)
