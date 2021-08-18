@@ -2923,9 +2923,9 @@ void Room::processRequestSurrender(ServerPlayer *player, const QVariant &)
     //@todo: return false for 3v3 and 1v1!!!
     if (player == NULL || !player->m_isWaitingReply)
         return;
-    if (!_m_isFirstSurrenderRequest
-        && _m_timeSinceLastSurrenderRequest.elapsed() <= Config.S_SURRENDER_REQUEST_MIN_INTERVAL)
-        return; //@todo: warn client here after new protocol has been enacted on the warn request
+    //if (!_m_isFirstSurrenderRequest
+    //    && _m_timeSinceLastSurrenderRequest.elapsed() <= Config.S_SURRENDER_REQUEST_MIN_INTERVAL)
+    //    return; //@todo: warn client here after new protocol has been enacted on the warn request
 
     _m_isFirstSurrenderRequest = false;
     _m_timeSinceLastSurrenderRequest.restart();
