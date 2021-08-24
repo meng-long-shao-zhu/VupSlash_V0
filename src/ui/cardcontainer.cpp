@@ -34,7 +34,7 @@ QRectF CardContainer::boundingRect() const
     return _m_boundingRect;
 }
 
-void CardContainer::fillCards(const QList<int> &card_ids, const QList<int> &disabled_ids, bool hide_suit_number)
+void CardContainer::fillCards(const QList<int> &card_ids, const QList<int> &disabled_ids, bool hide_suit_number, const QString &foot_notes)
 {
     QList<CardItem *> card_items;
     if (card_ids.isEmpty() && items.isEmpty())
@@ -63,6 +63,8 @@ void CardContainer::fillCards(const QList<int> &card_ids, const QList<int> &disa
     qreal whole_width = skip * (column-1);
     items.append(card_items);
     int n = items.length();
+
+    QStringList footnote_list = foot_notes.split("|");
 
     for (int i = 0; i < n; i++) {
         QPointF pos;
@@ -93,6 +95,10 @@ void CardContainer::fillCards(const QList<int> &card_ids, const QList<int> &disa
         item->setHomeOpacity(1.0);
         item->setFlag(QGraphicsItem::ItemIsFocusable);
         if (hide_suit_number) item->hideSuitNumber();
+        if (footnote_list.size() > i) {
+            item->setFootnote(Sanguosha->translate(footnote_list.at(i)));
+            item->showFootnote();
+        }
         if (disabled_ids.contains(item->getCard()->getEffectiveId())) item->setEnabled(false);
         item->show();
     }

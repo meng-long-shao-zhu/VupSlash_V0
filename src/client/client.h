@@ -345,7 +345,7 @@ signals:
     void nullification_asked(bool asked);
     void surrender_enabled(bool enabled);
 
-    void ag_filled(const QList<int> &card_ids, const QList<int> &disabled_ids, bool hide_suit_number);
+    void ag_filled(const QList<int> &card_ids, const QList<int> &disabled_ids, bool hide_suit_number, const QString &foot_notes);
     void ag_taken(ClientPlayer *taker, int card_id, bool move_cards);
     void ag_cleared();
 

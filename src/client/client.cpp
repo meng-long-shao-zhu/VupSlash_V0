@@ -1503,14 +1503,16 @@ void Client::onPlayerDiscardCards(const Card *cards)
 void Client::fillAG(const QVariant &cards_str)
 {
     JsonArray cards = cards_str.value<JsonArray>();
-    if (cards.size() != 3) return;
+    if (cards.size() != 4) return;
     if (!JsonUtils::isBool(cards[2])) return;
+    if (!JsonUtils::isString(cards[3])) return;
     QList<int> card_ids, disabled_ids;
     JsonUtils::tryParse(cards[0], card_ids);
     JsonUtils::tryParse(cards[1], disabled_ids);
     bool hide_suit_number = cards[2].toBool();
+    QString foot_notes = cards[3].toString();
     m_askforAG_reason = "";
-    emit ag_filled(card_ids, disabled_ids, hide_suit_number);
+    emit ag_filled(card_ids, disabled_ids, hide_suit_number, foot_notes);
 }
 
 void Client::takeAG(const QVariant &take_var)

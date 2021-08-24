@@ -395,7 +395,7 @@ private:
 #endif
 
 private slots:
-    void fillCards(const QList<int> &card_ids, const QList<int> &disabled_ids = QList<int>(), bool hide_suit_number = false);
+    void fillCards(const QList<int> &card_ids, const QList<int> &disabled_ids = QList<int>(), bool hide_suit_number = false, const QString &foot_notes = "");
     void updateSkillButtons(bool isPrepare = false);
     void acquireSkill(const ClientPlayer *player, const QString &skill_name);
     void updateSelectedTargets();

@@ -6688,12 +6688,13 @@ void Room::makeReviving(const QString &name)
     broadcastProperty(player, "hp");
 }
 
-void Room::fillAG(const QList<int> &card_ids, ServerPlayer *who, const QList<int> &disabled_ids, bool hide_suit_number)
+void Room::fillAG(const QList<int> &card_ids, ServerPlayer *who, const QList<int> &disabled_ids, bool hide_suit_number, const QString &foot_notes)
 {
     JsonArray arg;
     arg << JsonUtils::toJsonArray(card_ids);
     arg << JsonUtils::toJsonArray(disabled_ids);
     arg << hide_suit_number;
+    arg << foot_notes;
 
     m_fillAGarg = arg;
 

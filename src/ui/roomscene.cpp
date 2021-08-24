@@ -187,7 +187,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     connect(card_container, SIGNAL(item_chosen(int)), ClientInstance, SLOT(onPlayerChooseAG(int)));
     connect(card_container, SIGNAL(item_gongxined(int)), ClientInstance, SLOT(onPlayerReplyGongxin(int)));
 
-    connect(ClientInstance, SIGNAL(ag_filled(QList<int>, QList<int>, bool)), this, SLOT(fillCards(QList<int>, QList<int>, bool)));
+    connect(ClientInstance, SIGNAL(ag_filled(QList<int>, QList<int>, bool, QString)), this, SLOT(fillCards(QList<int>, QList<int>, bool, QString)));
     connect(ClientInstance, SIGNAL(ag_taken(ClientPlayer *, int, bool)), this, SLOT(takeAmazingGrace(ClientPlayer *, int, bool)));
     connect(ClientInstance, SIGNAL(ag_cleared()), card_container, SLOT(clear()));
 
@@ -938,6 +938,13 @@ void RoomScene::updateTable()
         { 1, 1, 1, 4, 4 }, // rebel (left), same with loyalist (left)
         { 3, 3, 1, 1, 1 } // loyalist (right), same with rebel (right)
     };
+    static int ttSeatIndex[][3] = {
+        { 1, 1, 4 }, // 1
+        { 3, 1, 1 }, // 2
+        { 1, 1, 4 }, // 3
+        { 3, 1, 1 }  // 4
+    };
+
 
     double hGap = _m_roomLayout->m_photoHDistance;
     double vGap = _m_roomLayout->m_photoVDistance;
@@ -1028,6 +1035,9 @@ void RoomScene::updateTable()
     } else if (ServerInfo.GameMode == "06_3v3" && game_started) {
         seatToRegion = kof3v3SeatIndex[(Self->getSeat() - 1) % 3];
         pkMode = true;
+    } else if (ServerInfo.GameMode == "04_tt" && game_started) {
+        seatToRegion = ttSeatIndex[Self->getSeat() - 1];
+        //pkMode = true;
     } else {
         seatToRegion = regularSeatIndex[photos.length() - 1];
     }
@@ -3820,10 +3830,10 @@ void RoomScene::speak()
     chat_edit->clear();
 }
 
-void RoomScene::fillCards(const QList<int> &card_ids, const QList<int> &disabled_ids, bool hide_suit_number)
+void RoomScene::fillCards(const QList<int> &card_ids, const QList<int> &disabled_ids, bool hide_suit_number, const QString &foot_notes)
 {
     bringToFront(card_container);
-    card_container->fillCards(card_ids, disabled_ids, hide_suit_number);
+    card_container->fillCards(card_ids, disabled_ids, hide_suit_number, foot_notes);
     card_container->show();
 }
 
