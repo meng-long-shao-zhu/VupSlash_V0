@@ -1029,7 +1029,7 @@ void Dashboard::reverseSelection()
 
 void Dashboard::viewMaxcards()
 {
-    QMessageBox::warning(NULL, "", tr("Your maxcards is %1").arg(QString::number(m_player->getMaxCards())));
+    QMessageBox::warning(NULL, Sanguosha->translate("GAME_NAME"), tr("Your maxcards is %1").arg(QString::number(m_player->getMaxCards())));
 }
 
 void Dashboard::cancelNullification()

@@ -644,7 +644,7 @@ public:
                 }
             }
             if (current && current->hasSkill("huoshui")
-                && player->getHp() >= (player->getMaxHp() + 1) / 2 && !skill->isAttachedLordSkill())
+                && player->getHp() > (player->getMaxHp() + 1) / 2 && !skill->isAttachedLordSkill())
                 return false;
         }
         return true;

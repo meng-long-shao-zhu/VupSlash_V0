@@ -892,7 +892,7 @@ bool Player::canDiscard(const Player *to, int card_id) const
             || (to->getArmor() && card_id == to->getArmor()->getEffectiveId())
             || (to->getTreasure() && card_id == to->getTreasure()->getEffectiveId()))
             return false;
-    } else if (to->hasSkill("xianrou") && this != to) {
+    } else if (to->hasSkill("muying") && this != to) {
         if (to->getArmor() && card_id == to->getArmor()->getEffectiveId())
             return false;
     } else if (this == to) {
