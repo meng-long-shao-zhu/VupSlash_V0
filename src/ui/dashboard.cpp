@@ -977,21 +977,25 @@ void Dashboard::sortCards()
     menu->clear();
     menu->setTitle(tr("Sort handcards"));
 
-    QAction *action1 = menu->addAction(tr("Sort by type"));
-    action1->setData((int)ByType);
+    if (m_player->hasSkills("shuoyi")) {
+        QToolTip::showText(QCursor::pos(), Sanguosha->translate("SORTCARDS_BANNED"));
+    } else {
+        QAction *action1 = menu->addAction(tr("Sort by type"));
+        action1->setData((int)ByType);
 
-    QAction *action2 = menu->addAction(tr("Sort by suit"));
-    action2->setData((int)BySuit);
+        QAction *action2 = menu->addAction(tr("Sort by suit"));
+        action2->setData((int)BySuit);
 
-    QAction *action3 = menu->addAction(tr("Sort by number"));
-    action3->setData((int)ByNumber);
+        QAction *action3 = menu->addAction(tr("Sort by number"));
+        action3->setData((int)ByNumber);
 
-    connect(action1, SIGNAL(triggered()), this, SLOT(beginSorting()));
-    connect(action2, SIGNAL(triggered()), this, SLOT(beginSorting()));
-    connect(action3, SIGNAL(triggered()), this, SLOT(beginSorting()));
+        connect(action1, SIGNAL(triggered()), this, SLOT(beginSorting()));
+        connect(action2, SIGNAL(triggered()), this, SLOT(beginSorting()));
+        connect(action3, SIGNAL(triggered()), this, SLOT(beginSorting()));
 
-    QPointF posf = QCursor::pos();
-    menu->popup(QPoint(posf.x(), posf.y()));
+        QPointF posf = QCursor::pos();
+        menu->popup(QPoint(posf.x(), posf.y()));
+    }
 }
 
 void Dashboard::beginSorting()

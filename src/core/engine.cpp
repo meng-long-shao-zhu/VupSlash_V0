@@ -49,11 +49,11 @@ void Engine::_loadMiniScenarios()
 
 void Engine::_loadModScenarios()
 {
-    addScenario(new GuanduScenario());
+    //addScenario(new GuanduScenario());
     addScenario(new CoupleScenario());
-    addScenario(new FanchengScenario());
-    addScenario(new ZombieScenario());
-    addScenario(new ImpasseScenario());
+    //addScenario(new FanchengScenario());
+    //addScenario(new ZombieScenario());
+    //addScenario(new ImpasseScenario());
 }
 
 void Engine::addPackage(const QString &name)
