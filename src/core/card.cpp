@@ -81,7 +81,7 @@ int Card::getNumber() const
 {
     if (m_number > 0) return m_number;
     if (isVirtualCard()) {
-        if (subcardsLength() == 0)
+        /*if (subcardsLength() == 0)
             return 0;
         else {
             int num = 0;
@@ -89,6 +89,11 @@ int Card::getNumber() const
                 num += Sanguosha->getCard(id)->getNumber();
             }
             return qMin(num, 13);
+        }*/
+        if (subcardsLength() == 1) {
+            return Sanguosha->getCard(subcards.first())->getNumber();
+        } else {
+            return 0;
         }
     } else
         return m_number;
