@@ -40,6 +40,7 @@ Room::Room(QObject *parent, const QString &mode)
     _m_lastMovementId = 0;
     player_count = Sanguosha->getPlayerCount(mode);
     scenario = Sanguosha->getScenario(mode);
+    first_time = false;
 
     initCallbacks();
 
@@ -2630,22 +2631,56 @@ void Room::prepareForStart()
         scenario->assign(generals, roles);
 
         bool expose_roles = scenario->exposeRoles();
-        for (int i = 0; i < m_players.length(); i++) {
-            ServerPlayer *player = m_players[i];
-            if (generals.size() > i && !generals[i].isNull()) {
-                player->setGeneralName(generals[i]);
-                broadcastProperty(player, "general");
+        if (mode == "couple") {
+            int counter = 0;
+            for (int i = 0; i < m_players.length(); i++) {
+                ServerPlayer *player = m_players[i];
+                if (player->getState() == "robot" && player->getAvatarGeneral()->objectName() == "xuehusang_zizaisuixin") {   //assign the xuehu_robot a lord
+                    player->setGeneralName("xuehusang_zizaisuixin");
+                    broadcastProperty(player, "general");
+                    player->setRole("lord");
+                    broadcastProperty(player, "role");
+                } else {
+                    if (roles.at(counter) == "lord")    //skip lord
+                        counter++;
+
+                    if (generals.size() > counter && !generals[counter].isNull()) {
+                        player->setGeneralName(generals[counter]);
+                        broadcastProperty(player, "general");
+                    }
+
+                    player->setRole(roles.at(counter));
+                    if (player->isLord())
+                        broadcastProperty(player, "role");
+
+                    if (expose_roles)
+                        broadcastProperty(player, "role");
+                    else
+                        notifyProperty(player, player, "role");
+
+                    counter++;
+                }
             }
+            qShuffle(m_players);
+        } else {
+            for (int i = 0; i < m_players.length(); i++) {
+                ServerPlayer *player = m_players[i];
+                if (generals.size() > i && !generals[i].isNull()) {
+                    player->setGeneralName(generals[i]);
+                    broadcastProperty(player, "general");
+                }
 
-            player->setRole(roles.at(i));
-            if (player->isLord())
-                broadcastProperty(player, "role");
+                player->setRole(roles.at(i));
+                if (player->isLord())
+                    broadcastProperty(player, "role");
 
-            if (expose_roles)
-                broadcastProperty(player, "role");
-            else
-                notifyProperty(player, player, "role");
+                if (expose_roles)
+                    broadcastProperty(player, "role");
+                else
+                    notifyProperty(player, player, "role");
+            }
         }
+
     } else if (mode == "06_3v3" || mode == "06_XMode" || mode == "02_1v1") {
         return;
     } else if (mode == "04_2v2") {
@@ -2973,6 +3008,26 @@ void Room::addRobotCommand(ServerPlayer *player, const QVariant &arg)
     int add_num = arg.toInt();
     if (add_num == -1)
         add_num = player_count - m_players.length();
+    else if (add_num == -2) { //for couple mode
+        if (isFull())
+            return;
+        ServerPlayer *robot = new ServerPlayer(this);
+        robot->setState("robot");
+
+        m_players << robot;
+
+        const QString robot_name = Sanguosha->translate("xuehusang_zizaisuixin");
+        n++;
+        const QString robot_avatar = "xuehusang_zizaisuixin";
+        signup(robot, robot_name, robot_avatar, true);
+
+        QString greeting = Sanguosha->translate("xuehu_greeting").toUtf8().toBase64();
+        speakCommand(robot, greeting);
+
+        broadcastProperty(robot, "state");
+
+        return;
+    }
 
     for (int i = 0; i < add_num; i++) {
         if (isFull())
@@ -3042,6 +3097,13 @@ void Room::signup(ServerPlayer *player, const QString &screen_name, const QStrin
         }
     } else
         toggleReadyCommand(player, QVariant());
+
+    if (!first_time) {
+        first_time = true;
+        if (mode == "couple") {
+            addRobotCommand(player, QVariant::fromValue(-2));
+        }
+    }
 }
 
 void Room::assignGeneralsForPlayers(const QList<ServerPlayer *> &to_assign)

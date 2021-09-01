@@ -605,6 +605,8 @@ private:
     QWaitCondition m_waitCond;
     mutable QMutex m_mutex;
 
+    bool first_time;
+
     volatile bool playerPropertySet;
     //QMutex mutexPlayerProperty;
     //QWaitCondition wcPlayerProperty;
