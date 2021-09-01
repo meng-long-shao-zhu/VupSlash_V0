@@ -856,7 +856,7 @@ QGroupBox *ServerDialog::createGameModeBox()
     }
 
     // add scenario modes
-    QRadioButton *scenario_button = new QRadioButton(tr("Scenario mode"));
+    QRadioButton *scenario_button = new QRadioButton(Sanguosha->translate("SCENARIO_MODE"));
     scenario_button->setObjectName("scenario");
     mode_group->addButton(scenario_button);
 

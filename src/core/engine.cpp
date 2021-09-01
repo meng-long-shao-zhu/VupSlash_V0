@@ -1068,7 +1068,7 @@ QString Engine::getModeName(const QString &mode) const
     if (modes.contains(mode))
         return modes.value(mode);
     else
-        return tr("%1 [Scenario mode]").arg(translate(mode));
+        return translate(mode)+ " [" + translate("SCENARIO_MODE") + "]";
 }
 
 int Engine::getPlayerCount(const QString &mode) const
