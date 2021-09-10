@@ -802,9 +802,13 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
 
                 return true;
             } else if (effect.card->getTypeId() == Card::TypeTrick) {
-                if (room->isCanceled(effect)) {
-                    effect.to->setFlags("Global_NonSkillNullify");
+                bool is_canceled = room->isCanceled(effect);
+
+                if (room->getTag("NullifyingTimes").toInt() > 0)
                     room->getThread()->trigger(EffectResponded, room, effect.from, data);
+
+                if (is_canceled) {
+                    effect.to->setFlags("Global_NonSkillNullify");
                     room->getThread()->trigger(EffectOffsetted, room, effect.from, data);
                     return true;
                 } else {

@@ -96,7 +96,12 @@ void CardContainer::fillCards(const QList<int> &card_ids, const QList<int> &disa
         item->setFlag(QGraphicsItem::ItemIsFocusable);
         if (hide_suit_number) item->hideSuitNumber();
         if (footnote_list.size() > i) {
-            item->setFootnote(Sanguosha->translate(footnote_list.at(i)));
+            QStringList footnote_parts = footnote_list.at(i).split("+");
+            QString footnote_string = "";
+            foreach(QString footnote_part, footnote_parts) {
+                footnote_string += Sanguosha->translate(footnote_part);
+            }
+            item->setFootnote(footnote_string);
             item->showFootnote();
         }
         if (disabled_ids.contains(item->getCard()->getEffectiveId())) item->setEnabled(false);

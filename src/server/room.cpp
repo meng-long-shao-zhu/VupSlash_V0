@@ -2635,11 +2635,16 @@ void Room::prepareForStart()
             int counter = 0;
             for (int i = 0; i < m_players.length(); i++) {
                 ServerPlayer *player = m_players[i];
-                if (player->getState() == "robot" && player->getAvatarGeneral()->objectName() == "xuehusang_zizaisuixin") {   //assign the xuehu_robot a lord
-                    player->setGeneralName("xuehusang_zizaisuixin");
-                    broadcastProperty(player, "general");
-                    player->setRole("lord");
-                    broadcastProperty(player, "role");
+                if (player->getState() == "robot" && player->getAvatarGeneral()->objectName() == "xuehusang_zizaisuixin") {   //assign the hougongwang_robot a lord
+                    for (int j = 0; j < m_players.length(); j++) {
+                        if (roles.at(j) == "lord") {
+                            player->setGeneralName(generals[j]);
+                            broadcastProperty(player, "general");
+                            player->setRole("lord");
+                            broadcastProperty(player, "role");
+                            break;
+                        }
+                    }
                 } else {
                     if (roles.at(counter) == "lord")    //skip lord
                         counter++;
@@ -3016,12 +3021,12 @@ void Room::addRobotCommand(ServerPlayer *player, const QVariant &arg)
 
         m_players << robot;
 
-        const QString robot_name = Sanguosha->translate("xuehusang_zizaisuixin");
+        const QString robot_name = Sanguosha->translate("hougongwang");
         n++;
         const QString robot_avatar = "xuehusang_zizaisuixin";
         signup(robot, robot_name, robot_avatar, true);
 
-        QString greeting = Sanguosha->translate("xuehu_greeting").toUtf8().toBase64();
+        QString greeting = Sanguosha->translate("hougongwang_greeting").toUtf8().toBase64();
         speakCommand(robot, greeting);
 
         broadcastProperty(robot, "state");

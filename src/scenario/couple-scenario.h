@@ -25,16 +25,16 @@ public:
     bool isSingle(const ServerPlayer *player) const;
     bool AllSingle(const ServerPlayer *player) const;
 
-    QMap<QString, QStringList> getMap(bool isHusband) const;
-    QMap<QString, QString> getOriginalMap(bool isHusband) const;
+    //QMap<QString, QStringList> getMap(bool isHusband) const;
+    //QMap<QString, QString> getOriginalMap(bool isHusband) const;
 
     //QStringList start_cps;
 
 private:
-    QMap<QString, QStringList> husband_map;
-    QMap<QString, QStringList> wife_map;
-    QMap<QString, QString> original_husband_map;
-    QMap<QString, QString> original_wife_map;
+    //QMap<QString, QStringList> husband_map;
+    //QMap<QString, QStringList> wife_map;
+    //QMap<QString, QString> original_husband_map;
+    //QMap<QString, QString> original_wife_map;
     QMap<QString, QStringList> cp_map;
 
     void marry(ServerPlayer *husband, ServerPlayer *wife) const;

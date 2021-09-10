@@ -58,6 +58,12 @@ public:
             break;
         }
         case GameOverJudge: {
+            if (player) {
+                ServerPlayer *ex_pair = scenario->getSpouse(player);
+                if (ex_pair && ex_pair->isAlive()) {
+                    player->setProperty("cp_before_died", ex_pair->objectName());
+                }
+            }
             if (player->isLord()) {
                 ServerPlayer *ex_pair = scenario->getSpouse(player);
                 if (ex_pair) {
@@ -75,7 +81,7 @@ public:
                         widows << player;
                 }
 
-                if (!widows.isEmpty()) {
+                if (!widows.isEmpty() && room->getLord()->isAlive()) {
                     room->sendCompulsoryTriggerLog(room->getLord(), "xuanfei");
                     ServerPlayer *new_wife = room->askForPlayerChosen(room->getLord(), widows, "remarry", "#xuanfei", false, false);
                     if (new_wife) {
@@ -127,13 +133,29 @@ public:
             // reward and punishment
             if (death.damage && death.damage->from) {
                 ServerPlayer *killer = death.damage->from;
-                if (killer == player)
-                    return false;
+                if (killer && killer != player){
+                    if (scenario->getSpouse(killer) == player)
+                        killer->throwAllHandCardsAndEquips();
+                    else
+                        killer->drawCards(2, "kill");
+                }
+            }
+            QString ex_pair_objname = player->property("cp_before_died").toString();
+            if (ex_pair_objname != "") {
+                foreach (ServerPlayer *ex_pair, room->getAlivePlayers()) {
+                    if (ex_pair->objectName() == ex_pair_objname) {
+                        LogMessage log;
+                        log.type = "#cp_died";
+                        log.from = ex_pair;
+                        log.to << player;
+                        room->sendLog(log);
 
-                if (scenario->getSpouse(killer) == player)
-                    killer->throwAllHandCardsAndEquips();
-                else
-                    killer->drawCards(2, "kill");
+                        if (ex_pair->getCardCount(true) < 2 || !room->askForDiscard(ex_pair, "cp_died", 2, 2, true, true, "@cp_died"))
+                            room->loseHp(ex_pair, 1);
+                        player->setProperty("cp_before_died", "");
+                        break;
+                    }
+                }
             }
 
             break;
@@ -150,7 +172,8 @@ CoupleScenario::CoupleScenario()
     : Scenario("couple")
 {
     lua_State *lua = Sanguosha->getLuaState();
-    lord = GetConfigFromLuaState(lua, "couple_lord").toString();
+    QStringList lords_list = GetConfigFromLuaState(lua, "couple_lord").toString().split("|");
+    lord = lords_list.at(qrand() % lords_list.length());
     loadCoupleMap();
 
     rule = new CoupleScenarioRule(this);
@@ -324,6 +347,8 @@ void CoupleScenario::assign(QStringList &generals, QStringList &roles) const
                 foreach(QString to, filter_map[general]) {
                     if (filter_map[to].contains(general)) {
                         filter_map[to].removeOne(general);
+                        if (filter_map[to].isEmpty())
+                            filter_map.remove(to);
                     }
                 }
                 filter_map.remove(general);
@@ -389,7 +414,7 @@ AI::Relation CoupleScenario::relationTo(const ServerPlayer *a, const ServerPlaye
     return AI::Enemy;
 }
 
-QMap<QString, QStringList> CoupleScenario::getMap(bool isHusband) const
+/*QMap<QString, QStringList> CoupleScenario::getMap(bool isHusband) const
 {
     return isHusband ? husband_map : wife_map;
 }
@@ -397,4 +422,4 @@ QMap<QString, QStringList> CoupleScenario::getMap(bool isHusband) const
 QMap<QString, QString> CoupleScenario::getOriginalMap(bool isHusband) const
 {
     return isHusband ? original_husband_map : original_wife_map;
-}
+}*/
