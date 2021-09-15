@@ -98,6 +98,7 @@ public:
     bool isMale() const;
     bool isFemale() const;
     bool isNeuter() const;
+    bool isSexless() const;
 
     bool hasShownRole() const;
     void setShownRole(bool shown);
@@ -418,6 +419,7 @@ public:
 	void ViewAsEquip(const char *equip_name, bool can_duplication = false);
     void removeViewAsEquip(const char *equip_name, bool remove_all_duplication = true);
 	bool canUse(const Card *card, QList<ServerPlayer *> players = QList<ServerPlayer *>());
+    bool canUse(const Card *card, ServerPlayer *player);
 	void endPlayPhase(bool sendLog = true);
 	void breakYinniState();
 };
@@ -847,6 +849,7 @@ enum TriggerEvent {
 	CardOvert,
 	BeforeGameStart,
 	BeforeGameOver,
+	BeforeCardFinished,
 
 	Appear, // For yinni only
 

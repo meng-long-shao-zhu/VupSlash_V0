@@ -250,6 +250,7 @@ private:
     Window *prompt_box;
     Window *pindian_box;
     CardItem *pindian_from_card, *pindian_to_card;
+    int pindian_from_number, pindian_to_number;
     QGraphicsItem *control_panel;
     QMap<PlayerCardContainer *, const ClientPlayer *> item2player;
     QDialog *m_choiceDialog; // Dialog for choosing generals, suits, card/equip, or kingdoms
@@ -352,7 +353,7 @@ private:
     void fillGenerals1v1(const QStringList &names);
     void fillGenerals3v3(const QStringList &names);
 
-    void showPindianBox(const QString &from_name, int from_id, const QString &to_name, int to_id, const QString &reason);
+    void showPindianBox(const QString &from_name, int from_id, const QString &to_name, int to_id, const QString &reason, int from_number, int to_number);
     void setChatBoxVisible(bool show);
     QRect getBubbleChatBoxShowArea(const QString &who) const;
 
@@ -448,6 +449,10 @@ private slots:
     void startAssign();
 
     void doPindianAnimation();
+    void doPindianFromChangeAnimation();
+    void doPindianToChangeAnimation();
+    void changePindianFromNumber();
+    void changePindianToNumber();
 
     // 3v3 mode & 1v1 mode
     void fillGenerals(const QStringList &names);

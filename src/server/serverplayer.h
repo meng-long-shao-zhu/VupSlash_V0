@@ -134,6 +134,7 @@ public:
     void ViewAsEquip(const QString &equip_name, bool can_duplication = false);
     void removeViewAsEquip(const QString &equip_name, bool remove_all_duplication = true);
     bool canUse(const Card *card, QList<ServerPlayer *> players = QList<ServerPlayer *>());
+    bool canUse(const Card *card, ServerPlayer *player);
     void endPlayPhase(bool sendLog = true);
     void breakYinniState();
     QList<int> getHandPile() const;

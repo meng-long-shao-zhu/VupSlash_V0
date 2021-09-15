@@ -614,9 +614,10 @@ void RoomScene::handleGameEvent(const QVariant &args)
         bool other_success = arg[6].toBool();
         pindian_other_success = other_success;
         QString reason = arg[7].toString();
+        int from_number = arg[8].toInt(), to_number = arg[9].toInt();
 
         if (Config.value("EnablePindianBox", true).toBool())
-            showPindianBox(from_name, from_id, to_name, to_id, reason);
+            showPindianBox(from_name, from_id, to_name, to_id, reason, from_number, to_number);
         else
             setEmotion(from_name, success ? "success" : "no-success");
     }
@@ -4828,7 +4829,7 @@ void RoomScene::finishArrange()
     ClientInstance->setStatus(Client::NotActive);
 }
 
-void RoomScene::showPindianBox(const QString &from_name, int from_id, const QString &to_name, int to_id, const QString &reason)
+void RoomScene::showPindianBox(const QString &from_name, int from_id, const QString &to_name, int to_id, const QString &reason, int from_number, int to_number)
 {
     pindian_box->setOpacity(0.0);
     pindian_box->setPos(m_tableCenterPos);
@@ -4846,7 +4847,8 @@ void RoomScene::showPindianBox(const QString &from_name, int from_id, const QStr
         pindian_to_card = NULL;
     }
 
-    pindian_from_card = new CardItem(Sanguosha->getCard(from_id));
+    const Card *from_card = Sanguosha->getCard(from_id);
+    pindian_from_card = new CardItem(from_card);
     pindian_from_card->setParentItem(pindian_box);
     pindian_from_card->setPos(QPointF(28 + pindian_from_card->boundingRect().width() / 2,
         44 + pindian_from_card->boundingRect().height() / 2));
@@ -4854,7 +4856,8 @@ void RoomScene::showPindianBox(const QString &from_name, int from_id, const QStr
     pindian_from_card->setHomePos(pindian_from_card->pos());
     pindian_from_card->setFootnote(ClientInstance->getPlayerName(from_name));
 
-    pindian_to_card = new CardItem(Sanguosha->getCard(to_id));
+    const Card *to_card = Sanguosha->getCard(to_id);
+    pindian_to_card = new CardItem(to_card);
     pindian_to_card->setParentItem(pindian_box);
     pindian_to_card->setPos(QPointF(126 + pindian_to_card->boundingRect().width() / 2,
         44 + pindian_to_card->boundingRect().height() / 2));
@@ -4864,7 +4867,24 @@ void RoomScene::showPindianBox(const QString &from_name, int from_id, const QStr
 
     bringToFront(pindian_box);
     pindian_box->appear();
-    QTimer::singleShot(500, this, SLOT(doPindianAnimation()));
+
+    int wait_time = 500;
+
+    if (from_card->getNumber() != from_number) {
+        pindian_from_number = from_number;
+        QTimer::singleShot(500, this, SLOT(doPindianFromChangeAnimation()));
+        QTimer::singleShot(1100, this, SLOT(changePindianFromNumber()));
+        wait_time = 1200;
+    }
+
+    if (to_card->getNumber() != to_number) {
+        pindian_to_number = to_number;
+        QTimer::singleShot(500, this, SLOT(doPindianToChangeAnimation()));
+        QTimer::singleShot(1100, this, SLOT(changePindianToNumber()));
+        wait_time = 1200;
+    }
+
+    QTimer::singleShot(wait_time, this, SLOT(doPindianAnimation()));
 }
 
 void RoomScene::doPindianAnimation()
@@ -4880,6 +4900,30 @@ void RoomScene::doPindianAnimation()
         connect(pma, SIGNAL(finished()), pindian_box, SLOT(disappear()));
     } else
         pindian_box->disappear();
+}
+
+void RoomScene::doPindianFromChangeAnimation()
+{
+    if (!pindian_box->isVisible() || !pindian_from_card || !pindian_to_card) return;
+    PixmapAnimation::GetPixmapAnimation(pindian_from_card, "shiny_card");
+}
+
+void RoomScene::doPindianToChangeAnimation()
+{
+    if (!pindian_box->isVisible() || !pindian_from_card || !pindian_to_card) return;
+    PixmapAnimation::GetPixmapAnimation(pindian_to_card, "shiny_card");
+}
+
+void RoomScene::changePindianFromNumber()
+{
+    if (!pindian_box->isVisible() || !pindian_from_card || !pindian_to_card) return;
+    pindian_from_card->setNumber(pindian_from_number);
+}
+
+void RoomScene::changePindianToNumber()
+{
+    if (!pindian_box->isVisible() || !pindian_from_card || !pindian_to_card) return;
+    pindian_to_card->setNumber(pindian_to_number);
 }
 
 static inline void AddRoleIcon(QMap<QChar, QPixmap> &map, char c, const QString &role)

@@ -80,6 +80,7 @@ public:
     bool isMale() const;
     bool isFemale() const;
     bool isNeuter() const;
+    bool isSexless() const;
 
     bool isOwner() const;
     void setOwner(bool owner);

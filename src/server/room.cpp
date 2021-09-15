@@ -1750,6 +1750,7 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
                 card_use.from = player;
                 if (to) card_use.to << to;
                 QVariant data2 = QVariant::fromValue(card_use);
+                thread->trigger(BeforeCardFinished, this, player, data2);
                 thread->trigger(CardFinished, this, player, data2);
             }
         }
@@ -3962,6 +3963,7 @@ bool Room::useCard(const CardUseStruct &use, bool add_history)
             if (!moves.isEmpty())
                 moveCardsAtomic(moves, true);
             QVariant data = QVariant::fromValue(card_use);
+            thread->trigger(BeforeCardFinished, this, card_use.from, data);
             card_use.from->setFlags("Global_ProcessBroken");
             thread->trigger(CardFinished, this, card_use.from, data);
             card_use.from->setFlags("-Global_ProcessBroken");

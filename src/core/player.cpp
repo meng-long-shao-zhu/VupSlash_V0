@@ -125,6 +125,11 @@ bool Player::isNeuter() const
     return m_gender == General::Neuter;
 }
 
+bool Player::isSexless() const
+{
+    return m_gender == General::Sexless;
+}
+
 int Player::getSeat() const
 {
     return seat;

@@ -670,7 +670,7 @@ bool ServerPlayer::pindian(ServerPlayer *target, const QString &reason, const Ca
 
     JsonArray arg;
     arg << S_GAME_EVENT_REVEAL_PINDIAN << objectName() << pindian_struct->from_card->getEffectiveId() << target->objectName()
-        << pindian_struct->to_card->getEffectiveId() << pindian_struct->success << other_success << reason;
+        << pindian_struct->to_card->getEffectiveId() << pindian_struct->success << other_success << reason << pindian_struct->from_number << pindian_struct->to_number;
     room->doBroadcastNotify(S_COMMAND_LOG_EVENT, arg);
 
     data = QVariant::fromValue(pindian_struct);
@@ -796,6 +796,7 @@ int ServerPlayer::pindianInt(ServerPlayer *target, const QString &reason, const 
     thread->trigger(PindianVerifying, room, this, data);
 
     pindian_struct->success = pindian_struct->from_number > pindian_struct->to_number;
+    bool other_success = pindian_struct->to_number > pindian_struct->from_number;
 
     log.type = pindian_struct->success ? "#PindianSuccess" : "#PindianFailure";
     log.from = this;
@@ -806,7 +807,7 @@ int ServerPlayer::pindianInt(ServerPlayer *target, const QString &reason, const 
 
     JsonArray arg;
     arg << S_GAME_EVENT_REVEAL_PINDIAN << objectName() << pindian_struct->from_card->getEffectiveId() << target->objectName()
-        << pindian_struct->to_card->getEffectiveId() << pindian_struct->success << reason;
+        << pindian_struct->to_card->getEffectiveId() << pindian_struct->success << other_success << reason << pindian_struct->from_number << pindian_struct->to_number;
     room->doBroadcastNotify(S_COMMAND_LOG_EVENT, arg);
 
     thread->trigger(Pindian, room, this, data);
@@ -934,6 +935,7 @@ PindianStruct *ServerPlayer::PinDian(ServerPlayer *target, const QString &reason
     thread->trigger(PindianVerifying, room, this, data);
 
     pindian_struct->success = pindian_struct->from_number > pindian_struct->to_number;
+    bool other_success = pindian_struct->to_number > pindian_struct->from_number;
 
     log.type = pindian_struct->success ? "#PindianSuccess" : "#PindianFailure";
     log.from = this;
@@ -943,7 +945,8 @@ PindianStruct *ServerPlayer::PinDian(ServerPlayer *target, const QString &reason
     room->sendLog(log);
 
     JsonArray arg;
-    arg << S_GAME_EVENT_REVEAL_PINDIAN << objectName() << pindian_struct->from_card->getEffectiveId() << target->objectName() << pindian_struct->to_card->getEffectiveId() << pindian_struct->success << reason;
+    arg << S_GAME_EVENT_REVEAL_PINDIAN << objectName() << pindian_struct->from_card->getEffectiveId() << target->objectName()
+        << pindian_struct->to_card->getEffectiveId() << pindian_struct->success << other_success << reason << pindian_struct->from_number << pindian_struct->to_number;
     room->doBroadcastNotify(S_COMMAND_LOG_EVENT, arg);
 
     data = QVariant::fromValue(pindian_struct);
@@ -2062,6 +2065,13 @@ bool ServerPlayer::canUse(const Card *card, QList<ServerPlayer *> players)
         }
     }
     return false;
+}
+
+bool ServerPlayer::canUse(const Card *card, ServerPlayer *player)
+{
+    QList<ServerPlayer*> players;
+    players << player;
+    return this->canUse(card, players);
 }
 
 void ServerPlayer::endPlayPhase(bool sendLog)

@@ -3,6 +3,7 @@
 
 #include "qsan-selectable-item.h"
 #include "settings.h"
+#include "engine.h"
 
 class FilterSkill;
 class General;
@@ -50,6 +51,10 @@ public:
     void hideAvatar();
     void showSuitNumber();
     void hideSuitNumber();
+    void setShiny(bool shiny);
+    void setNumber(int number);
+    void setColor(Card::Color color);
+    void setSuit(Card::Suit suit);
     void setAutoBack(bool auto_back);
     void changeGeneral(const QString &general_name);
     void setFootnote(const QString &desc);
@@ -96,6 +101,9 @@ protected:
     QImage _m_footnoteImage;
     bool _m_showFootnote;
     bool _m_showSuitNumber;
+    Card::Suit m_suit;
+    Card::Color m_color;
+    int m_number;
     // QGraphicsPixmapItem *_m_footnoteItem;
     QMutex m_animationMutex;
     double m_opacityAtHome;

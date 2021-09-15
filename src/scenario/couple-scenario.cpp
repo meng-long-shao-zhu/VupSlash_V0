@@ -130,33 +130,41 @@ public:
         case BuryVictim: {
             DeathStruct death = data.value<DeathStruct>();
             player->bury();
+
+            //find ex_pair by player property
+            ServerPlayer *ex_pair;
+            QString ex_pair_objname = player->property("cp_before_died").toString();
+            if (ex_pair_objname != "") {
+                foreach (ServerPlayer *p, room->getAlivePlayers()) {
+                    if (p->objectName() == ex_pair_objname) {
+                        ex_pair = p;
+                        break;
+                    }
+                }
+            }
+
             // reward and punishment
             if (death.damage && death.damage->from) {
                 ServerPlayer *killer = death.damage->from;
                 if (killer && killer != player){
-                    if (scenario->getSpouse(killer) == player)
+                    if (killer->objectName() == ex_pair_objname)
                         killer->throwAllHandCardsAndEquips();
                     else
                         killer->drawCards(2, "kill");
                 }
             }
-            QString ex_pair_objname = player->property("cp_before_died").toString();
-            if (ex_pair_objname != "") {
-                foreach (ServerPlayer *ex_pair, room->getAlivePlayers()) {
-                    if (ex_pair->objectName() == ex_pair_objname) {
-                        LogMessage log;
-                        log.type = "#cp_died";
-                        log.from = ex_pair;
-                        log.to << player;
-                        room->sendLog(log);
 
-                        if (ex_pair->getCardCount(true) < 2 || !room->askForDiscard(ex_pair, "cp_died", 2, 2, true, true, "@cp_died"))
-                            room->loseHp(ex_pair, 1);
-                        player->setProperty("cp_before_died", "");
-                        break;
-                    }
-                }
+            if (ex_pair && ex_pair->isAlive()) {
+                LogMessage log;
+                log.type = "#cp_died";
+                log.from = ex_pair;
+                log.to << player;
+                room->sendLog(log);
+
+                if (ex_pair->getCardCount(true) < 2 || !room->askForDiscard(ex_pair, "cp_died", 2, 2, true, true, "@cp_died"))
+                    room->loseHp(ex_pair, 1);
             }
+            player->setProperty("cp_before_died", "");
 
             break;
         }
@@ -346,7 +354,7 @@ void CoupleScenario::assign(QStringList &generals, QStringList &roles) const
             if (filter_map.keys().contains(general)) {
                 foreach(QString to, filter_map[general]) {
                     if (filter_map[to].contains(general)) {
-                        filter_map[to].removeOne(general);
+                        filter_map[to].removeAll(general);
                         if (filter_map[to].isEmpty())
                             filter_map.remove(to);
                     }
@@ -372,8 +380,10 @@ void CoupleScenario::assign(QStringList &generals, QStringList &roles) const
         qShuffle(rand_tos);
         QString rand_to = rand_tos.first();
 
-        start_cps.append(rand_from+"+"+rand_to);
-        generals << rand_from << rand_to;
+        if (!generals.contains(rand_from) &&!generals.contains(rand_from)) {    //keep it safe
+            start_cps.append(rand_from+"+"+rand_to);
+            generals << rand_from << rand_to;
+        }
     }
     qShuffle(generals);
 

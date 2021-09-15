@@ -18,6 +18,10 @@ void CardItem::_initialize()
     _m_isUnknownGeneral = false;
     auto_back = true;
     frozen = false;
+    m_isShiny = false;
+    m_number = 0;
+    m_suit = Card::NoSuit;
+    m_color = Card::Colorless;
     resetTransform();
     setTransform(QTransform::fromTranslate(-_m_width / 2, -_m_height / 2), true);
 }
@@ -25,7 +29,7 @@ void CardItem::_initialize()
 CardItem::CardItem(const Card *card)
 {
     _initialize();
-    m_isShiny = (qrand() <= ((RAND_MAX + 1L) / 4096));
+    //m_isShiny = (qrand() <= ((RAND_MAX + 1L) / 4096));
     setCard(card);
     setAcceptHoverEvents(true);
 }
@@ -52,6 +56,9 @@ void CardItem::setCard(const Card *card)
         const Card *engineCard = Sanguosha->getEngineCard(m_cardId);
         Q_ASSERT(engineCard != NULL);
         setObjectName(engineCard->objectName());
+        m_color = engineCard->getColor();
+        m_suit = engineCard->getSuit();
+        m_number = engineCard->getNumber();
         QString description = engineCard->getDescription();
         if (m_isShiny)
             description = QString("<font color=#FF0000>%1</font>").arg(description);
@@ -188,6 +195,32 @@ void CardItem::hideSuitNumber()
     _m_showSuitNumber = false;
 }
 
+void CardItem::setShiny(bool shiny)
+{
+    m_isShiny = shiny;
+}
+
+void CardItem::setNumber(int number)
+{
+    m_number = number;
+}
+
+void CardItem::setColor(Card::Color color)
+{
+    m_color = color;
+}
+
+void CardItem::setSuit(Card::Suit suit)
+{
+    m_suit = suit;
+    if (m_suit == Card::Heart || m_suit == Card::Diamond)
+        m_color = Card::Red;
+    else if (m_suit == Card::Spade || m_suit == Card::Club)
+        m_color = Card::Black;
+    else
+        m_color = Card::Colorless;
+}
+
 void CardItem::setAutoBack(bool auto_back)
 {
     this->auto_back = auto_back;
@@ -293,9 +326,9 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
         painter->drawPixmap(G_COMMON_LAYOUT.m_cardMainArea, G_ROOM_SKIN.getPixmap("generalCardBack", QString(), true));
     const Card *card = Sanguosha->getEngineCard(m_cardId);
     if (card) {
-        if (_m_showSuitNumber) {
-            painter->drawPixmap(G_COMMON_LAYOUT.m_cardSuitArea, G_ROOM_SKIN.getCardSuitPixmap(card->getSuit()));
-            painter->drawPixmap(G_COMMON_LAYOUT.m_cardNumberArea, G_ROOM_SKIN.getCardNumberPixmap(card->getNumber(), card->isBlack()));
+        if (_m_showSuitNumber && m_suit != Card::NoSuit && m_number > 0 && m_number <= 13 && (m_color == Card::Black || m_color == Card::Red)) {
+            painter->drawPixmap(G_COMMON_LAYOUT.m_cardSuitArea, G_ROOM_SKIN.getCardSuitPixmap(m_suit));
+            painter->drawPixmap(G_COMMON_LAYOUT.m_cardNumberArea, G_ROOM_SKIN.getCardNumberPixmap(m_number, (m_color == Card::Black)));
         }
         QRect rect = G_COMMON_LAYOUT.m_cardFootnoteArea;
         // Deal with stupid QT...
