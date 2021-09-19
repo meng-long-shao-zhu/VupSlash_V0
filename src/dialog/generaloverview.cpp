@@ -617,7 +617,7 @@ void GeneralOverview::on_tableWidget_itemSelectionChanged()
         if (!last_word.startsWith("~")) {
             if (last_word == " ")
                 last_word = tr("Translation missing.");
-            QCommandLinkButton *death_button = new QCommandLinkButton(tr("Death"), last_word);
+            QCommandLinkButton *death_button = new QCommandLinkButton(Sanguosha->translate("Death"), last_word);
             button_layout->addWidget(death_button);
 
             connect(death_button, SIGNAL(clicked()), general, SLOT(lastWord()));

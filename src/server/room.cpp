@@ -4270,6 +4270,7 @@ void Room::damage(const DamageStruct &data)
                 break;
             }
 
+            damage_data = qdata.value<DamageStruct>();
             if (damage_data.from) {
                 if (thread->trigger(DamageCaused, this, damage_data.from, qdata)) {
                     REMOVE_QINGGANG_TAG;

@@ -2154,6 +2154,7 @@ QString RoomScene::_translateMovement(const CardsMoveStruct &move)
 
 void RoomScene::keepLoseCardLog(const CardsMoveStruct &move)
 {
+    if (move.reason.m_skillName == "hide_log_skill") return;
     if (move.from && move.to_place == Player::DrawPile) {
         if (move.reason.m_reason == CardMoveReason::S_REASON_PUT && move.reason.m_skillName == "luck_card") return;
         bool hidden = false;
@@ -2181,6 +2182,7 @@ void RoomScene::keepLoseCardLog(const CardsMoveStruct &move)
 void RoomScene::keepGetCardLog(const CardsMoveStruct &move)
 {
     if (move.card_ids.isEmpty()) return;
+    if (move.reason.m_skillName == "hide_log_skill") return;
     if (move.to
         && (move.to_place == Player::PlaceHand
         || move.to_place == Player::PlaceEquip
