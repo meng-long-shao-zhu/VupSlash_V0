@@ -2094,7 +2094,8 @@ QString RoomScene::_translateMovement(const CardsMoveStruct &move)
 
     QString result(playerName + targetName);
     result.append(Sanguosha->translate(reason.m_eventName));
-    result.append(Sanguosha->translate(reason.m_skillName));
+    if (reason.m_skillName != "hide_log_skill")
+        result.append(Sanguosha->translate(reason.m_skillName));
     if ((reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_USE && reason.m_skillName.isEmpty()) {
         result.append(Sanguosha->translate("use"));
     } else if ((reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_RESPONSE) {

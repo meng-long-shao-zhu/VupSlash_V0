@@ -106,6 +106,7 @@ public:
     void addRound(const QVariant &);
     void setPileNumber(const QVariant &pile_str);
     void synchronizeDiscardPile(const QVariant &discard_pile);
+    void refreshSwapAndRoundNums(const QVariant &args);
     void gameOver(const QVariant &);
     void loseCards(const QVariant &);
     void getCards(const QVariant &);

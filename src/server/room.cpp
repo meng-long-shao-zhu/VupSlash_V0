@@ -4423,6 +4423,11 @@ void Room::marshal(ServerPlayer *player)
 
         QVariant discard = JsonUtils::toJsonArray(*m_discardPile);
         doNotify(player, S_COMMAND_SYNCHRONIZE_DISCARD_PILE, discard);
+
+        JsonArray arg;
+        arg << getTag("SwapPile");
+        arg << getTag("TurnLengthCount");
+        doNotify(player, S_COMMAND_REFRESH_SWAP_AND_ROUND_NUMS, arg);
     }
 }
 

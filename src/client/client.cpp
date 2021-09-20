@@ -75,6 +75,7 @@ Client::Client(QObject *parent, const QString &filename)
     m_callbacks[S_COMMAND_RESET_PILE] = &Client::resetPiles;
     m_callbacks[S_COMMAND_UPDATE_PILE] = &Client::setPileNumber;
     m_callbacks[S_COMMAND_SYNCHRONIZE_DISCARD_PILE] = &Client::synchronizeDiscardPile;
+    m_callbacks[S_COMMAND_REFRESH_SWAP_AND_ROUND_NUMS] = &Client::refreshSwapAndRoundNums;
     m_callbacks[S_COMMAND_CARD_FLAG] = &Client::setCardFlag;
 
     // interactive methods
@@ -1159,6 +1160,16 @@ void Client::synchronizeDiscardPile(const QVariant &discard_pile)
         }
         updatePileNum();
     }
+}
+
+void Client::refreshSwapAndRoundNums(const QVariant &args)
+{
+    JsonArray arg = args.value<JsonArray>();
+    if (arg.size() != 2 || !JsonUtils::isNumber(arg[0]) || !JsonUtils::isNumber(arg[1]))
+        return;
+    add_round = arg[0].toInt();
+    swap_pile = arg[1].toInt();
+    updatePileNum();
 }
 
 void Client::setCardFlag(const QVariant &pattern_str)
