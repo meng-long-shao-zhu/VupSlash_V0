@@ -14,6 +14,7 @@ public:
     void arrange(ServerPlayer *player, const QStringList &arranged);
     void assignRoles(const QString &scheme);
 
+
 protected:
     virtual void run();
 

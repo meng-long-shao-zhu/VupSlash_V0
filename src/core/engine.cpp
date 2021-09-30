@@ -23,6 +23,7 @@
 #include "boss-mode-scenario.h"
 #include "zombie-scenario.h"
 #include "fancheng-scenario.h"
+#include "pve-saver-scenario.h"
 
 Engine *Sanguosha = NULL;
 
@@ -54,6 +55,7 @@ void Engine::_loadModScenarios()
     //addScenario(new FanchengScenario());
     //addScenario(new ZombieScenario());
     //addScenario(new ImpasseScenario());
+    addScenario(new PveSaverScenario());
 }
 
 void Engine::addPackage(const QString &name)

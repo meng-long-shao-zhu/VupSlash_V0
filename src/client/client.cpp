@@ -112,6 +112,7 @@ Client::Client(QObject *parent, const QString &filename)
     // 3v3 mode & 1v1 mode
     m_interactions[S_COMMAND_ASK_GENERAL] = &Client::askForGeneral3v3;
     m_interactions[S_COMMAND_ARRANGE_GENERAL] = &Client::startArrange;
+    m_interactions[S_COMMAND_SELECT_FINISHED] = &Client::selectFinished;
 
     m_callbacks[S_COMMAND_FILL_GENERAL] = &Client::fillGenerals;
     m_callbacks[S_COMMAND_TAKE_GENERAL] = &Client::takeGeneral;
@@ -2041,6 +2042,12 @@ void Client::takeGeneral(const QVariant &take)
     QString rule = take_array[2].toString();
 
     emit general_taken(who, name, rule);
+}
+
+void Client::selectFinished(const QVariant &)
+{
+    emit select_finished();
+    setStatus(NotActive);
 }
 
 void Client::startArrange(const QVariant &to_arrange)

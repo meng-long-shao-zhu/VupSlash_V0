@@ -351,7 +351,7 @@ private:
     void createReplayControlBar();
 
     void fillGenerals1v1(const QStringList &names);
-    void fillGenerals3v3(const QStringList &names);
+    void fillGenerals3v3(const QStringList &names, bool is_pve);
 
     void showPindianBox(const QString &from_name, int from_id, const QString &to_name, int to_id, const QString &reason, int from_number, int to_number);
     void setChatBoxVisible(bool show);
@@ -457,6 +457,7 @@ private slots:
     // 3v3 mode & 1v1 mode
     void fillGenerals(const QStringList &names);
     void takeGeneral(const QString &who, const QString &name, const QString &rule);
+    void hideSelectorBox();
     void recoverGeneral(int index, const QString &name);
     void startGeneralSelection();
     void selectGeneral();

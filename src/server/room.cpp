@@ -2636,7 +2636,7 @@ void Room::prepareForStart()
             int counter = 0;
             for (int i = 0; i < m_players.length(); i++) {
                 ServerPlayer *player = m_players[i];
-                if (player->getState() == "robot" && player->getAvatarGeneral()->objectName() == "xuehusang_zizaisuixin") {   //assign the hougongwang_robot a lord
+                if (player->getState() == "robot" && player->screenName() == Sanguosha->translate("hougongwang")) {   //assign the hougongwang_robot a lord
                     for (int j = 0; j < m_players.length(); j++) {
                         if (roles.at(j) == "lord") {
                             player->setGeneralName(generals[j]);
@@ -2668,6 +2668,43 @@ void Room::prepareForStart()
                 }
             }
             qShuffle(m_players);
+        } else if (mode == "pve-saver") {
+            int counter = 0;
+            for (int i = 0; i < m_players.length(); i++) {
+                ServerPlayer *player = m_players[i];
+                if (player->getState() == "robot" && player->screenName() == Sanguosha->translate("pve-boss")) {
+                    for (int j = 0; j < m_players.length(); j++) {
+                        if (roles.at(j) == "lord") {
+                            player->setGeneralName(generals[j]);
+                            broadcastProperty(player, "general");
+                            player->setRole("lord");
+                            broadcastProperty(player, "role");
+                            break;
+                        }
+                    }
+                } else {
+                    if (roles.at(counter) == "lord")    //skip lord
+                        counter++;
+
+                    if (generals.size() > counter && !generals[counter].isNull()) {
+                        player->setGeneralName(generals[counter]);
+                        broadcastProperty(player, "general");
+                    }
+
+                    player->setRole(roles.at(counter));
+                    if (player->isLord())
+                        broadcastProperty(player, "role");
+
+                    if (expose_roles)
+                        broadcastProperty(player, "role");
+                    else
+                        notifyProperty(player, player, "role");
+
+                    counter++;
+                }
+            }
+            qShuffle(m_players);
+            qSort(m_players.begin(), m_players.end(), CompareByRole);
         } else {
             for (int i = 0; i < m_players.length(); i++) {
                 ServerPlayer *player = m_players[i];
@@ -3033,6 +3070,25 @@ void Room::addRobotCommand(ServerPlayer *player, const QVariant &arg)
         broadcastProperty(robot, "state");
 
         return;
+    } else if (add_num == -3) { //for pve-saver mode
+        if (isFull())
+            return;
+        ServerPlayer *robot = new ServerPlayer(this);
+        robot->setState("robot");
+
+        m_players << robot;
+
+        const QString robot_name = Sanguosha->translate("pve-boss");
+        n++;
+        const QString robot_avatar = "baishenyao_zhaijiahaibao";
+        signup(robot, robot_name, robot_avatar, true);
+
+        //QString greeting = Sanguosha->translate("boss_greeting").toUtf8().toBase64();
+        //speakCommand(robot, greeting);
+
+        broadcastProperty(robot, "state");
+
+        return;
     }
 
     for (int i = 0; i < add_num; i++) {
@@ -3108,6 +3164,8 @@ void Room::signup(ServerPlayer *player, const QString &screen_name, const QStrin
         first_time = true;
         if (mode == "couple") {
             addRobotCommand(player, QVariant::fromValue(-2));
+        } else if (mode == "pve-saver") {
+            addRobotCommand(player, QVariant::fromValue(-3));
         }
     }
 }
@@ -4694,6 +4752,63 @@ void Room::throwCard(int card_id, ServerPlayer *who, ServerPlayer *thrower)
 RoomThread *Room::getThread() const
 {
     return thread;
+}
+
+void Room::startArrangeForPve(ServerPlayer *player)
+{
+    tryPause();
+    QList<ServerPlayer *> online;
+    online.append(player);
+    if (!player->isOnline()) {
+        GeneralSelector *selector = GeneralSelector::getInstance();
+        arrangeForPve(selector->arrange3v3(player));
+        online.removeOne(player);
+    }
+    if (online.isEmpty()) return;
+
+    foreach(ServerPlayer *player, online)
+        player->m_commandArgs = QVariant();
+
+    doBroadcastNotify(S_COMMAND_FILL_GENERAL, JsonUtils::toJsonArray(player->getSelected()));
+    /*foreach (QString name, player->getSelected()) {
+        doBroadcastNotify(S_COMMAND_TAKE_GENERAL, JsonUtils::toJsonArray(QStringList() << "cool" << name << ""));
+    }*/
+    doBroadcastRequest(online, S_COMMAND_ARRANGE_GENERAL);
+
+    foreach (ServerPlayer *player, online) {
+        JsonArray clientReply = player->getClientReply().value<JsonArray>();
+        if (player->m_isClientResponseReady && clientReply.size() == 3) {
+            QStringList arranged;
+            JsonUtils::tryParse(clientReply, arranged);
+            arrangeForPve(arranged);
+        } else {
+            GeneralSelector *selector = GeneralSelector::getInstance();
+            arrangeForPve(selector->arrange3v3(player));
+        }
+    }
+    player->clearSelected();
+    JsonArray arg;
+    foreach(ServerPlayer *p, m_players) {
+        if (p != player && p->getState() != "robot")
+            doNotify(p, S_COMMAND_FILL_GENERAL, arg);
+    }
+    //doBroadcastNotify(S_COMMAND_FILL_GENERAL, arg);
+}
+
+void Room::arrangeForPve(const QStringList &arranged)
+{
+    Q_ASSERT(arranged.length() == 3);
+
+    //changeHero(m_players.at(1),arranged.at(0),true,false,false,false);
+    //changeHero(m_players.at(2),arranged.at(1),true,false,false,false);
+    //changeHero(m_players.at(3),arranged.at(2),true,false,false,false);
+    for (int i=0;i<3;i++){
+        ServerPlayer *p = m_players.at(i+1);
+        QString general_name = arranged.at(i);
+        changeHero(p,general_name,true,false,false,false);
+        int start_hp = Sanguosha->getGeneral(general_name)->getStartHp();
+        setPlayerProperty(p, "hp", start_hp);
+    }
 }
 
 void Room::moveCardTo(const Card *card, ServerPlayer *dstPlayer, Player::Place dstPlace, bool forceMoveVisible, bool guanxin)

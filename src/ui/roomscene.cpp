@@ -199,7 +199,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     enemy_box = NULL;
     self_box = NULL;
 
-    if (ServerInfo.GameMode == "06_3v3" || ServerInfo.GameMode == "02_1v1" || ServerInfo.GameMode == "06_XMode") {
+    if (ServerInfo.GameMode == "06_3v3" || ServerInfo.GameMode == "02_1v1" || ServerInfo.GameMode == "06_XMode" || ServerInfo.GameMode == "pve-saver") {
         if (ServerInfo.GameMode != "06_XMode") {
             connect(ClientInstance, SIGNAL(generals_filled(QStringList)), this, SLOT(fillGenerals(QStringList)));
             connect(ClientInstance, SIGNAL(general_asked()), this, SLOT(startGeneralSelection()));
@@ -207,6 +207,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
             connect(ClientInstance, SIGNAL(general_recovered(int, QString)), this, SLOT(recoverGeneral(int, QString)));
         }
         connect(ClientInstance, SIGNAL(arrange_started(QString)), this, SLOT(startArrange(QString)));
+        connect(ClientInstance, SIGNAL(select_finished()), this, SLOT(hideSelectorBox()));
 
         arrange_button = NULL;
 
@@ -901,7 +902,7 @@ void RoomScene::updateTable()
     int pad = _m_roomLayout->m_scenePadding + _m_roomLayout->m_photoRoomPadding;
     int tablew = log_box_widget->x() - pad * 2;
     int tableh = sceneRect().height() - pad * 2 - dashboard->boundingRect().height();
-    if ((ServerInfo.GameMode == "04_1v3" || ServerInfo.GameMode == "06_3v3") && game_started)
+    if ((ServerInfo.GameMode == "04_1v3" || ServerInfo.GameMode == "06_3v3" || ServerInfo.GameMode == "pve-saver") && game_started)
         tableh -= _m_roomLayout->m_photoVDistance;
     int photow = _m_photoLayout->m_normalWidth;
     int photoh = _m_photoLayout->m_normalHeight;
@@ -1030,7 +1031,7 @@ void RoomScene::updateTable()
 
     int *seatToRegion;
     bool pkMode = false;
-    if ((ServerInfo.GameMode == "04_1v3" || ServerInfo.GameMode == "04_boss") && game_started) {
+    if ((ServerInfo.GameMode == "04_1v3" || ServerInfo.GameMode == "04_boss" || ServerInfo.GameMode == "pve-saver") && game_started) {
         seatToRegion = hulaoSeatIndex[Self->getSeat() - 1];
         pkMode = true;
     } else if (ServerInfo.GameMode == "06_3v3" && game_started) {
@@ -4520,8 +4521,13 @@ void RoomScene::fillGenerals1v1(const QStringList &names)
     }
 }
 
-void RoomScene::fillGenerals3v3(const QStringList &names)
+void RoomScene::fillGenerals3v3(const QStringList &names, bool is_pve)
 {
+    int n = names.length();
+    if (n == 0){
+        hideSelectorBox();
+        return;
+    }
     QString temperature;
     if (Self->getRole().startsWith("l"))
         temperature = "warm";
@@ -4529,6 +4535,8 @@ void RoomScene::fillGenerals3v3(const QStringList &names)
         temperature = "cool";
 
     QString path = QString("image/system/3v3/select-%1.png").arg(temperature);
+    if (is_pve)
+        path = QString("image/system/3v3/wait_for_arrange.png").arg(temperature);
     selector_box = new QSanSelectableItem(path, true);
     selector_box->setFlag(QGraphicsItem::ItemIsMovable);
     addItem(selector_box);
@@ -4539,16 +4547,25 @@ void RoomScene::fillGenerals3v3(const QStringList &names)
     const static int width = 86;
     const static int row_y[4] = { 150, 271, 394, 516 };
 
-    int n = names.length();
     double scaleRatio = 116.0 / G_COMMON_LAYOUT.m_cardNormalHeight;
     for (int i = 0; i < n; i++) {
         int row, column;
-        if (i < 8) {
-            row = 1;
-            column = i;
+        if (is_pve) {
+            if (i < 8) {
+                row = 3;
+                column = i;
+            } else {
+                row = 0;
+                column = 15 - i;
+            }
         } else {
-            row = 2;
-            column = i - 8;
+            if (i < 8) {
+                row = 1;
+                column = i;
+            } else {
+                row = 2;
+                column = i - 8;
+            }
         }
 
         CardItem *general_item = new CardItem(names.at(i));
@@ -4559,13 +4576,18 @@ void RoomScene::fillGenerals3v3(const QStringList &names)
         general_item->setObjectName(names.at(i));
 
         general_items << general_item;
+        if (is_pve) {
+            down_generals.append(general_item);
+        }
     }
 }
 
 void RoomScene::fillGenerals(const QStringList &names)
 {
     if (ServerInfo.GameMode == "06_3v3")
-        fillGenerals3v3(names);
+        fillGenerals3v3(names, false);
+    else if (ServerInfo.GameMode == "pve-saver")
+        fillGenerals3v3(names, true);
     else if (ServerInfo.GameMode == "02_1v1")
         fillGenerals1v1(names);
 }
@@ -4612,7 +4634,7 @@ void RoomScene::takeGeneral(const QString &who, const QString &name, const QStri
     to_add->append(general_item);
 
     int x, y;
-    if (ServerInfo.GameMode == "06_3v3") {
+    if (ServerInfo.GameMode == "06_3v3" || ServerInfo.GameMode == "pve-saver") {
         x = 63 + (to_add->length() - 1) * (148 - 62);
         y = self_taken ? 452 : 85;
     } else {
@@ -4624,7 +4646,7 @@ void RoomScene::takeGeneral(const QString &who, const QString &name, const QStri
     general_item->setHomePos(QPointF(x, y));
     general_item->goBack(true);
 
-    if (((ServerInfo.GameMode == "06_3v3" && Self->getRole() != "lord" && Self->getRole() != "renegade")
+    if ((((ServerInfo.GameMode == "06_3v3" || ServerInfo.GameMode == "pve-saver") && Self->getRole() != "lord" && Self->getRole() != "renegade")
         || (ServerInfo.GameMode == "02_1v1" && rule == "2013"))
         && general_items.isEmpty()) {
         if (selector_box) {
@@ -4633,6 +4655,12 @@ void RoomScene::takeGeneral(const QString &who, const QString &name, const QStri
             selector_box = NULL;
         }
     }
+}
+
+void RoomScene::hideSelectorBox()
+{
+    if (selector_box)
+        selector_box->deleteLater();
 }
 
 void RoomScene::recoverGeneral(int index, const QString &name)
@@ -4695,6 +4723,9 @@ void RoomScene::startArrange(const QString &to_arrange)
     if (ServerInfo.GameMode == "06_3v3") {
         mode = "3v3";
         positions << QPointF(279, 356) << QPointF(407, 356) << QPointF(535, 356);
+    } else if (ServerInfo.GameMode == "pve-saver") {
+        mode = "pve";
+        positions << QPointF(279, 356) << QPointF(407, 356) << QPointF(535, 356);
     } else if (ServerInfo.GameMode == "02_1v1") {
         mode = "1v1";
         if (down_generals.length() == 5)
@@ -4718,6 +4749,8 @@ void RoomScene::startArrange(const QString &to_arrange)
     } else {
         QString suffix = (mode == "1v1" && down_generals.length() == 6) ? "2" : QString();
         QString path = QString("image/system/%1/arrange%2.png").arg(mode).arg(suffix);
+        if (mode == "pve")
+            path = QString("image/system/3v3/arrange_pve.png");
         selector_box->load(path);
         selector_box->setPos(m_tableCenterPos);
     }
@@ -4804,6 +4837,13 @@ void RoomScene::toggleArrange()
         if (ServerInfo.GameMode == "06_3v3")
             pos = QPointF(65 + G_COMMON_LAYOUT.m_cardNormalWidth / 2 + i * 86,
             452 + G_COMMON_LAYOUT.m_cardNormalHeight / 2);
+        else if (ServerInfo.GameMode == "pve-saver")
+            if (i < 8)
+                pos = QPointF(65 + G_COMMON_LAYOUT.m_cardNormalWidth / 2 + i * 86,
+                452 + G_COMMON_LAYOUT.m_cardNormalHeight / 2);
+            else
+                pos = QPointF(65 + G_COMMON_LAYOUT.m_cardNormalWidth / 2 + (15-i) * 86,
+                86 + G_COMMON_LAYOUT.m_cardNormalHeight / 2);
         else
             pos = QPointF(43 + G_COMMON_LAYOUT.m_cardNormalWidth / 2 + i * 86,
             60 + G_COMMON_LAYOUT.m_cardNormalHeight / 2 + 3 * 120);

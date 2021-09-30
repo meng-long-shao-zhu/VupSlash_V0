@@ -147,7 +147,8 @@ SOURCES += \
     src/package/li.cpp \
     src/package/bei.cpp \
     src/dialog/knowncardviewdialog.cpp \
-    src/dialog/winrateviewdialog.cpp
+    src/dialog/winrateviewdialog.cpp \
+    src/scenario/pve-saver-scenario.cpp
 
 HEADERS += \
     src/client/aux-skills.h \
@@ -283,7 +284,8 @@ HEADERS += \
     src/package/li.h \
     src/package/bei.h \
     src/dialog/knowncardviewdialog.h \
-    src/dialog/winrateviewdialog.h
+    src/dialog/winrateviewdialog.h \
+    src/scenario/pve-saver-scenario.h
 
 FORMS += \
     src/dialog/cardoverview.ui \

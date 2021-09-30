@@ -175,6 +175,7 @@ public:
     // 3v3 & 1v1 methods
     void fillGenerals(const QVariant &generals);
     void askForGeneral3v3(const QVariant &);
+    void selectFinished(const QVariant &);
     void takeGeneral(const QVariant &take_str);
     void startArrange(const QVariant &to_arrange);
 
@@ -353,6 +354,7 @@ signals:
     void generals_filled(const QStringList &general_names);
     void general_taken(const QString &who, const QString &name, const QString &rule);
     void general_asked();
+    void select_finished();
     void arrange_started(const QString &to_arrange);
     void general_recovered(int index, const QString &name);
     void general_revealed(bool self, const QString &general);

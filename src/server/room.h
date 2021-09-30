@@ -54,6 +54,8 @@ public:
     QString getMode() const;
     const Scenario *getScenario() const;
     RoomThread *getThread() const;
+    void startArrangeForPve(ServerPlayer *player);
+    void arrangeForPve(const QStringList &arranged);
     ServerPlayer *getCurrent() const;
     void setCurrent(ServerPlayer *current);
     int alivePlayerCount() const;

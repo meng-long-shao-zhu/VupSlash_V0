@@ -564,8 +564,9 @@ public:
         if (selected.isEmpty())
             return !to_select->isEquipped() && !suits.contains(to_select->getSuitString());
         else if (selected.length() == 1) {
-            const Card *card = selected.first();
-            return !to_select->isEquipped() && to_select->getSuit() == card->getSuit();
+            //const Card *card = selected.first();
+            //return !to_select->isEquipped() && to_select->getSuit() == card->getSuit();
+            return !to_select->isEquipped() && !suits.contains(to_select->getSuitString());
         } else
             return false;
     }
@@ -602,10 +603,15 @@ public:
             CardUseStruct use = data.value<CardUseStruct>();
             if (!use.card->isKindOf("ArcheryAttack") || use.card->getSkillName() != "mobileluanji") return false;
             if (!use.card->isVirtualCard() || use.card->getSubcards().isEmpty()) return false;
-            const Card *card = Sanguosha->getCard(use.card->getSubcards().first());
+            const Card *card1 = Sanguosha->getCard(use.card->getSubcards().first());
+            const Card *card2 = Sanguosha->getCard(use.card->getSubcards().last());
             QStringList suits = player->property("mobileluanji_suitstring").toString().split("+");
-            if (!suits.contains(card->getSuitString())) {
-                suits << card->getSuitString();
+            if (!suits.contains(card1->getSuitString())) {
+                suits << card1->getSuitString();
+                room->setPlayerProperty(player, "mobileluanji_suitstring", suits.join("+"));
+            }
+            if (!suits.contains(card2->getSuitString())) {
+                suits << card2->getSuitString();
                 room->setPlayerProperty(player, "mobileluanji_suitstring", suits.join("+"));
             }
         } else if (event == EventPhaseChanging) {

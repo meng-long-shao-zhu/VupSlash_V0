@@ -143,6 +143,7 @@ namespace QSanProtocol {
         S_COMMAND_SET_PUBLIC_CARDS,
         S_COMMAND_REFRESH_OVERT_PILE,
         S_COMMAND_REFRESH_SWAP_AND_ROUND_NUMS,
+        S_COMMAND_SELECT_FINISHED,
     };
 
     enum GameEventType
