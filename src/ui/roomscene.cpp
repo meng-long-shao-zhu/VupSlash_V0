@@ -3096,6 +3096,8 @@ void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nat
             doAnimation(S_ANIMATE_SHOT, QStringList() << who);
         else if (audio_name == "earth_hit")
                 doAnimation(S_ANIMATE_EARTH_HIT, QStringList() << who);
+        else if (audio_name == "potato_mine")
+                doAnimation(S_ANIMATE_POTATO_MINE, QStringList() << who);
         else {
             if (nature == DamageStruct::Fire)
                 doAnimation(S_ANIMATE_FIRE, QStringList() << who);
@@ -4423,6 +4425,7 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         map[S_ANIMATE_ICE] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_SHOT] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_EARTH_HIT] = &RoomScene::doAppearingAnimation;
+        map[S_ANIMATE_POTATO_MINE] = &RoomScene::doAppearingAnimation;
 
         map[S_ANIMATE_LIGHTBOX] = &RoomScene::doLightboxAnimation;
         map[S_ANIMATE_HUASHEN] = &RoomScene::doHuashen;
@@ -4441,6 +4444,7 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         anim_name[S_ANIMATE_ICE] = "ice";
         anim_name[S_ANIMATE_SHOT] = "shot";
         anim_name[S_ANIMATE_EARTH_HIT] = "earth_hit";
+        anim_name[S_ANIMATE_POTATO_MINE] = "potato_mine";
 
         anim_name[S_ANIMATE_LIGHTBOX] = "lightbox";
         anim_name[S_ANIMATE_HUASHEN] = "huashen";

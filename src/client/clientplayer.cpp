@@ -239,8 +239,8 @@ void ClientPlayer::setMark(const QString &mark, int value)
             if (key.startsWith("@") && marks[key] > 0) {
                 int val = marks[key];
                 QString mark_text = QString("<img src='image/mark/%1.png' />").arg(key);
-                if (val != 1)
-                    mark_text.append(QString("%1").arg(val));
+                if (val != 1 || key.startsWith("@!"))
+                    mark_text.append(QString("<strong style='background:rgba(202,142,255,0.4)'>%1</strong>").arg(val));
                 if (this != Self)
                     mark_text.append("<br>");
                 text.append(mark_text);

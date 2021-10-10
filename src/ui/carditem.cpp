@@ -19,6 +19,7 @@ void CardItem::_initialize()
     auto_back = true;
     frozen = false;
     m_isShiny = false;
+    m_isMine = false;
     m_number = 0;
     m_suit = Card::NoSuit;
     m_color = Card::Colorless;
@@ -40,13 +41,14 @@ CardItem::CardItem(const QString &general_name)
     _initialize();
     changeGeneral(general_name);
     m_isShiny = false;
+    m_isMine = false;
     m_currentAnimation = NULL;
     m_opacityAtHome = 1.0;
 }
 
 QRectF CardItem::boundingRect() const
 {
-    return G_COMMON_LAYOUT.m_cardFrameArea;
+    return (m_isMine) ? QRect(-5,-30,98,160) : G_COMMON_LAYOUT.m_cardFrameArea;
 }
 
 void CardItem::setCard(const Card *card)
@@ -60,8 +62,12 @@ void CardItem::setCard(const Card *card)
         m_suit = engineCard->getSuit();
         m_number = engineCard->getNumber();
         QString description = engineCard->getDescription();
-        if (m_isShiny)
-            description = QString("<font color=#FF0000>%1</font>").arg(description);
+        if (card->hasFlag("potato_mine"))
+            m_isMine = true;
+        if (m_isMine)
+            description.prepend(Sanguosha->translate("potato_mine_card_state"));
+        //if (m_isShiny)
+        //    description = QString("<font color=#FF0000>%1</font>").arg(description);
         setToolTip(description);
     } else {
         m_cardId = Card::S_UNKNOWN_CARD_ID;
@@ -260,12 +266,14 @@ const int CardItem::_S_MOVE_JITTER_TOLERANCE = 200;
 void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if (frozen) return;
+    //if (!G_COMMON_LAYOUT.m_cardFrameArea.contains(mouseEvent->pos().x(), mouseEvent->pos().y())) return;
     _m_lastMousePressScenePos = mapToParent(mouseEvent->pos());
 }
 
 void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if (frozen) return;
+    //if (!G_COMMON_LAYOUT.m_cardFrameArea.contains(mouseEvent->pos().x(), mouseEvent->pos().y())) return;
 
     QPointF totalMove = mapToParent(mouseEvent->pos()) - _m_lastMousePressScenePos;
     if (totalMove.x() * totalMove.x() + totalMove.y() * totalMove.y() < _S_MOVE_JITTER_TOLERANCE)
@@ -280,6 +288,8 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 void CardItem::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+    //if (!G_COMMON_LAYOUT.m_cardFrameArea.contains(mouseEvent->pos().x(), mouseEvent->pos().y())) return;
+
     if (!(flags() & QGraphicsItem::ItemIsMovable)) return;
     QPointF newPos = mapToParent(mouseEvent->pos());
     QPointF totalMove = newPos - _m_lastMousePressScenePos;
@@ -292,6 +302,7 @@ void CardItem::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 void CardItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
     if (frozen) return;
+    //if (!G_COMMON_LAYOUT.m_cardFrameArea.contains(event->pos().x(), event->pos().y())) return;
 
     if (hasFocus()) {
         event->accept();
@@ -300,15 +311,27 @@ void CardItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
         emit toggle_discards();
 }
 
-void CardItem::hoverEnterEvent(QGraphicsSceneHoverEvent *)
+void CardItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
+    //if (!G_COMMON_LAYOUT.m_cardFrameArea.contains(event->pos().x(), event->pos().y())) return;
     emit enter_hover();
 }
 
-void CardItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *)
+void CardItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
+    //if (!G_COMMON_LAYOUT.m_cardFrameArea.contains(event->pos().x(), event->pos().y())) return;
     emit leave_hover();
 }
+
+/*void CardItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+{
+    bool now_in_boundary = G_COMMON_LAYOUT.m_cardFrameArea.contains(event->pos().x(), event->pos().y());
+    bool last_in_boundary = G_COMMON_LAYOUT.m_cardFrameArea.contains(event->lastPos().x(), event->lastPos().y());
+    if (now_in_boundary && !last_in_boundary)
+        emit enter_hover();
+    else if (!now_in_boundary && last_in_boundary)
+        emit leave_hover();
+}*/
 
 
 void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
@@ -337,6 +360,10 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 
     if (!_m_avatarName.isEmpty())
         painter->drawPixmap(G_COMMON_LAYOUT.m_cardAvatarArea, G_ROOM_SKIN.getCardAvatarPixmap(_m_avatarName));
+
+    if (!_m_isUnknownGeneral && _m_showSuitNumber && m_isMine) {    //only show mine pic when the card is a visible real-card
+        painter->drawPixmap(QRect(0,-30,93,130), G_ROOM_SKIN.getCardMainPixmap("mine_card", true));
+    }
 
     if (m_isShiny) {
         QBrush painter_brush(QColor(255, 215, 0, 64));
