@@ -1201,6 +1201,20 @@ QString Player::getSkillDescription() const
         description.append(QString("<b>%1</b>: %2 <br/> <br/>").arg(skill_name).arg(desc));
     }
 
+    QStringList related_skillnames;
+    if (getGeneral())
+        related_skillnames += getGeneral()->getRelatedSkillNames();
+    if (getGeneral2())
+        related_skillnames += getGeneral2()->getRelatedSkillNames();
+    foreach (const QString &skill_name, related_skillnames) {
+        const Skill *skill = Sanguosha->getSkill(skill_name);
+        if (skill && skill_name.startsWith("characteristic")) {
+            QString desc = skill->getDescription();
+            desc.replace("\n", "<br/>");
+            description.append(QString("<b>%1</b>: %2 <br/> <br/>").arg(Sanguosha->translate(skill_name)).arg(desc));
+        }
+    }
+
     if (description.isEmpty()) description = tr("No skills");
     return description;
 }

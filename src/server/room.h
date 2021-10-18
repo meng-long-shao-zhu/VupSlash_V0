@@ -124,6 +124,8 @@ public:
     QList<ServerPlayer *> getLieges(const QString &kingdom, ServerPlayer *lord) const;
     void sendLog(const LogMessage &log, QList<ServerPlayer *> players = QList<ServerPlayer *>());
     void sendLog(const LogMessage &log, ServerPlayer *player);
+    void sendLogWithIds(LogMessage &log, const QList<int> &card_ids, QList<ServerPlayer *> players = QList<ServerPlayer *>());
+    void sendLogWithIds(LogMessage &log, const QList<int> &card_ids, ServerPlayer *player);
     void sendCompulsoryTriggerLog(ServerPlayer *player, const QString &skill_name, bool notify_skill = true, bool broadcast = false, int type = 0);
     void showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer = NULL , bool self_can_see = true, bool trigger_event = true);
     void showCards(ServerPlayer *player, QList<int> ids, bool not_trigger_event = false);

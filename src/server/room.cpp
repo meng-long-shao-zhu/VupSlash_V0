@@ -7000,6 +7000,24 @@ void Room::sendLog(const LogMessage &log, ServerPlayer *player)
     doNotify(player, QSanProtocol::S_COMMAND_LOG_SKILL, log.toVariant());
 }
 
+void Room::sendLogWithIds(LogMessage &log, const QList<int> &card_ids, QList<ServerPlayer *> players)
+{
+    if (log.type.isEmpty())
+        return;
+    log.card_str = IntList2StringList(card_ids).join("+");
+    sendLog(log, players);
+    return;
+}
+
+void Room::sendLogWithIds(LogMessage &log, const QList<int> &card_ids, ServerPlayer *player)
+{
+    if (log.type.isEmpty())
+        return;
+    log.card_str = IntList2StringList(card_ids).join("+");
+    sendLog(log, player);
+    return;
+}
+
 void Room::sendCompulsoryTriggerLog(ServerPlayer *player, const QString &skill_name, bool notify_skill, bool broadcast, int type)
 {
     LogMessage log;

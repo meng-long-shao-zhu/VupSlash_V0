@@ -179,7 +179,7 @@ QString General::getSkillDescription(bool include_name, bool include_difficulty)
     QList<const Skill *> relatedskills;
     foreach (const QString &skill_name, getRelatedSkillNames()) {
         const Skill *skill = Sanguosha->getSkill(skill_name);
-        if (skill && skill->isVisible()) {
+        if (skill && (skill->isVisible() || skill_name.startsWith("characteristic"))) {
             skills << skill;
             relatedskills << skill;
         }

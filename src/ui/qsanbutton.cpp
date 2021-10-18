@@ -363,8 +363,14 @@ void QSanInvokeSkillButton::paint(QPainter *painter, const QStyleOptionGraphicsI
                 }
             }
         }
-        if (generalName == "")
-            return;
+        if (generalName == "") {
+            QString generalName_translate = _m_skill->objectName()+">>";
+            if (Sanguosha->translate(generalName_translate) != generalName_translate) {
+                generalName = Sanguosha->translate(generalName_translate);
+            } else {
+                return;
+            }
+        }
         QString path = G_ROOM_SKIN.getButtonPixmapPath(G_ROOM_SKIN.S_SKIN_KEY_BUTTON_SKILL, getSkillTypeString(_m_skillType), _m_state);
         int n = path.lastIndexOf("/");
         path = path.left(n + 1) + generalName + ".png";
