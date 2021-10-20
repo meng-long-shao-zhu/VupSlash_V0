@@ -89,8 +89,8 @@ QWidget *ServerDialog::createPackageTab()
     QStringList extensions = Sanguosha->getExtensions();
     QSet<QString> ban_packages = Config.BanPackages.toSet();
 
-    QGroupBox *box1 = new QGroupBox(tr("General package"));
-    QGroupBox *box2 = new QGroupBox(tr("Card package"));
+    QGroupBox *box1 = new QGroupBox(Sanguosha->translate("General package"));
+    QGroupBox *box2 = new QGroupBox(Sanguosha->translate("Card package"));
 
     QGridLayout *layout1 = new QGridLayout;
     QGridLayout *layout2 = new QGridLayout;
@@ -133,6 +133,8 @@ QWidget *ServerDialog::createPackageTab()
 
         switch (package->getType()) {
         case Package::GeneralPack: {
+            if (!Sanguosha->getConfigStringListFromLua("available_general_packages").contains(extension))
+                checkbox->setEnabled(false);
             extension_group->addButton(checkbox);
             row = i / 5;
             column = i % 5;
@@ -207,7 +209,7 @@ QWidget *ServerDialog::createAdvancedTab()
     enable_cheat_checkbox->setToolTip(tr("This option enables the cheat menu"));
     enable_cheat_checkbox->setChecked(Config.EnableCheat);
 
-    free_choose_checkbox = new QCheckBox(tr("Choose generals and cards freely"));
+    free_choose_checkbox = new QCheckBox(Sanguosha->translate("Choose generals and cards freely"));
     free_choose_checkbox->setChecked(Config.FreeChoose);
     free_choose_checkbox->setVisible(Config.EnableCheat);
 
@@ -324,6 +326,7 @@ QWidget *ServerDialog::createAdvancedTab()
 	checkBoxAddToListServer = new QCheckBox(tr("加入列表服务器"));
     checkBoxAddToListServer->setToolTip(tr("让其他人能够通过“查找服务器”功能找到本服务器，只有能被外网访问的服务器才会加入列表中。"));
     checkBoxAddToListServer->setChecked(Config.value("serverconfig/addtolistserver",false).toBool());
+    checkBoxAddToListServer->setEnabled(false); //暂时无效
 
     layout->addWidget(forbid_same_ip_checkbox);
     layout->addWidget(disable_chat_checkbox);
@@ -404,6 +407,11 @@ QWidget *ServerDialog::createMiscTab()
     luck_card_checkbox = new QCheckBox(tr("Enable the luck card"));
     luck_card_checkbox->setChecked(Config.EnableLuckCard);
 
+    //luck_card_spinbox = new QSpinBox;
+    //luck_card_spinbox->setRange(0, 15);
+    //luck_card_spinbox->setValue(Config.LuckCardTimes);
+    //luck_card_spinbox->setSuffix(Sanguosha->translate("LUCK_CARD_TIMES_SUFFIX"));
+
     QGroupBox *ai_groupbox = new QGroupBox(tr("Artificial intelligence"));
     ai_groupbox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
@@ -446,6 +454,7 @@ QWidget *ServerDialog::createMiscTab()
     tablayout->addWidget(minimize_dialog_checkbox);
     tablayout->addWidget(surrender_at_death_checkbox);
     tablayout->addWidget(luck_card_checkbox);
+    //tablayout->addLayout(HLay(new QLabel(Sanguosha->translate("LUCK_CARD_TIMES")), luck_card_spinbox));
     tablayout->addWidget(ai_groupbox);
     tablayout->addStretch();
 
@@ -1270,6 +1279,7 @@ int ServerDialog::config()
     Config.DisableLua = disable_lua_checkbox->isChecked();
     Config.SurrenderAtDeath = surrender_at_death_checkbox->isChecked();
     Config.EnableLuckCard = luck_card_checkbox->isChecked();
+    //Config.LuckCardTimes = luck_card_spinbox->value();
 
     // game mode
     if (mode_group->checkedButton()) {
@@ -1313,6 +1323,7 @@ int ServerDialog::config()
     Config.setValue("PreventAwakenBelow3", Config.PreventAwakenBelow3);
     Config.setValue("CountDownSeconds", game_start_spinbox->value());
     Config.setValue("NullificationCountDown", nullification_spinbox->value());
+    //Config.setValue("LuckCardTimes", luck_card_spinbox->value());
     Config.setValue("EnableMinimizeDialog", Config.EnableMinimizeDialog);
     Config.setValue("EnableAI", Config.EnableAI);
     Config.setValue("AIChat", ai_chat_checkbox->isChecked());

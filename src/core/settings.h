@@ -24,6 +24,7 @@ public:
     QString ServerName;
     int CountDownSeconds;
     int NullificationCountDown;
+    //int LuckCardTimes;
     bool EnableMinimizeDialog;
     QString GameMode;
     QStringList BanPackages;

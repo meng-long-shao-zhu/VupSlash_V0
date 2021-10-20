@@ -958,6 +958,15 @@ QStringList Engine::getKingdoms() const
     return kingdoms;
 }
 
+QStringList Engine::getConfigStringListFromLua(const char *key) const
+{
+    static QStringList str_list;
+    if (str_list.isEmpty())
+        str_list = GetConfigFromLuaState(lua, key).toStringList();
+
+    return str_list;
+}
+
 QColor Engine::getKingdomColor(const QString &kingdom) const
 {
     static QMap<QString, QColor> color_map;

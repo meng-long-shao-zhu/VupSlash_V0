@@ -128,6 +128,7 @@ private:
     QSpinBox *ai_delay_ad_spinbox;
     QCheckBox *surrender_at_death_checkbox;
     QCheckBox *luck_card_checkbox;
+    //QSpinBox *luck_card_spinbox;
     QRadioButton *official_3v3_radiobutton;
     QComboBox *official_3v3_ComboBox;
     QComboBox *role_choose_ComboBox;

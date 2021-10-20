@@ -121,6 +121,7 @@ void Settings::init()
     EnableSuperDrag = value("EnableSuperDrag", false).toBool();
     EnableAutoBackgroundChange = value("EnableAutoBackgroundChange", true).toBool();
     NullificationCountDown = value("NullificationCountDown", 8).toInt();
+    //LuckCardTimes = value("LuckCardTimes", 0).toInt();
     OperationTimeout = value("OperationTimeout", 15).toInt();
     OperationNoLimit = value("OperationNoLimit", false).toBool();
     EnableEffects = value("EnableEffects", true).toBool();

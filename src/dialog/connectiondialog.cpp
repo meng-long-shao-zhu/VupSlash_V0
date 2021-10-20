@@ -134,11 +134,12 @@ void ConnectionDialog::setAddress(const QString &address)
 
 void ConnectionDialog::on_pushButtonFindServer_clicked()
 {
-    if(!mwServerList)
+    /*if(!mwServerList)
     {
         mwServerList=new MainWindowServerList(this);
     }
-    mwServerList->initWindow();
+    mwServerList->initWindow();*/
+    QMessageBox::about(NULL, Sanguosha->translate("FIND_SERVER"), Sanguosha->translate("FIND_SERVER_INFO"));
 }
 
 // -----------------------------------

@@ -54,6 +54,8 @@
     <addaction name="actionNever_nullify_my_trick"/>
     <addaction name="actionView_Discarded"/>
     <addaction name="actionView_distance"/>
+    <addaction name="actionView_knowncard"/>
+    <addaction name="actionView_winrate"/>
     <addaction name="actionServerInformation"/>
     <addaction name="actionSurrender"/>
     <addaction name="actionSaveRecord"/>
@@ -127,7 +129,7 @@
   </action>
   <action name="actionStart_Server">
    <property name="text">
-    <string>Start server</string>
+    <string>启动游戏</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -135,7 +137,7 @@
   </action>
   <action name="actionStart_Game">
    <property name="text">
-    <string>Start game</string>
+    <string>加入联机</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+G</string>
@@ -195,6 +197,25 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionView_knowncard">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>查看已知牌</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionView_winrate">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>查看胜率</string>
    </property>
   </action>
   <action name="actionServerInformation">

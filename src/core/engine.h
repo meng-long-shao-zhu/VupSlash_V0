@@ -47,6 +47,7 @@ public:
     QString getMODName() const;
     QStringList getExtensions() const;
     QStringList getKingdoms() const;
+    QStringList getConfigStringListFromLua(const char *key) const;
     QColor getKingdomColor(const QString &kingdom) const;
     QMap<QString, QColor> getSkillTypeColorMap() const;
     QStringList getChattingEasyTexts() const;
