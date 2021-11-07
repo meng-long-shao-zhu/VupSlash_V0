@@ -133,11 +133,13 @@ public:
 
             //find ex_pair by player property
             ServerPlayer *ex_pair;
+            bool finded = false;
             QString ex_pair_objname = player->property("cp_before_died").toString();
             if (ex_pair_objname != "") {
                 foreach (ServerPlayer *p, room->getAlivePlayers()) {
                     if (p->objectName() == ex_pair_objname) {
                         ex_pair = p;
+                        finded = true;
                         break;
                     }
                 }
@@ -154,7 +156,7 @@ public:
                 }
             }
 
-            if (ex_pair && ex_pair->isAlive()) {
+            if (finded && ex_pair && ex_pair->isAlive()) {
                 LogMessage log;
                 log.type = "#cp_died";
                 log.from = ex_pair;

@@ -166,7 +166,7 @@ void MagatamasBoxItem::_doHpChangeAnimation(int newHp)
 
 void MagatamasBoxItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
-    if (m_maxHp <= 0) return;
+    if (m_maxHp <= 0 && m_hp <= 0) return;
     int imageIndex = qBound(0, m_hp, 5);
     int bgIndex = qMin(m_maxHp, 5);
     if (m_hp == m_maxHp) imageIndex = 5;

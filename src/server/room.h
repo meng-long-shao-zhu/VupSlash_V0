@@ -266,6 +266,9 @@ public:
         doAnimate((QSanProtocol::AnimateType)type, arg1, arg2, players);
     }
 
+    void doPicAnimate(const QString &arg1 = QString(), const QString &arg2 = QString(),
+        QList<ServerPlayer *> players = QList<ServerPlayer *>());
+
     void preparePlayers();
     void changePlayerGeneral(ServerPlayer *player, const QString &new_general);
     void changePlayerGeneral2(ServerPlayer *player, const QString &new_general);

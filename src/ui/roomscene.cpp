@@ -4172,7 +4172,11 @@ void RoomScene::doMovingAnimation(const QString &name, const QStringList &args)
 
 void RoomScene::doAppearingAnimation(const QString &name, const QStringList &args)
 {
-    QSanSelectableItem *item = new QSanSelectableItem(QString("image/system/animation/%1.png").arg(name));
+    QString path = name;
+    if (name == "pic_animation") {
+        path = args.at(1);
+    }
+    QSanSelectableItem *item = new QSanSelectableItem(QString("image/system/animation/%1.png").arg(path));
     item->setZValue(10086.0);
     addItem(item);
 
@@ -4180,6 +4184,12 @@ void RoomScene::doAppearingAnimation(const QString &name, const QStringList &arg
     QPointF from = fromItem->scenePos();
     if (fromItem == dashboard)
         from.setX(fromItem->boundingRect().width() / 2);
+    else {
+        qreal x_offset = (fromItem->boundingRect().width() - item->boundingRect().width()) / 2.0;
+        qreal y_offset = (fromItem->boundingRect().height() - item->boundingRect().height()) / 2.0;
+        from.setX(from.x() + x_offset);
+        from.setY(from.y() + y_offset);
+    }
     item->setPos(from);
 
     QPropertyAnimation *disappear = new QPropertyAnimation(item, "opacity");
@@ -4248,7 +4258,17 @@ void RoomScene::doLightboxAnimation(const QString &, const QStringList &args)
         _m_animationContext->setContextProperty("sceneHeight", sceneRect().height());
         _m_animationContext->setContextProperty("tableWidth", m_tableCenterPos.x() * 2);
         _m_animationContext->setContextProperty("hero", hero);
-        _m_animationContext->setContextProperty("skill", Sanguosha->translate(skill));
+        QStringList skill_list = skill.split("+");
+        QStringList skill_trans_list;
+        foreach (QString arg, skill_list) {
+            skill_trans_list << Sanguosha->translate(arg);
+        }
+        _m_animationContext->setContextProperty("skill", skill_trans_list.first());
+        int counter = 0;
+        foreach (QString arg, skill_trans_list) {
+            counter++;
+            _m_animationContext->setContextProperty("skill"+QString::number(counter), arg);
+        }
         QGraphicsObject *object = qobject_cast<QGraphicsObject *>(_m_animationComponent->create(_m_animationContext));
         object->setParentItem(lightbox);    //in order to remove it by getting its parent
         if (will_release)
@@ -4426,6 +4446,7 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         map[S_ANIMATE_SHOT] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_EARTH_HIT] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_POTATO_MINE] = &RoomScene::doAppearingAnimation;
+        map[S_ANIMATE_PIC_ANIMATION] = &RoomScene::doAppearingAnimation;
 
         map[S_ANIMATE_LIGHTBOX] = &RoomScene::doLightboxAnimation;
         map[S_ANIMATE_HUASHEN] = &RoomScene::doHuashen;
@@ -4445,6 +4466,7 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         anim_name[S_ANIMATE_SHOT] = "shot";
         anim_name[S_ANIMATE_EARTH_HIT] = "earth_hit";
         anim_name[S_ANIMATE_POTATO_MINE] = "potato_mine";
+        anim_name[S_ANIMATE_PIC_ANIMATION] = "pic_animation";
 
         anim_name[S_ANIMATE_LIGHTBOX] = "lightbox";
         anim_name[S_ANIMATE_HUASHEN] = "huashen";

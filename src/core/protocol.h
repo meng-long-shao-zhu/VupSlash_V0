@@ -183,7 +183,8 @@ namespace QSanProtocol {
         S_ANIMATE_POTATO_MINE,
         S_ANIMATE_FLIP,
         S_ANIMATE_DIE_THROW,
-        S_ANIMATE_REVIVE
+        S_ANIMATE_REVIVE,
+        S_ANIMATE_PIC_ANIMATION
     };
 
     enum Game3v3ChooseOrderCommand

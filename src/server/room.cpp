@@ -202,6 +202,16 @@ void Room::outputEventStack()
 
 void Room::enterDying(ServerPlayer *player, DamageStruct *reason, HpLostStruct *lost_reason)
 {
+    if (player->getHp() <= 0 && player->getMaxHp() <= 0) {
+        DyingStruct dying;
+        dying.who = player;
+        dying.damage = reason;
+        dying.hplost = lost_reason;
+        QVariant dying_data = QVariant::fromValue(dying);
+        setTag("LastDyingData", QVariant::fromValue(dying_data));   //for kill_animation
+
+        killPlayer(player, reason, lost_reason);
+    }
     setPlayerFlag(player, "Global_Dying");
     QStringList currentdying = getTag("CurrentDying").toStringList();
     currentdying << player->objectName();
@@ -5650,6 +5660,12 @@ void Room::doAnimate(QSanProtocol::AnimateType type, const QString &arg1, const 
     arg << arg1;
     arg << arg2;
     doBroadcastNotify(players, S_COMMAND_ANIMATE, arg);
+}
+
+void Room::doPicAnimate(const QString &arg1, const QString &arg2,
+    QList<ServerPlayer *> players)
+{
+    doAnimate(S_ANIMATE_PIC_ANIMATION, arg1, arg2, players);
 }
 
 void Room::preparePlayers()

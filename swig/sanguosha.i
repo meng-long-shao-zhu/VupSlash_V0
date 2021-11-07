@@ -1282,6 +1282,7 @@ public:
     void broadcastSkillInvoke(const char *skillName, bool isMale, int type);
     void doLightbox(const char *lightboxName, int duration = 2000, int pixelSize = 0);
     void doAnimate(int type, const char *arg1 = NULL, const char *arg2 = NULL, QList<ServerPlayer *> players = QList<ServerPlayer *>());
+    void doPicAnimate(const char *arg1 = NULL, const char *arg2 = NULL, QList<ServerPlayer *> players = QList<ServerPlayer *>());
     void setPlayerChained(ServerPlayer *player);
     void moveCardsToEndOfDrawpile(ServerPlayer *player, QList<int> card_ids, const char *skill_name, bool forceMoveVisible = false, bool guanxing = false);
 	void moveCardsInToDrawpile(ServerPlayer *player, const Card *card, const char *skill_name, int n = 0, bool forceMoveVisible = false);
