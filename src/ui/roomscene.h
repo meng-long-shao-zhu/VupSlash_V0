@@ -422,7 +422,7 @@ private slots:
     void removeLightBox();
     void removeAnimate();
 
-    void showCard(const QString &player_name, int card_id);
+    void showCard(const QString &player_name, int card_id, bool is_overt = false);
     void viewDistance();
     void viewKnowncard();
 

@@ -127,8 +127,8 @@ public:
     void sendLogWithIds(LogMessage &log, const QList<int> &card_ids, QList<ServerPlayer *> players = QList<ServerPlayer *>());
     void sendLogWithIds(LogMessage &log, const QList<int> &card_ids, ServerPlayer *player);
     void sendCompulsoryTriggerLog(ServerPlayer *player, const QString &skill_name, bool notify_skill = true, bool broadcast = false, int type = 0);
-    void showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer = NULL , bool self_can_see = true, bool trigger_event = true);
-    void showCards(ServerPlayer *player, QList<int> ids, bool not_trigger_event = false);
+    void showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer = NULL , bool self_can_see = true, bool trigger_event = true, bool is_overt = false);
+    void showCards(ServerPlayer *player, QList<int> ids, bool not_trigger_event = false, bool is_overt = false);
     void showAllCards(ServerPlayer *player, ServerPlayer *to = NULL);
     void setOvertCard(ServerPlayer *player, int card_id, bool can = true);
     void setOvertCards(ServerPlayer *player, QList<int> ids, bool can = true);
@@ -277,7 +277,7 @@ public:
     void acquireSkill(ServerPlayer *player, const Skill *skill, bool open = true, bool getmark = true, bool event_and_log = true);
     void acquireSkill(ServerPlayer *player, const QString &skill_name, bool open = true, bool getmark = true, bool event_and_log = true);
     void adjustSeats();
-    void swapPile();
+    void swapPile(bool add_times = true);
     inline QList<int> getDiscardPile()
     {
         return *m_discardPile;

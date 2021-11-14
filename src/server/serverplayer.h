@@ -133,8 +133,8 @@ public:
     bool isLowestHpPlayer(bool only = false);
     void ViewAsEquip(const QString &equip_name, bool can_duplication = false);
     void removeViewAsEquip(const QString &equip_name, bool remove_all_duplication = true);
-    bool canUse(const Card *card, QList<ServerPlayer *> players = QList<ServerPlayer *>());
-    bool canUse(const Card *card, ServerPlayer *player);
+    bool canUse(const Card *card, QList<ServerPlayer *> players = QList<ServerPlayer *>(), bool ignore_limit = false);
+    bool canUse(const Card *card, ServerPlayer *player, bool ignore_limit = false);
     void endPlayPhase(bool sendLog = true);
     void breakYinniState();
     QList<int> getHandPile() const;

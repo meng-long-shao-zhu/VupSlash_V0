@@ -193,6 +193,7 @@ public:
         QRect m_cardMoveRegion;
         QRect m_onlineStatusArea;
         QSanShadowTextFont m_onlineStatusFont;
+        QSanShadowTextFont m_SeatFont;
         QColor m_onlineStatusBgColor;
         QRect m_skillNameArea;
         QSanShadowTextFont m_skillNameFont;

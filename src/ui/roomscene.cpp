@@ -147,7 +147,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     //connect(ClientInstance, SIGNAL(round_add()), this, SLOT(addRound()));
     connect(ClientInstance, SIGNAL(player_killed(QString)), this, SLOT(killPlayer(QString)));
     connect(ClientInstance, SIGNAL(player_revived(QString)), this, SLOT(revivePlayer(QString)));
-    connect(ClientInstance, SIGNAL(card_shown(QString, int)), this, SLOT(showCard(QString, int)));
+    connect(ClientInstance, SIGNAL(card_shown(QString, int, bool)), this, SLOT(showCard(QString, int, bool)));
     connect(ClientInstance, SIGNAL(gongxin(QList<int>, bool, QList<int>)), this, SLOT(doGongxin(QList<int>, bool, QList<int>)));
     connect(ClientInstance, SIGNAL(focus_moved(QStringList, QSanProtocol::Countdown)), this, SLOT(moveFocus(QStringList, QSanProtocol::Countdown)));
     connect(ClientInstance, SIGNAL(emotion_set(QString, QString)), this, SLOT(setEmotion(QString, QString)));
@@ -1773,7 +1773,7 @@ void RoomScene::chooseOption(const QString &skillName, const QStringList &option
                 column = index % 6;
                 index++;
                 gridlayout->addWidget(button, row, column);
-            } else if (option == "cancel") {
+            } else if (option.startsWith("cancel")) {
                 QString text = QString("%1:%2").arg(skillName).arg(option);
                 QString translated = Sanguosha->translate(text);
 
@@ -1817,7 +1817,7 @@ void RoomScene::chooseOption(const QString &skillName, const QStringList &option
 
             connect(button, SIGNAL(clicked()), dialog, SLOT(accept()));
             connect(button, SIGNAL(clicked()), ClientInstance, SLOT(onPlayerMakeChoice()));
-            if (option.toStdString() == "cancel") {
+            if (option.startsWith("cancel")) {
                 main_layout->addWidget(button);
             } else {
                 layout->addWidget(button);
@@ -2124,6 +2124,8 @@ QString RoomScene::_translateMovement(const CardsMoveStruct &move)
             result.append(Sanguosha->translate("turnover"));
         else if (reason.m_reason == CardMoveReason::S_REASON_DEMONSTRATE)
             result.append(Sanguosha->translate("show"));
+        else if (reason.m_reason == CardMoveReason::S_REASON_OVERT)
+            result.append(Sanguosha->translate("OVERT"));
         else if (reason.m_reason == CardMoveReason::S_REASON_PREVIEW)
             result.append(Sanguosha->translate("preview"));
     } else if ((reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_PUT) {
@@ -3675,7 +3677,7 @@ void RoomScene::takeAmazingGrace(ClientPlayer *taker, int card_id, bool move_car
         delete copy;
 }
 
-void RoomScene::showCard(const QString &player_name, int card_id)
+void RoomScene::showCard(const QString &player_name, int card_id, bool is_overt)
 {
     QList<int> card_ids;
     card_ids << card_id;
@@ -3683,7 +3685,7 @@ void RoomScene::showCard(const QString &player_name, int card_id)
 
     GenericCardContainer *container = _getGenericCardContainer(Player::PlaceHand, (Player *)player);
     QList<CardItem *> card_items = container->cloneCardItems(card_ids);
-    CardMoveReason reason(CardMoveReason::S_REASON_DEMONSTRATE, player->objectName());
+    CardMoveReason reason(is_overt ? CardMoveReason::S_REASON_OVERT : CardMoveReason::S_REASON_DEMONSTRATE, player->objectName());
     bringToFront(m_tablePile);
     CardsMoveStruct move;
     move.from_place = Player::PlaceHand;

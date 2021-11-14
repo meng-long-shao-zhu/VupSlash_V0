@@ -73,11 +73,16 @@ int Player::getMaxHp() const
 
 void Player::setMaxHp(int max_hp, bool keep_hp)
 {
-    if (this->max_hp == max_hp)
+    int value = max_hp - this->max_hp;
+    if (value == 0)
         return;
+    bool is_overflow = this->hp > this->max_hp;
     this->max_hp = max_hp;
-    if (!keep_hp && hp > max_hp)
-        hp = max_hp;
+    if (!keep_hp && value < 0)
+        if (!is_overflow)
+            hp = qMin(max_hp, hp);
+        else
+            hp += value;
     emit hp_changed();
 }
 
@@ -1677,6 +1682,8 @@ bool Player::canSeeHandcard(const Player *player) const
         if (mark.startsWith("HandcardVisible_ALL") && player->getMark(mark) > 0)
             return true;
         if (mark.startsWith("HandcardVisible_" + objectName()) && player->getMark(mark) > 0)
+            return true;
+        if (mark.contains("+handcard_public+") && player->getMark(mark) > 0)
             return true;
     }
     return false;

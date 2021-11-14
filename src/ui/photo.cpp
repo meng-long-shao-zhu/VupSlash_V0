@@ -30,6 +30,7 @@ Photo::Photo() : PlayerCardContainer()
     m_player = NULL;
     _m_focusFrame = NULL;
     _m_onlineStatusItem = NULL;
+    _m_seatStatusItem = NULL;
     _m_layout = &G_PHOTO_LAYOUT;
     _m_frameType = S_FRAME_NO_FRAME;
     setAcceptHoverEvents(true);
@@ -79,6 +80,23 @@ void Photo::refresh(bool killed)
     } else if (_m_onlineStatusItem != NULL && state_str == "online")
         _m_onlineStatusItem->hide();
 
+    int seat = m_player->getSeat();
+    if (seat && seat > 0 && seat < 11) {
+        QRect rect = G_PHOTO_LAYOUT.m_onlineStatusArea;
+        rect.translate(0, 20);
+        QImage image(rect.size(), QImage::Format_ARGB32);
+        image.fill(Qt::transparent);
+        QPainter painter(&image);
+        painter.fillRect(QRect(0, 0, rect.width(), rect.height()), G_PHOTO_LAYOUT.m_onlineStatusBgColor);
+        QString seat_str = Sanguosha->translate("CAPITAL("+QString::number(seat)+")")+Sanguosha->translate("SEAT_NUM");
+        G_PHOTO_LAYOUT.m_onlineStatusFont.paintText(&painter, QRect(QPoint(0, 0), rect.size()),
+            Qt::AlignCenter,
+            seat_str);
+        QPixmap pixmap = QPixmap::fromImage(image);
+        _paintPixmap(_m_seatStatusItem, rect, pixmap, _m_groupMain);
+        _layBetween(_m_seatStatusItem, _m_mainFrame, _m_chainIcon);
+        if (!_m_seatStatusItem->isVisible()) _m_seatStatusItem->show();
+    }
 }
 
 QRectF Photo::boundingRect() const

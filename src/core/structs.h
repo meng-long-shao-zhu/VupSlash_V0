@@ -192,6 +192,7 @@ public:
     static const int S_REASON_JUDGE = 0x28;             // show a card from drawpile for judge
     static const int S_REASON_PREVIEW = 0x38;           // Not done yet, plan for view some cards for self only(guanxing yiji miji)
     static const int S_REASON_DEMONSTRATE = 0x48;       // show a card which copy one to move to table
+    static const int S_REASON_OVERT = 0x58;             // same as demonstrate, but show for overt
 
     //subcategory of transfer
     static const int S_REASON_SWAP = 0x19;              // exchange card for two players

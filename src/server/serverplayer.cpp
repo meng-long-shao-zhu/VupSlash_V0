@@ -2044,14 +2044,14 @@ void ServerPlayer::removeViewAsEquip(const QString &equip_name, bool remove_all_
     room->setPlayerProperty(this, "View_As_Equips_List", equips);
 }
 
-bool ServerPlayer::canUse(const Card *card, QList<ServerPlayer *> players)
+bool ServerPlayer::canUse(const Card *card, QList<ServerPlayer *> players, bool ignore_limit)
 {
     QList<ServerPlayer *> new_players = players;
     if (new_players.isEmpty()) new_players = room->getAlivePlayers();
 
-    if (!card || new_players.isEmpty() || !card->isAvailable(this)) return false;
-    if (card->isKindOf("Slash") && !Slash::IsAvailable(this)) return false;
-    if (card->isKindOf("Analeptic") && !Analeptic::IsAvailable(this)) return false;
+    if (!card || new_players.isEmpty() || !ignore_limit && !card->isAvailable(this)) return false;
+    if (!ignore_limit && card->isKindOf("Slash") && !Slash::IsAvailable(this)) return false;
+    if (!ignore_limit && card->isKindOf("Analeptic") && !Analeptic::IsAvailable(this)) return false;
 
     if (card->targetFixed()) {
         if (!isLocked(card)) {
@@ -2067,11 +2067,11 @@ bool ServerPlayer::canUse(const Card *card, QList<ServerPlayer *> players)
     return false;
 }
 
-bool ServerPlayer::canUse(const Card *card, ServerPlayer *player)
+bool ServerPlayer::canUse(const Card *card, ServerPlayer *player, bool ignore_limit)
 {
     QList<ServerPlayer*> players;
     players << player;
-    return this->canUse(card, players);
+    return this->canUse(card, players, ignore_limit);
 }
 
 void ServerPlayer::endPlayPhase(bool sendLog)

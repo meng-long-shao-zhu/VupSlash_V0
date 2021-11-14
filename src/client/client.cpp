@@ -1130,10 +1130,14 @@ QTextDocument *Client::getPromptDoc() const
     return prompt_doc;
 }
 
-void Client::resetPiles(const QVariant &)
+void Client::resetPiles(const QVariant &arg)
 {
+    JsonArray args = arg.value<JsonArray>();
+    if (args.size() != 1 || !JsonUtils::isBool(args[0])) return;
+    bool add_times = args[0].toBool();
     discarded_list.clear();
-    swap_pile++;
+    if (add_times)
+        swap_pile++;
     updatePileNum();
     emit pile_reset();
 }
@@ -1641,17 +1645,20 @@ void Client::alertFocus()
 void Client::showCard(const QVariant &show_str)
 {
     JsonArray show = show_str.value<JsonArray>();
-    if (show.size() != 2 || !JsonUtils::isString(show[0]) || !JsonUtils::isNumber(show[1]))
+    if (show.size() < 2 || show.size() > 3 || !JsonUtils::isString(show[0]) || !JsonUtils::isNumber(show[1]))
         return;
 
     QString player_name = show[0].toString();
     int card_id = show[1].toInt();
+    bool is_overt = false;
+    if (show.size() == 3 && JsonUtils::isBool(show[2]))
+        is_overt = show[2].toBool();
 
     ClientPlayer *player = getPlayer(player_name);
     if (player != Self)
         player->addKnownHandCard(Sanguosha->getCard(card_id));
 
-    emit card_shown(player_name, card_id);
+    emit card_shown(player_name, card_id, is_overt);
 }
 
 void Client::attachSkill(const QVariant &skill)

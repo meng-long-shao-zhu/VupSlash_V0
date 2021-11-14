@@ -120,6 +120,7 @@ protected:
     QGraphicsPixmapItem *_m_skillNameItem;
     QGraphicsPixmapItem *_m_focusFrame;
     QGraphicsPixmapItem *_m_onlineStatusItem;
+    QGraphicsPixmapItem *_m_seatStatusItem;
     QGraphicsRectItem *_m_duanchangMask;
 };
 

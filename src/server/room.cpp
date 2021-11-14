@@ -2369,7 +2369,7 @@ void Room::broadcast(const QString &message, ServerPlayer *except)
     }
 }
 
-void Room::swapPile()
+void Room::swapPile(bool add_times)
 {
     if (m_discardPile->isEmpty()) {
         // the standoff
@@ -2377,19 +2377,28 @@ void Room::swapPile()
     }
 
     int times = tag.value("SwapPile", 0).toInt();
-    tag.insert("SwapPile", ++times);
+    if (add_times) {
+        tag.insert("SwapPile", ++times);
+    }
 
     int limit = Config.value("PileSwappingLimitation", 5).toInt() + 1;
     if (mode == "04_1v3")
         limit = qMin(limit, Config.BanPackages.contains("maneuvering") ? 3 : 2);
     else if (mode == "08_defense")
         limit = qMin(limit, Config.BanPackages.contains("maneuvering") ? 9 : 6);
-    if (limit > 0 && times == limit)
+
+    if (add_times && limit > 0 && times == limit)
         gameOver(".");
 
-    qSwap(m_drawPile, m_discardPile);
+    //qSwap(m_drawPile, m_discardPile);
+    foreach (int card_id, *m_discardPile) {
+        m_drawPile->append(card_id);
+    }
+    m_discardPile->clear();
 
-    doBroadcastNotify(S_COMMAND_RESET_PILE, QVariant());
+    JsonArray arg;
+    arg << add_times;
+    doBroadcastNotify(S_COMMAND_RESET_PILE, arg);
     doBroadcastNotify(S_COMMAND_UPDATE_PILE, m_drawPile->length());
 
     qShuffle(*m_drawPile);
@@ -3669,6 +3678,16 @@ void Room::adjustSeats()
     foreach(ServerPlayer *player, m_players)
         player_circle << player->objectName();
     doBroadcastNotify(S_COMMAND_ARRANGE_SEATS, JsonUtils::toJsonArray(player_circle));
+
+    for (int i = 0; i < m_players.length(); i++) {  //refresh to show seat number in photo
+        ServerPlayer *player = m_players[i];
+        QString state = player->getState();
+        player->setState("ready");
+        broadcastProperty(player, "state");
+        player->setState(state);
+        broadcastProperty(player, "state");
+    }
+
 }
 
 int Room::getCardFromPile(const QString &card_pattern)
@@ -4127,7 +4146,7 @@ void Room::loseMaxHp(ServerPlayer *victim, int lose)
     arg << -new_lose;
     doBroadcastNotify(S_COMMAND_CHANGE_MAXHP, arg);
 
-    if (victim->getMaxHp() <= 0)
+    if (victim->getMaxHp() <= 0 && victim->getHp() <= 0)
         killPlayer(victim);
     else
         thread->trigger(MaxHpChanged, this, victim);
@@ -7051,7 +7070,7 @@ void Room::sendCompulsoryTriggerLog(ServerPlayer *player, const QString &skill_n
     }
 }
 
-void Room::showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer, bool self_can_see, bool trigger_event)
+void Room::showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer, bool self_can_see, bool trigger_event, bool is_overt)
 {
     if (getCardOwner(card_id) != player) return;
 
@@ -7060,6 +7079,7 @@ void Room::showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer
     JsonArray show_arg;
     show_arg << player->objectName();
     show_arg << card_id;
+    show_arg << is_overt;
 
     WrappedCard *card = Sanguosha->getWrappedCard(card_id);
     bool modified = card->isModified();
@@ -7090,10 +7110,10 @@ void Room::showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer
     }
 }
 
-void Room::showCards(ServerPlayer *player, QList<int> ids, bool not_trigger_event)
+void Room::showCards(ServerPlayer *player, QList<int> ids, bool not_trigger_event, bool is_overt)
 {
     foreach (int id, ids) {
-        showCard(player, id, NULL, true, false);
+        showCard(player, id, NULL, true, false, is_overt);
     }
     if (!not_trigger_event) {
         QVariant data = QVariant::fromValue(ids);
@@ -7871,7 +7891,7 @@ void Room::setOvertCard(ServerPlayer *player, int card_id, bool can)
     if (getCardOwner(card_id) != player) return;
 
     if (can)
-        showCard(player, card_id);
+        showCard(player, card_id, NULL, true, true, true);
 
     Sanguosha->getCard(card_id)->setOvert(can);
 
@@ -7907,7 +7927,7 @@ void Room::setOvertCard(ServerPlayer *player, int card_id, bool can)
 void Room::setOvertCards(ServerPlayer *player, QList<int> ids, bool can)
 {
     if (can)
-        showCards(player, ids, false);
+        showCards(player, ids, false, true);
 
     foreach (int id, ids) {
         Sanguosha->getCard(id)->setOvert(can);
@@ -7928,7 +7948,7 @@ void Room::setOvertCards(ServerPlayer *player, QList<int> ids, bool can)
     if (can) {
         LogMessage log;
         log.from = player;
-        log.type = "#OvertLog";
+        log.type = "$OvertLog";
         log.card_str = IntList2StringList(ids).join("+");
         sendLog(log);
 

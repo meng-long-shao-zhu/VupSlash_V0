@@ -418,8 +418,8 @@ public:
 	bool isLowestHpPlayer(bool only = false);
 	void ViewAsEquip(const char *equip_name, bool can_duplication = false);
     void removeViewAsEquip(const char *equip_name, bool remove_all_duplication = true);
-	bool canUse(const Card *card, QList<ServerPlayer *> players = QList<ServerPlayer *>());
-    bool canUse(const Card *card, ServerPlayer *player);
+	bool canUse(const Card *card, QList<ServerPlayer *> players = QList<ServerPlayer *>(), bool ignore_limit = false);
+    bool canUse(const Card *card, ServerPlayer *player, bool ignore_limit = false);
 	void endPlayPhase(bool sendLog = true);
 	void breakYinniState();
 };
@@ -502,6 +502,7 @@ public:
     static const int S_REASON_JUDGE = 0x28;             // show a card  from drawpile for judge
     static const int S_REASON_PREVIEW = 0x38;           // Not done yet, plan for view some cards for self only(guanxing yiji miji)
     static const int S_REASON_DEMONSTRATE = 0x48;       // show a card which copy one to move to table
+	static const int S_REASON_OVERT = 0x58;             // same as demonstrate, but show for overt
 
     //subcategory of transfer
     static const int S_REASON_SWAP = 0x19;              // exchange card for two players
@@ -1268,8 +1269,8 @@ public:
 	void sendLogWithIds(LogMessage &log, const QList<int> &card_ids, QList<ServerPlayer *> players = QList<ServerPlayer *>());
 	void sendLogWithIds(LogMessage &log, const QList<int> &card_ids, ServerPlayer *player);
     void sendCompulsoryTriggerLog(ServerPlayer *player, const char *skill_name, bool notify_skill = true, bool broadcast = false, int type = 0);
-    void showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer = NULL , bool self_can_see = true);
-	void showCards(ServerPlayer *player, QList<int> ids, bool not_trigger_event = false);
+    void showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer = NULL, bool self_can_see = true, bool trigger_event = true, bool is_overt = false);
+	void showCards(ServerPlayer *player, QList<int> ids, bool not_trigger_event = false, bool is_overt = false);
     void showAllCards(ServerPlayer *player, ServerPlayer *to = NULL);
     void setOvertCard(ServerPlayer *player, int card_id, bool can = true);
     void setOvertCards(ServerPlayer *player, QList<int> ids, bool can = true);
@@ -1307,7 +1308,7 @@ public:
     void acquireSkill(ServerPlayer *player, const Skill *skill, bool open = true, bool getmark = true, bool event_and_log = true);
     void acquireSkill(ServerPlayer *player, const char *skill_name, bool open = true, bool getmark = true, bool event_and_log = true);
     void adjustSeats();
-    void swapPile();
+    void swapPile(bool add_times = true);
     QList<int> getDiscardPile();
     QList<int> &getDrawPile();
     int getCardFromPile(const char *card_name);
