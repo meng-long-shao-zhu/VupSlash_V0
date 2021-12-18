@@ -216,6 +216,9 @@ void ClientPlayer::setMark(const QString &mark, int value)
     if (mark == "drank")
         emit drank_changed();
 
+    if (mark == "surrender")
+        emit duanchang_invoked();
+
     if (!mark.startsWith("@") && !mark.startsWith("&"))
         return;
     if (mark.startsWith("@")) {

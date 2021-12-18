@@ -800,15 +800,21 @@ const Card *Engine::getEngineCard(int cardId) const
     }
 }
 
-Card *Engine::cloneCard(const Card *card) const
+Card *Engine::cloneCard(const Card *card, int new_id)
 {
     QString name = card->getClassName();
     Card *result = cloneCard(name, card->getSuit(), card->getNumber(), card->getFlags());
     if (result == NULL)
         return NULL;
-    result->setId(card->getEffectiveId());
     result->setSkillName(card->getSkillName(false));
     result->setObjectName(card->objectName());
+    if (new_id == -1)
+        result->setId(card->getEffectiveId());
+    else {
+        result->setId(cards.length());
+        result->setCopy(true);
+        cards << result;
+    }
     return result;
 }
 

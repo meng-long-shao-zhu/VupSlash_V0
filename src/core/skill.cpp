@@ -14,7 +14,7 @@
 
 Skill::Skill(const QString &name, Frequency frequency)
     : frequency(frequency), limit_mark(QString()), lord_skill(false), attached_lord_skill(false), change_skill(false), limited_skill(false),
-      hide_skill(false)
+      hide_skill(false), level_skill(false)
 {
     static QChar lord_symbol('$');
     static QChar attached_lord_symbol('&');
@@ -59,6 +59,16 @@ bool Skill::isLimitedSkill() const
 bool Skill::isHideSkill() const
 {
     return hide_skill;
+}
+
+bool Skill::isLevelSkill() const
+{
+    return level_skill;
+}
+
+void Skill::setLevelSkill(bool can)
+{
+    level_skill = can;
 }
 
 bool Skill::shouldBeVisible(const Player *Self) const

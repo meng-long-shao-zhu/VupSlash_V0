@@ -1544,7 +1544,7 @@ void RoomScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
                 //if (!ServerInfo.EnableCheat && !Self->canSeeHandcard(player))
                 //    known.clear();
 
-                if (known.isEmpty()) {
+                if (known.isEmpty() || player->isKongcheng()) {
                     known_cards->addAction(ClientInstance->getPlayerName(player->objectName()))->setEnabled(false);
                 } else {
                     QMenu *submenu = known_cards->addMenu(ClientInstance->getPlayerName(player->objectName()));

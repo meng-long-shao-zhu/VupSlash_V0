@@ -870,6 +870,10 @@ public:
                     int n = player->getChangeSkillState(sk->objectName());
                     room->setPlayerMark(player, "&" + sk->objectName() + "+" + QString::number(n) + "_num", 1);
                 }
+                if (sk->isLevelSkill()) {
+                    int n = player->getChangeSkillState(sk->objectName());
+                    room->setPlayerMark(player, "&" + sk->objectName() + "+" + QString::number(n) + "+LEVEL", 1);
+                }
             }
         } else if (event == EventAcquireSkill) {
             const Skill *sk = Sanguosha->getSkill(data.toString());
@@ -877,11 +881,19 @@ public:
                 int n = player->getChangeSkillState(sk->objectName());
                 room->setPlayerMark(player, "&" + sk->objectName() + "+" + QString::number(n) + "_num", 1);
             }
+            if (sk && sk->isVisible() && sk->isLevelSkill() && player->hasSkill(sk)) {
+                int n = player->getChangeSkillState(sk->objectName());
+                room->setPlayerMark(player, "&" + sk->objectName() + "+" + QString::number(n) + "+LEVEL", 1);
+            }
         } else if (event == EventLoseSkill) {
             const Skill *sk = Sanguosha->getSkill(data.toString());
             if (sk && sk->isVisible() && sk->isChangeSkill() && !player->hasSkill(sk)) {
                 int n = player->getChangeSkillState(sk->objectName());
                 room->setPlayerMark(player, "&" + sk->objectName() + "+" + QString::number(n) + "_num", 0);
+            }
+            if (sk && sk->isVisible() && sk->isLevelSkill() && !player->hasSkill(sk)) {
+                int n = player->getChangeSkillState(sk->objectName());
+                room->setPlayerMark(player, "&" + sk->objectName() + "+" + QString::number(n) + "+LEVEL", 0);
             }
         }
         return false;

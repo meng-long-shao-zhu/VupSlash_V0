@@ -2012,10 +2012,10 @@ void Room::setPlayerFlag(ServerPlayer *player, const QString &flag)
 void Room::_setAreaMark(ServerPlayer *player, int i, bool flag)
 {
     if (flag == true) {
-        setPlayerMark(player, "@Equip5lose", 0);
+        setPlayerMark(player, "&AreaLose->Equip5lose", 0);
         for (int m = 0; m < 5; m++) {
             if (!player->hasEquipArea(m))
-                setPlayerMark(player, "@Equip" + QString::number(m) +"lose", 1);
+                setPlayerMark(player, "&AreaLose->Equip" + QString::number(m) +"lose", 1);
         }
     } else {
         DummyCard *card = new DummyCard;
@@ -2024,7 +2024,7 @@ void Room::_setAreaMark(ServerPlayer *player, int i, bool flag)
             throwCard(card, player);
         }
         delete card;
-        setPlayerMark(player, "@Equip" + QString::number(i) +"lose", 1);
+        setPlayerMark(player, "&AreaLose->Equip" + QString::number(i) +"lose", 1);
     }
 }
 
@@ -2126,7 +2126,7 @@ void Room::setPlayerProperty(ServerPlayer *player, const char *property_name, co
 
     if (strcmp(property_name, "hasjudgearea") == 0) {
         if (player->hasJudgeArea()) {
-            setPlayerMark(player, "@Judgelose", 0);
+            setPlayerMark(player, "&AreaLose->Judgelose", 0);
             thread->trigger(ObtainJudgeArea, this, player);
         } else {
             QList<const Card *> tricks = player->getJudgingArea();
@@ -2139,7 +2139,7 @@ void Room::setPlayerProperty(ServerPlayer *player, const char *property_name, co
                 throwCard(card, reason, NULL);
             }
             delete card;
-            setPlayerMark(player, "@Judgelose", 1);
+            setPlayerMark(player, "&AreaLose->Judgelose", 1);
             thread->trigger(ThrowJudgeArea, this, player);
         }
     }
@@ -2156,6 +2156,14 @@ void Room::setPlayerMark(ServerPlayer *player, const QString &mark, int value, Q
     //if (player->isDead()) return;
     if (mark.endsWith("-Clear") && !hasCurrent() && value != 0) return;
     if (mark.endsWith("-PlayClear") && !hasCurrent() && value != 0) return;
+    if (mark.endsWith("->*") && mark.startsWith("&") && value == 0) {
+        QString mark_prefix = mark.left(mark.length()-1);
+        foreach (QString name, player->getMarkNames()) {
+            if (name.startsWith(mark_prefix) && player->getMark(name) > 0)
+                setPlayerMark(player, name, value, only_viewers);
+        }
+        return;
+    }
 
     int gain = value - player->getMark(mark);
     if (gain == 0) return;
@@ -2170,12 +2178,12 @@ void Room::setPlayerMark(ServerPlayer *player, const QString &mark, int value, Q
     bool trigger = true;
     bool invoke = false;
 
-    if (mark.endsWith("-Clear") || mark.endsWith("-PlayClear") || mark.endsWith("_lun") || mark.endsWith("-Keep"))
+    if (mark.endsWith("-Clear") || mark.endsWith("-PlayClear") || mark.endsWith("_lun") || mark.endsWith("_lun!") || mark.endsWith("-Keep"))
         trigger = false;
 
     if (trigger) {
         QStringList special_marks;
-        special_marks << "BossMode_Boss" << "@Equip0lose" << "@Equip1lose" << "@Equip2lose" << "@Equip3lose" << "@Equip4lose" << "@Equip5lose";
+        special_marks << "BossMode_Boss" << "&AreaLose->Equip0lose" << "&AreaLose->Equip1lose" << "&AreaLose->Equip2lose" << "&AreaLose->Equip3lose" << "&AreaLose->Equip4lose" << "&AreaLose->Equip5lose";
         if (special_marks.contains(mark))
             trigger = false;
     }
@@ -2373,7 +2381,10 @@ void Room::swapPile(bool add_times)
 {
     if (m_discardPile->isEmpty()) {
         // the standoff
-        gameOver(".");
+        if (add_times)
+            gameOver(".");
+        else
+            return;
     }
 
     int times = tag.value("SwapPile", 0).toInt();
@@ -2473,7 +2484,7 @@ void Room::resetAI(ServerPlayer *player)
     if (smart_ai) {
         index = ais.indexOf(smart_ai);
         ais.removeOne(smart_ai);
-        delete smart_ai;
+        //delete smart_ai;
     }
     AI *new_ai = cloneAI(player);
     player->setAI(new_ai);
@@ -2934,8 +2945,8 @@ void Room::pauseCommand(ServerPlayer *player, const QVariant &arg)
 void Room::processRequestCheat(ServerPlayer *player, const QVariant &arg)
 {
     player->m_cheatArgs = QVariant();
-    if (!Config.EnableCheat)
-        return;
+    //if (!Config.EnableCheat)
+    //    return;
     if (!arg.canConvert<JsonArray>() || !arg.value<JsonArray>().value(0).canConvert(QVariant::Int))
         return;
     //@todo: synchronize this
@@ -5717,6 +5728,12 @@ void Room::changePlayerGeneral(ServerPlayer *player, const QString &new_general)
                         setPlayerMark(player, mark, 0);
                 }
             }
+            if (skill->isLevelSkill()) {
+                foreach (QString mark, player->getMarkNames()) {
+                    if (mark.startsWith("&" + skill->objectName()) && mark.endsWith("+LEVEL") && player->getMark(mark) > 0)
+                        setPlayerMark(player, mark, 0);
+                }
+            }
         }
     }
     setPlayerProperty(player, "general", new_general);
@@ -5740,6 +5757,12 @@ void Room::changePlayerGeneral2(ServerPlayer *player, const QString &new_general
             if (skill->isChangeSkill()) {
                 foreach (QString mark, player->getMarkNames()) {
                     if (mark.startsWith("&" + skill->objectName()) && mark.endsWith("_num") && player->getMark(mark) > 0)
+                        setPlayerMark(player, mark, 0);
+                }
+            }
+            if (skill->isLevelSkill()) {
+                foreach (QString mark, player->getMarkNames()) {
+                    if (mark.startsWith("&" + skill->objectName()) && mark.endsWith("+LEVEL") && player->getMark(mark) > 0)
                         setPlayerMark(player, mark, 0);
                 }
             }
@@ -5953,7 +5976,7 @@ void Room::activate(ServerPlayer *player, CardUseStruct &card_use)
             if (!game_finished)
                 return activate(player, card_use);
         } else {
-            if (Config.EnableCheat && makeCheat(player)) {
+            if (/*Config.EnableCheat &&*/ makeCheat(player)) {
                 if (player->isAlive()) return activate(player, card_use);
                 return;
             }
@@ -6913,7 +6936,7 @@ void Room::makeReviving(const QString &name)
     broadcastProperty(player, "hp");
 }
 
-void Room::fillAG(const QList<int> &card_ids, ServerPlayer *who, const QList<int> &disabled_ids, bool hide_suit_number, const QString &foot_notes)
+void Room::fillAG(const QList<int> &card_ids, ServerPlayer *who, const QList<int> &disabled_ids, bool hide_suit_number, const QString &foot_notes, bool refresh_handcard_visible)
 {
     JsonArray arg;
     arg << JsonUtils::toJsonArray(card_ids);
@@ -6922,6 +6945,21 @@ void Room::fillAG(const QList<int> &card_ids, ServerPlayer *who, const QList<int
     arg << foot_notes;
 
     m_fillAGarg = arg;
+
+    if (refresh_handcard_visible) {
+        foreach (int id, card_ids) {
+            if (getCardOwner(id) != who && getCardPlace(id) == Player::PlaceHand) {
+                JsonArray show_arg;
+                show_arg << getCardOwner(id)->objectName();
+                show_arg << id;
+                show_arg << false;
+                show_arg << true;
+                QList<ServerPlayer *>players;
+                players << who;
+                doBroadcastNotify(players, S_COMMAND_SHOW_CARD, show_arg);
+            }
+        }
+    }
 
     if (who)
         doNotify(who, S_COMMAND_FILL_AMAZING_GRACE, arg);
@@ -7708,6 +7746,33 @@ void Room::setChangeSkillState(ServerPlayer *player, const QString &skill_name, 
     setPlayerMark(player, "&" + skill_name + "+" + QString::number(n) + "_num", 1);
 }
 
+int Room::getLevelSkillState(ServerPlayer *player, const QString &skill_name)
+{
+    QString str = "LevelSkill_" + skill_name + "_State";
+    const char *ch = str.toLatin1().constData();
+    int n = player->property(ch).toInt();
+    if (n <= 0) n = 1;
+    return n;
+}
+
+void Room::setLevelSkillState(ServerPlayer *player, const QString &skill_name, int n)
+{
+    if (player->isDead()) return;
+    int m = getLevelSkillState(player, skill_name);
+
+    //if (n <= 0) n = 1;
+
+    QString str = "LevelSkill_" + skill_name + "_State";
+    const char *ch = str.toLatin1().constData();
+    setPlayerProperty(player, ch, n);
+
+    QString new_translation = Sanguosha->translate(":" + skill_name + QString::number(n));
+    changeTranslation(player, skill_name, new_translation);
+    setPlayerMark(player, "&" + skill_name + "+" + QString::number(m) + "+LEVEL", 0);
+    if (!player->getSkillList(true, false).contains(Sanguosha->getSkill(skill_name))) return;
+    setPlayerMark(player, "&" + skill_name + "+" + QString::number(n) + "+LEVEL", 1);
+}
+
 bool Room::CardInPlace(const Card *card, Player::Place place)
 {
     Q_ASSERT(card != NULL);
@@ -7995,4 +8060,21 @@ QString Room::askForChooseCardName(ServerPlayer *player, const QString &type, bo
     } else {
         return "";
     }
+}
+
+Card *Room::copyCard(const Card *card)
+{
+    if (!card || !game_started) return NULL;
+    Card *copy_card = Sanguosha->cloneCard(card, 0);
+    //moveCardTo(card, getCurrent(), NULL, Player::PlaceTable, CardMoveReason(CardMoveReason::S_REASON_UNKNOWN, QString()), true, false);
+    m_drawPile->prepend(copy_card->getId());
+    // initialize the place_map and owner_map;
+        setCardMapping(copy_card->getId(), NULL, Player::DrawPile);
+    doBroadcastNotify(S_COMMAND_UPDATE_PILE, QVariant(m_drawPile->length()));
+    QList<int> all_cards = Sanguosha->getRandomCards();
+    doBroadcastNotify(S_COMMAND_AVAILABLE_CARDS, JsonUtils::toJsonArray(all_cards));
+    resetCard(copy_card->getId());
+    broadcastResetCard(getAllPlayers(true), copy_card->getId());
+
+    return copy_card;
 }

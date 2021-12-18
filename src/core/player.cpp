@@ -743,13 +743,14 @@ bool Player::hasArmorEffect(const QString &armor_name) const
         if (equips.contains(armor_name)) return true;
 
         if (armor == NULL && alive) {
-            if (armor_name == "eight_diagram" && (hasSkill("bazhen") || hasSkill("linglong")))
+            if (armor_name == "eight_diagram" && hasSkills("bazhen|linglong|xiangrui"))
                 return true;
             if (armor_name == "vine" && hasSkill("bossmanjia"))
                 return true;
         }
         if (!armor) return false;
         if (armor->objectName() == armor_name || armor->isKindOf(armor_name.toStdString().c_str())) return true;
+        if (armor_name == "sliver_lion" && armor->objectName() == "small_silver_lion") return true;
         const Card *real_armor = Sanguosha->getEngineCard(armor->getEffectiveId());
         return real_armor->objectName() == armor_name || real_armor->isKindOf(armor_name.toStdString().c_str());
     } else {
@@ -853,7 +854,7 @@ bool Player::isAllNude() const
 
 bool Player::canDiscard(const Player *to, const QString &flags) const
 {
-    if (to == NULL || isDead() || to->isDead()) return false;
+    if (to == NULL || to->isDead()) return false;
     static QChar handcard_flag('h');
     static QChar equip_flag('e');
     static QChar judging_flag('j');
@@ -895,7 +896,7 @@ bool Player::canDiscard(const Player *to, int card_id) const
     if (to == NULL)
         return false;
 
-    if (isDead() || to->isDead()) return false;
+    if (to->isDead()) return false;
 
     if (to->hasSkill("qicai") && this != to) {
         if ((to->getWeapon() && card_id == to->getWeapon()->getEffectiveId())
@@ -1592,6 +1593,15 @@ bool Player::isWeidi() const
 int Player::getChangeSkillState(const QString &skill_name) const
 {
     QString str = "ChangeSkill_" + skill_name + "_State";
+    const char *ch = str.toLatin1().constData();
+    int n = property(ch).toInt();
+    if (n <= 0) n = 1;
+    return n;
+}
+
+int Player::getLevelSkillState(const QString &skill_name) const
+{
+    QString str = "LevelSkill_" + skill_name + "_State";
     const char *ch = str.toLatin1().constData();
     int n = property(ch).toInt();
     if (n <= 0) n = 1;

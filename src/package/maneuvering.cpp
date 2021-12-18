@@ -344,6 +344,58 @@ void SilverLion::onUninstall(ServerPlayer *player) const
         player->setFlags("SilverLionRecover");
 }
 
+class SmallSilverLionSkill : public ArmorSkill
+{
+public:
+    SmallSilverLionSkill() : ArmorSkill("small_silver_lion")
+    {
+        events << DamageInflicted << CardsMoveOneTime;
+    }
+
+    bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL && target->isAlive();
+    }
+
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (triggerEvent == DamageInflicted && ArmorSkill::triggerable(player)) {
+            DamageStruct damage = data.value<DamageStruct>();
+            if (damage.damage > 1) {
+                room->setEmotion(player, "armor/silver_lion");
+                LogMessage log;
+                log.type = "#SilverLion";
+                log.from = player;
+                log.arg = QString::number(damage.damage);
+                log.arg2 = objectName();
+                room->sendLog(log);
+
+                damage.damage = 1;
+                data = QVariant::fromValue(damage);
+            }
+        } else {
+            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+            if (move.from != player || !move.from_places.contains(Player::PlaceEquip))
+                return false;
+            if (player->hasFlag("SilverLionRecover") || move.reason.m_skillName == "THROW_EQUIP_AREA") {
+                for (int i = 0; i < move.card_ids.size(); i++) {
+                    if (move.from_places[i] != Player::PlaceEquip) continue;
+                    const Card *card = Sanguosha->getEngineCard(move.card_ids[i]);
+                    if (card->objectName() == objectName()) {
+                        player->setFlags("-SilverLionRecover");
+                        //if (player->isWounded()) {
+                            room->setEmotion(player, "armor/silver_lion");
+                            room->recover(player, RecoverStruct(NULL, card));
+                        //}
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+};
+
 FireAttack::FireAttack(Card::Suit suit, int number)
     : SingleTargetTrick(suit, number)
 {
@@ -559,11 +611,17 @@ ManeuveringPackage::ManeuveringPackage()
 
     cards << hualiu;
 
+    for (int i=2;i<=4;i++){
+        SilverLion *small_silver_lion = new SilverLion(Card::Club, i);
+        small_silver_lion->setObjectName("small_silver_lion");
+        cards << small_silver_lion;
+    }
+
     foreach(Card *card, cards)
         card->setParent(this);
 
     skills << new GudingBladeSkill << new FanSkill
-        << new VineSkill << new SilverLionSkill;
+        << new VineSkill << new SilverLionSkill << new SmallSilverLionSkill;
 }
 
 ADD_PACKAGE(Maneuvering)

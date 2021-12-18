@@ -255,6 +255,7 @@ public:
     bool isYourFriend(const Player *fri) const;
     bool isWeidi() const;
     int getChangeSkillState(const QString &skill_name) const;
+    int getLevelSkillState(const QString &skill_name) const;
     bool hasCard(const Card *card) const;
     bool hasCard(int id) const;
     QList<int> getdrawPile() const;

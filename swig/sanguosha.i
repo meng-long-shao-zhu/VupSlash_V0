@@ -270,6 +270,7 @@ public:
     bool isYourFriend(const Player *fri) const;
 	bool isWeidi() const;
 	int getChangeSkillState(const char *skill_name) const;
+	int getLevelSkillState(const char *skill_name) const;
 	bool hasCard(const Card *card) const;
     bool hasCard(int id) const;
 	QList<int> getdrawPile() const;
@@ -941,11 +942,13 @@ public:
     bool canRecast() const;
     bool isOvert() const;
     bool noIndicator() const;
+    bool isCopy() const;
     bool hasPreAction() const;
     Card::HandlingMethod getHandlingMethod() const;
     void setCanRecast(bool can);
     void setOvert(bool can);
     void setIndicatorHide(bool can);
+    void setCopy(bool can);
 
     void setFlags(const char *flag) const;
     bool hasFlag(const char *flag) const;
@@ -1049,7 +1052,7 @@ public:
     void addPackage(Package *package);
     void addBanPackage(const char *package_name);
     QStringList getBanPackages() const;
-    Card *cloneCard(const Card *card) const;
+    Card *cloneCard(const Card *card, int new_id = -1);
     Card *cloneCard(const char *name, Card::Suit suit = Card::SuitToBeDecided, int number = -1, QStringList flags = QStringList()) const;
     SkillCard *cloneSkillCard(const char *name) const;
     QString getVersion() const;
@@ -1135,6 +1138,8 @@ public:
 	bool isChangeSkill() const;
 	bool isLimitedSkill() const;
 	bool isHideSkill() const;
+	bool isLevelSkill() const;
+	void setLevelSkill(bool can = false);
     QString getDescription() const;
     bool isVisible() const;
 
@@ -1259,7 +1264,7 @@ public:
 	void returnToEndDrawPile(const QList<int> &cards);
     int doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target, QList<int> enabled_ids = QList<int>(), const char *skill_name = "gongxin");
     int drawCard(bool isTop = true);
-    void fillAG(const QList<int> &card_ids, ServerPlayer *who = NULL, const QList<int> &disabled_ids = QList<int>(), bool hide_suit_number = false, const char *foot_notes = "");
+    void fillAG(const QList<int> &card_ids, ServerPlayer *who = NULL, const QList<int> &disabled_ids = QList<int>(), bool hide_suit_number = false, const char *foot_notes = "", bool refresh_handcard_visible = false);
     void takeAG(ServerPlayer *player, int card_id, bool move_cards = true, QList<ServerPlayer *> to_notify = QList<ServerPlayer *>());
     void clearAG(ServerPlayer *player = NULL);
     void provide(const Card *card);
@@ -1275,6 +1280,7 @@ public:
     void setOvertCard(ServerPlayer *player, int card_id, bool can = true);
     void setOvertCards(ServerPlayer *player, QList<int> ids, bool can = true);
 	QString askForChooseCardName(ServerPlayer *player, const char *type, bool refusable, const char *reason);
+	Card *copyCard(const Card *card);
     void retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge, const char *skill_name, bool exchange = false);
     void notifySkillInvoked(ServerPlayer *player, const char *skill_name);
     void broadcastSkillInvoke(const char *skillName);
@@ -1426,6 +1432,8 @@ public:
 	void changeTranslation(ServerPlayer *player, const char *skill_name, const char *new_translation);
 	int getChangeSkillState(ServerPlayer *player, const char *skill_name);
     void setChangeSkillState(ServerPlayer *player, const char *skill_name, int n);
+	int getLevelSkillState(ServerPlayer *player, const char *skill_name);
+    void setLevelSkillState(ServerPlayer *player, const char *skill_name, int n);
 	bool CardInPlace(const Card *card, Player::Place place);
 	bool CardInTable(const Card *card);
 	bool hasCurrent(bool need_alive = false);

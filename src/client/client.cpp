@@ -174,7 +174,7 @@ void Client::updateCard(const QVariant &val)
         // reset card
         int cardId = val.toInt();
         Card *card = _m_roomState.getCard(cardId);
-        if (!card->isModified()) return;
+        if (card != NULL && !card->isModified()) return;
         _m_roomState.resetCard(cardId);
     } else {
         // update card
@@ -1645,20 +1645,24 @@ void Client::alertFocus()
 void Client::showCard(const QVariant &show_str)
 {
     JsonArray show = show_str.value<JsonArray>();
-    if (show.size() < 2 || show.size() > 3 || !JsonUtils::isString(show[0]) || !JsonUtils::isNumber(show[1]))
+    if (show.size() < 2 || show.size() > 4 || !JsonUtils::isString(show[0]) || !JsonUtils::isNumber(show[1]))
         return;
 
     QString player_name = show[0].toString();
     int card_id = show[1].toInt();
     bool is_overt = false;
-    if (show.size() == 3 && JsonUtils::isBool(show[2]))
+    if (show.size() >= 3 && JsonUtils::isBool(show[2]))
         is_overt = show[2].toBool();
+    bool record_only = false;
+    if (show.size() >= 4 && JsonUtils::isBool(show[3]))
+        record_only = show[3].toBool();
 
     ClientPlayer *player = getPlayer(player_name);
     if (player != Self)
         player->addKnownHandCard(Sanguosha->getCard(card_id));
 
-    emit card_shown(player_name, card_id, is_overt);
+    if (!record_only)
+        emit card_shown(player_name, card_id, is_overt);
 }
 
 void Client::attachSkill(const QVariant &skill)

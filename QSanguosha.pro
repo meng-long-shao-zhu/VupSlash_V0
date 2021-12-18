@@ -12,6 +12,9 @@ CONFIG += lua
 CONFIG -= flat
 
 CONFIG += precompile_header
+
+CONFIG += qaxcontainer
+
 PRECOMPILED_HEADER = src/pch.h
 DEFINES += USING_PCH
 

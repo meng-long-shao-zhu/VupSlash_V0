@@ -223,7 +223,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                 room->doBroadcastNotify(QSanProtocol::S_COMMAND_ADD_ROUND, QVariant());
                 foreach (ServerPlayer *p, room->getPlayers()) {
                     foreach (QString mark, p->getMarkNames()) {
-                        if (mark.endsWith("_lun"))
+                        if (mark.endsWith("_lun") || mark.endsWith("_lun!"))
                             room->setPlayerMark(p, mark, 0);
                     }
                 }
@@ -1705,7 +1705,7 @@ bool HulaoPassMode::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer 
                     room->doBroadcastNotify(QSanProtocol::S_COMMAND_ADD_ROUND, QVariant());
                     foreach (ServerPlayer *p, room->getPlayers()) {
                         foreach (QString mark, p->getMarkNames()) {
-                            if (mark.endsWith("_lun"))
+                            if (mark.endsWith("_lun") || mark.endsWith("_lun!"))
                                 room->setPlayerMark(p, mark, 0);
                         }
                     }

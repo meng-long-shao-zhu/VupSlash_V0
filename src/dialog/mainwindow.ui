@@ -47,6 +47,7 @@
     <addaction name="actionView_ban_list"/>
     <addaction name="actionManage_Ban_IP"/>
     <addaction name="actionBroadcast"/>
+    <addaction name="actionExecute_script_at_server_side"/>
     <addaction name="actionReplay_file_convert"/>
     <addaction name="actionRecord_analysis"/>
     <addaction name="separator"/>
@@ -95,7 +96,6 @@
     <addaction name="actionDamage_maker"/>
     <addaction name="actionDeath_note"/>
     <addaction name="actionRevive_wand"/>
-    <addaction name="actionExecute_script_at_server_side"/>
    </widget>
    <widget class="QMenu" name="menuDIY">
     <property name="title">

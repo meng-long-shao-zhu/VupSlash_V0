@@ -20,8 +20,12 @@ void RoomState::resetCard(int cardId)
 {
     Card *newCard = Card::Clone(Sanguosha->getEngineCard(cardId));
     if (newCard == NULL) return;
-    newCard->setFlags(m_cards[cardId]->getFlags());
-    newCard->tag = m_cards[cardId]->tag;
+    if (m_cards[cardId] == NULL) {
+        m_cards[cardId] = new WrappedCard(newCard);
+    } else {
+        newCard->setFlags(m_cards[cardId]->getFlags());
+        newCard->tag = m_cards[cardId]->tag;
+    }
     m_cards[cardId]->copyEverythingFrom(newCard);
     newCard->clearFlags();
     newCard->tag.clear();
@@ -41,6 +45,7 @@ void RoomState::reset()
         const Card *card = Sanguosha->getEngineCard(i);
         Card *clonedCard = Card::Clone(card);
         m_cards[i] = new WrappedCard(Card::Clone(clonedCard));
+        delete clonedCard;
     }
 }
 

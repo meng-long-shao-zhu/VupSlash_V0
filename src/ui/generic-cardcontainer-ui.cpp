@@ -428,46 +428,107 @@ void PlayerCardContainer::updateMark(const QString &mark_name, bool get)
     if (!player) return;
 
     QString new_mark = "&" + mark_name;
-    if (!get) {
-        if (_m_privatePiles.contains(new_mark)) {
-            delete _m_privatePiles[new_mark];
-            _m_privatePiles[new_mark] = NULL;
-            _m_privatePiles.remove(new_mark);
+    QStringList mark_group = mark_name.split("->");
+    bool is_group = mark_group.length() > 1;
+    if (is_group) {
+        QString mark_name = mark_group.at(0);
+        QString new_mark = "&" + mark_name;
+        QString sub_name = mark_group.at(1);
+
+        QStringList sub_names = sub_name.split("+");
+        QString sub_text;
+        foreach (QString name, sub_names) {
+            sub_text.append(Sanguosha->translate(name));
+        }
+
+        if (!get) {
+            if (_m_privatePiles.contains(new_mark)) {
+                QPushButton *button;
+                button = (QPushButton *)(_m_privatePiles[new_mark]->widget());
+                QMenu* menu;
+                menu = button->menu();
+                foreach (QAction* act, menu->actions()) {
+                    QString act_name = act->text();
+                    if (act_name == sub_text) {
+                        menu->removeAction(act);
+                        break;
+                    }
+                }
+                if (menu->actions().isEmpty()) {
+                    button->setMenu(NULL);
+                    delete _m_privatePiles[new_mark];
+                    _m_privatePiles[new_mark] = NULL;
+                    _m_privatePiles.remove(new_mark);
+                }
+            }
+        } else {
+            QPushButton *button;
+            QMenu* menu;
+            if (_m_privatePiles.contains(new_mark)) {
+                button = (QPushButton *)(_m_privatePiles[new_mark]->widget());
+                menu = button->menu();
+            } else {
+                button = new QPushButton;
+                button->setObjectName(new_mark);
+                button->setProperty("private_pile", "true");
+                QGraphicsProxyWidget *button_widget = new QGraphicsProxyWidget(_getPileParent());
+                button_widget->setObjectName(new_mark);
+                button_widget->setWidget(button);
+                _m_privatePiles[new_mark] = button_widget;
+                button->setText(Sanguosha->translate(mark_name));
+                if (":mark:"+new_mark != Sanguosha->translate(":mark:"+new_mark))
+                    button->setToolTip(Sanguosha->translate(":mark:"+new_mark));
+
+                menu = new QMenu(button);
+                menu->setProperty("private_pile", "true");
+            }
+            menu->addAction(sub_text);
+            button->setMenu(menu);
         }
     } else {
-        QPushButton *button;
-        if (!_m_privatePiles.contains(new_mark)) {
-            button = new QPushButton;
-            button->setObjectName(new_mark);
-            button->setProperty("private_pile", "true");
-            QGraphicsProxyWidget *button_widget = new QGraphicsProxyWidget(_getPileParent());
-            button_widget->setObjectName(new_mark);
-            button_widget->setWidget(button);
-            _m_privatePiles[new_mark] = button_widget;
-        } else
-            button = (QPushButton *)(_m_privatePiles[new_mark]->widget());
-
-        QStringList mark_names = mark_name.split("+");
-        QString text;
-        bool show_number = false;
-        foreach (QString name, mark_names) {
-            if (name.startsWith("#")) continue;
-            if (name.endsWith("-Clear") || name.endsWith("-PlayClear") || name.endsWith("-Keep"))
-                text.append(Sanguosha->translate(name.split("-").first()));
-            else if (name.endsWith("_lun"))
-                text.append(Sanguosha->translate(name.split("_").first()));
-            else if (name.endsWith("!")) {
-                text.append(Sanguosha->translate(name.split("!").first()));
-                show_number = true;
+        if (!get) {
+            if (_m_privatePiles.contains(new_mark)) {
+                delete _m_privatePiles[new_mark];
+                _m_privatePiles[new_mark] = NULL;
+                _m_privatePiles.remove(new_mark);
+            }
+        } else {
+            QPushButton *button;
+            if (!_m_privatePiles.contains(new_mark)) {
+                button = new QPushButton;
+                button->setObjectName(new_mark);
+                button->setProperty("private_pile", "true");
+                QGraphicsProxyWidget *button_widget = new QGraphicsProxyWidget(_getPileParent());
+                button_widget->setObjectName(new_mark);
+                button_widget->setWidget(button);
+                _m_privatePiles[new_mark] = button_widget;
             } else
-                text.append(Sanguosha->translate(name));
+                button = (QPushButton *)(_m_privatePiles[new_mark]->widget());
+
+            QStringList mark_names = mark_name.split("+");
+            QString text;
+            bool show_number = false;
+            foreach (QString name, mark_names) {
+                if (name.startsWith("#")) continue;
+                if (name.endsWith("-Clear") || name.endsWith("-PlayClear") || name.endsWith("-Keep")) {
+                    text.append(Sanguosha->translate(name.split("-").first()));
+                } else if (name.endsWith("_lun") || name.endsWith("_lun!")) {
+                    text.append(Sanguosha->translate(name.split("_").first()));
+                    show_number = true;
+                } else if (name.endsWith("!")) {
+                    text.append(Sanguosha->translate(name.split("!").first()));
+                    show_number = true;
+                } else
+                    text.append(Sanguosha->translate(name));
+            }
+
+            if (show_number || player->getMark(new_mark) > 1)
+                text.append(QString("[%1]").arg(player->getMark(new_mark)));
+            button->setText(text);
+            if (":mark:"+new_mark != Sanguosha->translate(":mark:"+new_mark))
+                button->setToolTip(Sanguosha->translate(":mark:"+new_mark));
         }
-
-        if (show_number || player->getMark(new_mark) > 1)
-            text.append(QString("[%1]").arg(player->getMark(new_mark)));
-        button->setText(text);
     }
-
     QPoint start = _m_layout->m_privatePileStartPos;
     QPoint step = _m_layout->m_privatePileStep;
     QSize size = _m_layout->m_privatePileButtonSize;

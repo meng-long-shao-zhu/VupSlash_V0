@@ -43,7 +43,7 @@ Photo::Photo() : PlayerCardContainer()
     _m_duanchangMask = new QGraphicsRectItem(_m_groupMain);
     _m_duanchangMask->setRect(boundingRect());
     _m_duanchangMask->setZValue(32767.0);
-    _m_duanchangMask->setOpacity(0.4);
+    _m_duanchangMask->setOpacity(0.6);
     _m_duanchangMask->hide();
     QBrush duanchang_brush(G_PHOTO_LAYOUT.m_duanchangMaskColor);
     _m_duanchangMask->setBrush(duanchang_brush);
@@ -80,22 +80,24 @@ void Photo::refresh(bool killed)
     } else if (_m_onlineStatusItem != NULL && state_str == "online")
         _m_onlineStatusItem->hide();
 
-    int seat = m_player->getSeat();
-    if (seat && seat > 0 && seat < 11) {
-        QRect rect = G_PHOTO_LAYOUT.m_onlineStatusArea;
-        rect.translate(0, 20);
-        QImage image(rect.size(), QImage::Format_ARGB32);
-        image.fill(Qt::transparent);
-        QPainter painter(&image);
-        painter.fillRect(QRect(0, 0, rect.width(), rect.height()), G_PHOTO_LAYOUT.m_onlineStatusBgColor);
-        QString seat_str = Sanguosha->translate("CAPITAL("+QString::number(seat)+")")+Sanguosha->translate("SEAT_NUM");
-        G_PHOTO_LAYOUT.m_onlineStatusFont.paintText(&painter, QRect(QPoint(0, 0), rect.size()),
-            Qt::AlignCenter,
-            seat_str);
-        QPixmap pixmap = QPixmap::fromImage(image);
-        _paintPixmap(_m_seatStatusItem, rect, pixmap, _m_groupMain);
-        _layBetween(_m_seatStatusItem, _m_mainFrame, _m_chainIcon);
-        if (!_m_seatStatusItem->isVisible()) _m_seatStatusItem->show();
+    if (!state_str.isEmpty() && state_str == "ready") { //only get the seat while game ready
+        int seat = m_player->getSeat();
+        if (seat && seat > 0 && seat < 11) {
+            QRect rect = G_PHOTO_LAYOUT.m_onlineStatusArea;
+            rect.translate(0, 20);
+            QImage image(rect.size(), QImage::Format_ARGB32);
+            image.fill(Qt::transparent);
+            QPainter painter(&image);
+            painter.fillRect(QRect(0, 0, rect.width(), rect.height()), G_PHOTO_LAYOUT.m_onlineStatusBgColor);
+            QString seat_str = Sanguosha->translate("CAPITAL("+QString::number(seat)+")")+Sanguosha->translate("SEAT_NUM");
+            G_PHOTO_LAYOUT.m_onlineStatusFont.paintText(&painter, QRect(QPoint(0, 0), rect.size()),
+                Qt::AlignCenter,
+                seat_str);
+            QPixmap pixmap = QPixmap::fromImage(image);
+            _paintPixmap(_m_seatStatusItem, rect, pixmap, _m_groupMain);
+            _layBetween(_m_seatStatusItem, _m_mainFrame, _m_chainIcon);
+            if (!_m_seatStatusItem->isVisible()) _m_seatStatusItem->show();
+        }
     }
 }
 
@@ -283,7 +285,7 @@ void Photo::hideEmotion()
 void Photo::updateDuanchang()
 {
     if (!m_player) return;
-    _m_duanchangMask->setVisible(m_player->getMark("@duanchang") > 0);
+    _m_duanchangMask->setVisible(m_player->getMark("@duanchang") > 0 || m_player->getMark("surrender") > 0);
 }
 
 const ClientPlayer *Photo::getPlayer() const

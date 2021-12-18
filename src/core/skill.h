@@ -31,6 +31,8 @@ public:
     bool isChangeSkill() const;
     bool isLimitedSkill() const;
     bool isHideSkill() const;
+    bool isLevelSkill() const;
+    void setLevelSkill(bool can = false);
     virtual bool shouldBeVisible(const Player *Self) const; // usually for attached skill
     QString getDescription() const;
     QString getNotice(int index) const;
@@ -52,6 +54,7 @@ protected:
     bool change_skill;
     bool limited_skill;
     bool hide_skill;
+    bool level_skill;
 
 private:
     bool lord_skill;

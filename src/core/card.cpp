@@ -23,7 +23,7 @@ Card::Card(Suit suit, int number, bool target_fixed)
     :target_fixed(target_fixed), mute(false),
     will_throw(true), has_preact(false), can_recast(false),
     m_suit(suit), m_number(number), m_id(-1),
-    is_gift(false), damage_card(false), is_overt(false), no_indicator(false)
+    is_gift(false), damage_card(false), is_overt(false), no_indicator(false), is_copy(false)
 {
     handling_method = will_throw ? Card::MethodDiscard : Card::MethodUse;
 }
@@ -277,6 +277,8 @@ QString Card::getPackage() const
 {
     if (parent())
         return parent()->objectName();
+    else if (is_copy)
+        return "COPY_CARD";
     else
         return QString();
 }
@@ -880,6 +882,16 @@ bool Card::noIndicator() const
 void Card::setIndicatorHide(bool can)
 {
     no_indicator = can;
+}
+
+bool Card::isCopy() const
+{
+    return is_copy;
+}
+
+void Card::setCopy(bool can)
+{
+    is_copy = can;
 }
 
 void Card::setCanRecast(bool can)

@@ -1734,7 +1734,7 @@ void ServerPlayer::throwEquipArea(int i)
         }
         delete card;
         list << i;
-        room->setPlayerMark(this, "@Equip" + QString::number(i) + "lose", 1);
+        room->setPlayerMark(this, "&AreaLose->Equip" + QString::number(i) + "lose", 1);
     }
     if (!list.isEmpty()) {
         RoomThread *thread = room->getThread();
@@ -1782,7 +1782,7 @@ void ServerPlayer::throwEquipArea(QList<int> list)
     if (newlist.isEmpty()) return;
     QList<int> _newlist = VariantList2IntList(newlist);
     foreach (int i, _newlist)
-        room->setPlayerMark(this, "@Equip" + QString::number(i) + "lose", 1);
+        room->setPlayerMark(this, "&AreaLose->Equip" + QString::number(i) + "lose", 1);
     RoomThread *thread = room->getThread();
     QVariant data = newlist;
     thread->trigger(ThrowEquipArea, room, this, data);
@@ -1823,7 +1823,7 @@ void ServerPlayer::throwEquipArea()
         room->throwCard(card, reason, this);
     }
     delete card;
-    room->setPlayerMark(this, "@Equip5lose", 1);
+    room->setPlayerMark(this, "&AreaLose->Equip5lose", 1);
     if (!list.isEmpty()) {
         RoomThread *thread = room->getThread();
         QVariant data = list;
@@ -1851,11 +1851,11 @@ void ServerPlayer::obtainEquipArea(int i)
         log.arg = areas.at(i);
         room->sendLog(log);
 
-        room->setPlayerMark(this, "@Equip5lose", 0);
-        room->setPlayerMark(this, "@Equip"+ QString::number(i) + "lose", 0);
+        room->setPlayerMark(this, "&AreaLose->Equip5lose", 0);
+        room->setPlayerMark(this, "&AreaLose->Equip"+ QString::number(i) + "lose", 0);
         for (int m = 0; m < 5; m++) {
             if (!hasEquipArea(m))
-                room->setPlayerMark(this, "@Equip"+ QString::number(m) + "lose", 1);
+                room->setPlayerMark(this, "&AreaLose->Equip"+ QString::number(m) + "lose", 1);
         }
         list << i;
     }
@@ -1893,13 +1893,13 @@ void ServerPlayer::obtainEquipArea(QList<int> list)
         }
     }
     if (newlist.isEmpty()) return;
-    room->setPlayerMark(this, "@Equip5lose", 0);
+    room->setPlayerMark(this, "&AreaLose->Equip5lose", 0);
     QList<int> _newlist = VariantList2IntList(newlist);
     foreach (int i, _newlist)
-        room->setPlayerMark(this, "@Equip" + QString::number(i) + "lose", 0);
+        room->setPlayerMark(this, "&AreaLose->Equip" + QString::number(i) + "lose", 0);
     for (int m = 0; m < 5; m++) {
         if (!hasEquipArea(m)) {
-            room->setPlayerMark(this, "@Equip" + QString::number(m) + "lose", 1);
+            room->setPlayerMark(this, "&AreaLose->Equip" + QString::number(m) + "lose", 1);
         }
     }
     RoomThread *thread = room->getThread();
@@ -1930,12 +1930,12 @@ void ServerPlayer::obtainEquipArea()
         room->sendLog(log);
     }
 
-    room->setPlayerMark(this, "@Equip5lose", 0);
-    room->setPlayerMark(this, "@Equip0lose", 0);
-    room->setPlayerMark(this, "@Equip1lose", 0);
-    room->setPlayerMark(this, "@Equip2lose", 0);
-    room->setPlayerMark(this, "@Equip3lose", 0);
-    room->setPlayerMark(this, "@Equip4lose", 0);
+    room->setPlayerMark(this, "&AreaLose->Equip5lose", 0);
+    room->setPlayerMark(this, "&AreaLose->Equip0lose", 0);
+    room->setPlayerMark(this, "&AreaLose->Equip1lose", 0);
+    room->setPlayerMark(this, "&AreaLose->Equip2lose", 0);
+    room->setPlayerMark(this, "&AreaLose->Equip3lose", 0);
+    room->setPlayerMark(this, "&AreaLose->Equip4lose", 0);
     if (!list.isEmpty()) {
         RoomThread *thread = room->getThread();
         QVariant data = list;
@@ -1968,7 +1968,7 @@ void ServerPlayer::throwJudgeArea()
         delete card;
         flag = true;
     }
-    room->setPlayerMark(this, "@Judgelose", 1);
+    room->setPlayerMark(this, "&AreaLose->Judgelose", 1);
     if (flag) {
         RoomThread *thread = room->getThread();
         thread->trigger(ThrowJudgeArea, room, this);
@@ -1988,7 +1988,7 @@ void ServerPlayer::obtainJudgeArea()
         room->sendLog(log);
         flag = true;
     }
-    room->setPlayerMark(this, "@Judgelose", 0);
+    room->setPlayerMark(this, "&AreaLose->Judgelose", 0);
     if (flag) {
         RoomThread *thread = room->getThread();
         thread->trigger(ObtainJudgeArea, room, this);
