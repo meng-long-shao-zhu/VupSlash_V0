@@ -7766,8 +7766,8 @@ void Room::setLevelSkillState(ServerPlayer *player, const QString &skill_name, i
     const char *ch = str.toLatin1().constData();
     setPlayerProperty(player, ch, n);
 
-    QString new_translation = Sanguosha->translate(":" + skill_name + QString::number(n));
-    changeTranslation(player, skill_name, new_translation);
+    //QString new_translation = Sanguosha->translate(":" + skill_name + QString::number(n));
+    //changeTranslation(player, skill_name, new_translation);
     setPlayerMark(player, "&" + skill_name + "+" + QString::number(m) + "+LEVEL", 0);
     if (!player->getSkillList(true, false).contains(Sanguosha->getSkill(skill_name))) return;
     setPlayerMark(player, "&" + skill_name + "+" + QString::number(n) + "+LEVEL", 1);

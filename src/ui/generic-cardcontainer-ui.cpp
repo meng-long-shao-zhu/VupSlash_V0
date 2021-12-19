@@ -512,7 +512,9 @@ void PlayerCardContainer::updateMark(const QString &mark_name, bool get)
                 if (name.startsWith("#")) continue;
                 if (name.endsWith("-Clear") || name.endsWith("-PlayClear") || name.endsWith("-Keep")) {
                     text.append(Sanguosha->translate(name.split("-").first()));
-                } else if (name.endsWith("_lun") || name.endsWith("_lun!")) {
+                } else if (name.endsWith("_lun")) {
+                    text.append(Sanguosha->translate(name.split("_").first()));
+                } else if (name.endsWith("_lun!")) {
                     text.append(Sanguosha->translate(name.split("_").first()));
                     show_number = true;
                 } else if (name.endsWith("!")) {
