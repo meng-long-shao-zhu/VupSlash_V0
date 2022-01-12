@@ -1717,7 +1717,7 @@ void Client::showAllCards(const QVariant &arg)
 
     if (who) who->setCards(card_ids);
 
-    emit gongxin(card_ids, false, QList<int>());
+    emit gongxin(card_ids, false, QList<int>(), who->getGeneralName());
 }
 
 void Client::askForGongxin(const QVariant &args)
@@ -1735,7 +1735,7 @@ void Client::askForGongxin(const QVariant &args)
 
     who->setCards(card_ids);
 
-    emit gongxin(card_ids, enable_heart, enabled_ids);
+    emit gongxin(card_ids, enable_heart, enabled_ids, who->getGeneralName());
     setStatus(AskForGongxin);
 }
 

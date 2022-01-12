@@ -214,7 +214,7 @@ void RecAnalysis::initialize(QString dir)
                 continue;
             }
 
-            if (type == "#Contingency") {
+            if (type == "#Contingency" || type == "#Assassinate" || type == "#dunai_curse") {
                 getPlayer(tos.first())->m_isAlive = false;
                 continue;
             }

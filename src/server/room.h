@@ -100,7 +100,7 @@ public:
     bool useCard(const CardUseStruct &card_use, bool add_history = false);
     void damage(const DamageStruct &data);
     void loseHp(ServerPlayer *victim, int lose = 1, ServerPlayer *from = NULL, QString reason = "");
-    void loseMaxHp(ServerPlayer *victim, int lose = 1);
+    void loseMaxHp(ServerPlayer *victim, int lose = 1, bool keep_hp = false);
     void gainMaxHp(ServerPlayer *player, int gain = 1);
     bool changeMaxHpForAwakenSkill(ServerPlayer *player, int magnitude = -1);
     void recover(ServerPlayer *player, const RecoverStruct &recover, bool set_emotion = false, int max_recover = 0);

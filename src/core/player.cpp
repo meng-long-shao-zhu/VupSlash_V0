@@ -99,6 +99,13 @@ bool Player::isWounded() const
             return true;
     }
 
+    if (isChained()){
+        foreach (const Player *p, getAliveSiblings()) {
+            if (p->hasSkill("bingfu"))
+                return true;
+        }
+    }
+
     if (hp < 0)
         return true;
     else

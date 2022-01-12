@@ -369,6 +369,7 @@ void Room::updateStateItem()
 void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason, HpLostStruct *lost_reason)
 {
     ServerPlayer *killer = reason ? reason->from : NULL;
+    ServerPlayer *lost_killer = lost_reason ? lost_reason->from : NULL;
     QList<ServerPlayer *> players_with_victim = getAllPlayers();
 
     victim->setAlive(false);
@@ -392,10 +393,14 @@ void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason, HpLostStruct *
     updateStateItem();
 
     LogMessage log;
-    log.type = killer ? (killer == victim ? "#Suicide" : "#Murder") : "#Contingency";
+    log.type = killer ? (killer == victim ? "#Suicide" : "#Murder") : (lost_killer ? "#Assassinate" : "#Contingency");
     log.to << victim;
     log.arg = Config.EnableHegemony ? victim->getKingdom() : victim->getRole();
-    log.from = killer;
+    log.from = killer ? killer : lost_killer;
+
+    if (log.type == "#Assassinate" && lost_reason->reason == "#characteristic_dunai")
+        log.type = "#dunai_curse";
+
     sendLog(log);
 
     broadcastProperty(victim, "alive");
@@ -4130,7 +4135,7 @@ void Room::loseHp(ServerPlayer *victim, int lose, ServerPlayer *from, QString re
     thread->trigger(HpLost, this, victim, data);
 }
 
-void Room::loseMaxHp(ServerPlayer *victim, int lose)
+void Room::loseMaxHp(ServerPlayer *victim, int lose, bool keep_hp)
 {
     if (victim->isDead() || lose <= 0 || victim->inYinniState())
         return;
@@ -4141,7 +4146,7 @@ void Room::loseMaxHp(ServerPlayer *victim, int lose)
     int new_lose = qAbs(data.toInt());
     if (new_lose <= 0 || victim->isDead()) return;
 
-    victim->setMaxHp(qMax(victim->getMaxHp() - new_lose, 0));
+    victim->setMaxHp(qMax(victim->getMaxHp() - new_lose, 0), keep_hp);
 
     broadcastProperty(victim, "maxhp");
     broadcastProperty(victim, "hp");

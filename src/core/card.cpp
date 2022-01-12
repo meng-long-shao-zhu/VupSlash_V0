@@ -353,7 +353,8 @@ void Card::setSkillName(const QString &name)
 
 bool Card::isGift() const
 {
-  return is_gift;
+    const Card *c = qobject_cast<const Card *>(getRealCard());
+     return c && c->is_gift;
 }
 
 void Card::setGift(bool flag)
@@ -364,11 +365,8 @@ void Card::setGift(bool flag)
 
 bool Card::isDamageCard() const
 {
-    Card *card = Sanguosha->cloneCard(this->objectName());
-    if (!card) return false;
-    card->deleteLater();
-    return card->damage_card;
-    //return damage_card;  不然ai操作时候无法正确判定
+    const Card *c = qobject_cast<const Card *>(getRealCard());
+    return c && c->damage_card;
 }
 
 void Card::setDamageCard(bool flag)

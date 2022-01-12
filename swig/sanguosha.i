@@ -90,7 +90,7 @@ public:
     int getHp() const;
     void setHp(int hp);
     int getMaxHp() const;
-    void setMaxHp(int max_hp);
+    void setMaxHp(int max_hp, bool keep_hp = false);
     int getLostHp() const;
     bool isWounded() const;
     General::Gender getGender() const;
@@ -1247,7 +1247,7 @@ public:
     void useCard(const CardUseStruct &card_use, bool add_history = false);
     void damage(const DamageStruct &data);
 	void loseHp(ServerPlayer *victim, int lose = 1, ServerPlayer *from = NULL, const char *reason = "");
-    void loseMaxHp(ServerPlayer *victim, int lose = 1);
+    void loseMaxHp(ServerPlayer *victim, int lose = 1, bool keep_hp = false);
 	void gainMaxHp(ServerPlayer *player, int gain = 1);
     bool changeMaxHpForAwakenSkill(ServerPlayer *player, int magnitude = -1);
     void recover(ServerPlayer *player, const RecoverStruct &recover, bool set_emotion = false, int max_recover = 0);
