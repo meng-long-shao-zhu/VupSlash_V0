@@ -1813,7 +1813,28 @@ void RoomScene::chooseOption(const QString &skillName, const QStringList &option
                 original_tooltip = QString(":%1").arg(option);
                 tooltip = Sanguosha->translate(original_tooltip);
             }
-            if (tooltip != original_tooltip) button->setToolTip(tooltip);
+            if (tooltip != original_tooltip) {
+                bool is_safe = true;
+                do {
+                    is_safe = true;
+                    int indexA = tooltip.indexOf("<acronym title='");
+                    if (indexA != -1) {
+                        int indexB = tooltip.indexOf("'>", indexA+16);
+                        if (indexB != -1) {
+                            is_safe = false;
+                            tooltip.remove(indexA, indexB+2-indexA);
+                        }
+                    }
+
+                    int indexC = tooltip.indexOf("</acronym>");
+                    if (indexC != -1) {
+                        is_safe = false;
+                        tooltip.remove(indexC, 10);
+                    }
+                } while (!is_safe);
+
+                button->setToolTip(tooltip);
+            }
 
             connect(button, SIGNAL(clicked()), dialog, SLOT(accept()));
             connect(button, SIGNAL(clicked()), ClientInstance, SLOT(onPlayerMakeChoice()));

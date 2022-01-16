@@ -1434,11 +1434,21 @@ void GameRule::rewardAndPunish(ServerPlayer *killer, ServerPlayer *victim) const
             }
         }
         return;
-    } else if (room->getMode() == "04_2v2" || room->getMode() == "04_tt") {
+    } else if (room->getMode() == "04_2v2") {
         foreach (ServerPlayer *p, room->getOtherPlayers(victim)) {
             if (p->getRole() == victim->getRole()) {
                 p->drawCards(1);
                 break;
+            }
+        }
+        return;
+    } else if (room->getMode() == "04_tt") {
+        foreach (ServerPlayer *p, room->getOtherPlayers(victim)) {
+            if (p->getRole() == victim->getRole()) {
+                if (p->askForSkillInvoke("tietie_draw", QVariant("choice:"), false)) {
+                    p->drawCards(1);
+                    break;
+                }
             }
         }
         return;
