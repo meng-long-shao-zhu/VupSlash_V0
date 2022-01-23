@@ -37,6 +37,7 @@ public:
     {
     }
     void adjustCards();
+    void adjustCards(QList<CardItem *> &new_items);
     virtual QRectF boundingRect() const;
     void showJudgeResult(int cardId, bool takeEffect);
 

@@ -94,7 +94,8 @@ void TablePile::_fadeOutCardsLocked(const QList<CardItem *> &cards)
         toRemove->setHomeOpacity(0.0);
         toRemove->setHomePos(QPointF(toRemove->homePos().x(), toRemove->homePos().y()));
         toRemove->deleteLater();
-        group->addAnimation(toRemove->getGoBackAnimation(true, false, 1000));
+        //group->addAnimation(toRemove->getGoBackAnimation(true, false, 1000));
+        group->addAnimation(toRemove->getGoBackAnimation(true, false));
     }
     group->start(QAbstractAnimation::DeleteWhenStopped);
 }
@@ -158,13 +159,14 @@ bool TablePile::_addCardItems(QList<CardItem *> &card_items, const CardsMoveStru
             || moveInfo.from_place == Player::PlaceTable) {
             card_item->setOpacity(0.0);
             card_item->setPos(rightMostPos);
+            card_item->setY_rotate(-90);
             rightMostPos += QPointF(G_COMMON_LAYOUT.m_cardNormalWidth, 0);
         }
         card_item->m_uiHelper.tablePileClearTimeStamp = INT_MAX;
     }
 
     _m_mutex_pileCards.unlock();
-    adjustCards();
+    adjustCards(card_items);
     return false;
 }
 
@@ -172,6 +174,18 @@ void TablePile::adjustCards()
 {
     if (m_visibleCards.length() == 0) return;
     _disperseCards(m_visibleCards, m_cardsDisplayRegion, Qt::AlignCenter, true, true);
+    QParallelAnimationGroup *animation = new QParallelAnimationGroup;
+    foreach(CardItem *card_item, m_visibleCards)
+        animation->addAnimation(card_item->getGoBackAnimation(true));
+    connect(animation, SIGNAL(finished()), this, SLOT(onAnimationFinished()));
+    animation->start();
+}
+
+
+void TablePile::adjustCards(QList<CardItem *> &new_items)
+{
+    if (m_visibleCards.length() == 0) return;
+    _disperseCards(m_visibleCards, m_cardsDisplayRegion, Qt::AlignCenter, true, true, new_items);
     QParallelAnimationGroup *animation = new QParallelAnimationGroup;
     foreach(CardItem *card_item, m_visibleCards)
         animation->addAnimation(card_item->getGoBackAnimation(true));

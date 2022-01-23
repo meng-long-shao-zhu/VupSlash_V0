@@ -78,6 +78,49 @@ void GenericCardContainer::_disperseCards(QList<CardItem *> &cards, QRectF fillR
     }
 }
 
+void GenericCardContainer::_disperseCards(QList<CardItem *> &cards, QRectF fillRegion,
+    Qt::Alignment align, bool useHomePos, bool keepOrder, QList<CardItem *> &new_items)
+{
+    int numCards = cards.size();
+    if (numCards == 0) return;
+    if (!keepOrder) qSort(cards.begin(), cards.end(), GenericCardContainer::_horizontalPosLessThan);
+    double maxWidth = fillRegion.width();
+    int cardWidth = G_COMMON_LAYOUT.m_cardNormalWidth;
+    double step = qMin((double)cardWidth, (maxWidth - cardWidth) / (numCards - 1));
+    align &= Qt::AlignHorizontal_Mask;
+    for (int i = 0; i < numCards; i++) {
+        CardItem *card = cards[i];
+        double newX = 0;
+        if (align == Qt::AlignHCenter)
+            newX = fillRegion.center().x() + step * (i - (numCards - 1) / 2.0);
+        else if (align == Qt::AlignLeft)
+            newX = fillRegion.left() + step * i + card->boundingRect().width() / 2.0;
+        else if (align == Qt::AlignRight)
+            newX = fillRegion.right() + step * (i - numCards) + card->boundingRect().width() / 2.0;
+        else
+            continue;
+        QPointF newPos = QPointF(newX, fillRegion.center().y());
+        if (useHomePos) {
+            card->setHomePos(newPos, 0, new_items.contains(card) ? 1.2 : 0);
+            if (new_items.contains(card) && card->X_rotate() == 0 && card->Y_rotate() == 0) {
+                if (newPos.y() > card->y())
+                    card->setX_rotate(40*(1-qPow(1.1, (-newPos.y() + card->y()))));
+                else
+                    card->setX_rotate(-40*(1-qPow(1.1, (newPos.y() - card->y()))));
+
+                if (newPos.x() > card->x())
+                    card->setY_rotate(45*(1-qPow(1.08, (-newPos.x() + card->x()))));
+                else
+                    card->setY_rotate(-45*(1-qPow(1.08, (newPos.x() - card->x()))));
+                //card->setY_rotate(90*(1-qPow(1.1, -(newPos.x() - card->x()))));
+            }
+        } else {
+            card->setPos(newPos);
+        }
+        card->setZValue(_m_highestZ++);
+    }
+}
+
 void GenericCardContainer::onAnimationFinished()
 {
     QParallelAnimationGroup *animation = qobject_cast<QParallelAnimationGroup *>(sender());
@@ -718,14 +761,19 @@ void PlayerCardContainer::addDelayedTricks(QList<CardItem *> &tricks)
         QRect start = _m_layout->m_delayedTrickFirstRegion;
         QPoint step = _m_layout->m_delayedTrickStep;
         start.translate(step * _m_judgeCards.size());
-        _paintPixmap(item, start, G_ROOM_SKIN.getCardJudgeIconPixmap(trick->getCard()->objectName()));
+        QString trick_name = trick->getCard()->objectName();
+        _paintPixmap(item, start, G_ROOM_SKIN.getCardJudgeIconPixmap(trick_name));
         trick->setHomeOpacity(0.0);
         trick->setHomePos(start.center());
+        //trick->setHomePos(start.center(), 90);
         const Card *card = Sanguosha->getEngineCard(trick->getCard()->getEffectiveId());
         QString toolTip = QString("<b>%1 [</b><img src='image/system/log/%2.png' height = 12/><b>%3]</b>")
             .arg(Sanguosha->translate(card->objectName()))
             .arg(card->getSuitString())
             .arg(card->getNumberString());
+        if (trick_name != card->objectName()) {
+            toolTip += "<br/>" + Sanguosha->translate("DELAYED_TRICK_VIEW_AS") + "<b>" + Sanguosha->translate(trick_name) + "</b>";
+        }
         item->setToolTip(toolTip);
         _m_judgeCards.append(trick);
         _m_judgeIcons.append(item);

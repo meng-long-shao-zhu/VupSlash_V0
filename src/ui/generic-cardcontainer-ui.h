@@ -38,6 +38,7 @@ protected:
     QList<CardItem *> _createCards(QList<int> card_ids);
     CardItem *_createCard(int card_id);
     void _disperseCards(QList<CardItem *> &cards, QRectF fillRegion, Qt::Alignment align, bool useHomePos, bool keepOrder);
+    void _disperseCards(QList<CardItem *> &cards, QRectF fillRegion, Qt::Alignment align, bool useHomePos, bool keepOrder, QList<CardItem *> &new_items);
     void _playMoveCardsAnimation(QList<CardItem *> &cards, bool destroyCards);
     int _m_highestZ;
 

@@ -12,6 +12,8 @@ class Card;
 class CardItem : public QSanSelectableItem
 {
     Q_OBJECT
+    Q_PROPERTY(qreal X_rotate READ X_rotate WRITE setX_rotate)
+    Q_PROPERTY(qreal Y_rotate READ Y_rotate WRITE setY_rotate)
 
 public:
     CardItem(const Card *card);
@@ -29,7 +31,7 @@ public:
     }
 
     // For move card animation
-    void setHomePos(QPointF home_pos);
+    void setHomePos(QPointF home_pos, float rotate_angle = 0, float slap = 0);
     QPointF homePos() const;
     QAbstractAnimation *getGoBackAnimation(bool doFadeEffect, bool smoothTransition = false,
         int duration = Config.S_MOVE_CARD_ANIMATION_DURATION);
@@ -58,6 +60,12 @@ public:
     void setAutoBack(bool auto_back);
     void changeGeneral(const QString &general_name);
     void setFootnote(const QString &desc);
+    qreal x_rotate = 0;
+    void setX_rotate(qreal val);
+    qreal X_rotate() const;
+    qreal y_rotate = 0;
+    void setY_rotate(qreal val);
+    qreal Y_rotate() const;
 
     inline bool isSelected() const
     {
@@ -128,6 +136,8 @@ private:
     bool auto_back, frozen;
     bool m_isShiny;
     bool m_isMine;
+    float rotate_angle;
+    float slap;
 
 signals:
     void toggle_discards();

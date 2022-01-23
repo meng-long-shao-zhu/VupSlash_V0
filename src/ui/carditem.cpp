@@ -23,6 +23,9 @@ void CardItem::_initialize()
     m_number = 0;
     m_suit = Card::NoSuit;
     m_color = Card::Colorless;
+    rotate_angle = 0;
+    slap = 0;
+    setTransformOriginPoint(_m_width / 2, _m_height / 2);
     resetTransform();
     setTransform(QTransform::fromTranslate(-_m_width / 2, -_m_height / 2), true);
 }
@@ -108,9 +111,43 @@ const Card *CardItem::getCard() const
     return Sanguosha->getCard(m_cardId);
 }
 
-void CardItem::setHomePos(QPointF home_pos)
+void CardItem::setX_rotate(qreal val)
+{
+    x_rotate = val;
+    //以x轴进行旋转
+    QTransform transform;
+    transform.rotate(x_rotate, Qt::XAxis);
+    transform.rotate(y_rotate, Qt::YAxis);
+    transform.translate(-_m_width/2, -_m_height/2);
+    this->setTransform(transform);
+}
+
+qreal CardItem::X_rotate() const
+{
+    return x_rotate;
+}
+
+void CardItem::setY_rotate(qreal val)
+{
+    y_rotate = val;
+    //以y轴进行旋转
+    QTransform transform;
+    transform.rotate(x_rotate, Qt::XAxis);
+    transform.rotate(y_rotate, Qt::YAxis);
+    transform.translate(-_m_width/2, -_m_height/2);
+    this->setTransform(transform);
+}
+
+qreal CardItem::Y_rotate() const
+{
+    return y_rotate;
+}
+
+void CardItem::setHomePos(QPointF home_pos, float rotate_angle, float slap)
 {
     this->home_pos = home_pos;
+    this->rotate_angle = rotate_angle;
+    this->slap = slap;
 }
 
 QPointF CardItem::homePos() const
@@ -144,13 +181,58 @@ QAbstractAnimation *CardItem::getGoBackAnimation(bool doFade, bool smoothTransit
         delete m_currentAnimation;
         m_currentAnimation = NULL;
     }
+    QParallelAnimationGroup *group = new QParallelAnimationGroup;
+
     QPropertyAnimation *goback = new QPropertyAnimation(this, "pos");
     goback->setEndValue(home_pos);
     goback->setEasingCurve(QEasingCurve::OutQuad);
     goback->setDuration(duration);
+    group->addAnimation(goback);
+
+    QPropertyAnimation *rotation = new QPropertyAnimation(this, "rotation");
+    rotation->setEndValue(rotate_angle);
+    rotation->setEasingCurve(QEasingCurve::OutQuad);
+    rotation->setDuration(duration);
+    group->addAnimation(rotation);
+
+    QPropertyAnimation *scale = new QPropertyAnimation(this, "scale");
+    scale->setEndValue(1.0);
+    if (slap != 0) {
+        scale->setStartValue(slap);
+        //scale->setKeyValueAt(0.5, slap);
+        scale->setEasingCurve(QEasingCurve::InBack);
+        scale->setDuration(duration);
+    } else {
+        rotation->setEasingCurve(QEasingCurve::OutQuad);
+        scale->setDuration(duration/2);
+    }
+    group->addAnimation(scale);
+
+    if (x_rotate != 0) {
+        QPropertyAnimation *anim_x = new QPropertyAnimation(this, "X_rotate");
+
+        //anim_x->setKeyValueAt(0.5, 90);
+        anim_x->setStartValue(x_rotate);
+        anim_x->setEndValue(0);
+        anim_x->setDuration(duration-0.75);
+
+        anim_x->setEasingCurve(QEasingCurve::OutQuad);
+        group->addAnimation(anim_x);
+    }
+
+    if (y_rotate != 0) {
+        QPropertyAnimation *anim_y = new QPropertyAnimation(this, "Y_rotate");
+
+        //anim_y->setKeyValueAt(0.5, 90);
+        anim_y->setStartValue(y_rotate);
+        anim_y->setEndValue(0);
+        anim_y->setDuration(duration-0.75);
+
+        anim_y->setEasingCurve(QEasingCurve::OutQuad);
+        group->addAnimation(anim_y);
+    }
 
     if (doFade) {
-        QParallelAnimationGroup *group = new QParallelAnimationGroup;
         QPropertyAnimation *disappear = new QPropertyAnimation(this, "opacity");
         double middleOpacity = qMax(opacity(), m_opacityAtHome);
         if (middleOpacity == 0) middleOpacity = 1.0;
@@ -161,13 +243,24 @@ QAbstractAnimation *CardItem::getGoBackAnimation(bool doFade, bool smoothTransit
             disappear->setDuration(duration);
         }
 
-        group->addAnimation(goback);
         group->addAnimation(disappear);
-
-        m_currentAnimation = group;
-    } else {
-        m_currentAnimation = goback;
     }
+
+    /*if (slap>0) {
+        slap = 0;
+        QPropertyAnimation *slap_anim = new QPropertyAnimation(this, "scale");
+        slap_anim->setEndValue(1.1);
+        //if (!smoothTransition) {
+            //slap_anim->setKeyValueAt(0.2, 1.1);
+            //slap_anim->setKeyValueAt(0.8, 1.1);
+            slap_anim->setDuration(duration);
+            slap_anim->setEasingCurve(QEasingCurve::OutQuad);
+        //}
+        group->addAnimation(slap_anim);
+    }*/
+
+    m_currentAnimation = group;
+
     m_animationMutex.unlock();
     connect(m_currentAnimation, SIGNAL(finished()), this, SIGNAL(movement_animation_finished()));
     connect(m_currentAnimation, SIGNAL(destroyed()), this, SLOT(currentAnimationDestroyed()));
