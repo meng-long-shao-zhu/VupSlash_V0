@@ -26,6 +26,7 @@ protected:
 public slots:
     void appear();
     void disappear();
+    void setFullOpacity(qreal value = 1.0);
 
 private:
     QGraphicsTextItem *titleItem;
@@ -34,6 +35,7 @@ private:
     bool keep_when_disappear;
     QImage *outimg;
     QPixmap *bg;
+    qreal full_opacity;
 };
 
 #endif

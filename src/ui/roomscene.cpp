@@ -77,6 +77,23 @@ RoomScene::RoomScene(QMainWindow *main_window)
     addItem(m_tablePile);
     connect(ClientInstance, SIGNAL(card_used()), m_tablePile, SLOT(clear()));
 
+    button_box_widget = new QGraphicsPixmapItem();
+    addItem(button_box_widget);
+
+    ok_button = new QSanButton("platter", "confirm", button_box_widget);
+    ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonAreaNew);
+    cancel_button = new QSanButton("platter", "cancel", button_box_widget);
+    cancel_button->setRect(G_DASHBOARD_LAYOUT.m_cancelButtonArea);
+    discard_button = new QSanButton("platter", "discard", button_box_widget);
+    discard_button->setRect(G_DASHBOARD_LAYOUT.m_discardButtonArea);
+    connect(ok_button, SIGNAL(clicked()), this, SLOT(doOkButton()));
+    connect(cancel_button, SIGNAL(clicked()), this, SLOT(doCancelButton()));
+    connect(discard_button, SIGNAL(clicked()), this, SLOT(doDiscardButton()));
+    ok_button->setEnabled(false);
+    cancel_button->setEnabled(false);
+    discard_button->setEnabled(false);
+    button_box_widget->setZValue(11000);
+
     // create dashboard
     dashboard = new Dashboard(createDashboardButtons());
     dashboard->setObjectName("dashboard");
@@ -98,7 +115,9 @@ RoomScene::RoomScene(QMainWindow *main_window)
     connect(Self, SIGNAL(role_changed(QString)), dashboard, SLOT(updateRole(QString)));
 
     m_replayControl = NULL;
+    is_replay = false;
     if (ClientInstance->getReplayer()) {
+        is_replay = true;
         dashboard->hideControlButtons();
         createReplayControlBar();
     }
@@ -274,12 +293,14 @@ RoomScene::RoomScene(QMainWindow *main_window)
     log_box_widget->setParent(this);
     connect(ClientInstance, SIGNAL(log_received(QStringList)), log_box, SLOT(appendLog(QStringList)));
 
-    prompt_box = new Window(Sanguosha->translate("GAME_NAME"), QSize(672, 280));
+    //prompt_box = new Window(Sanguosha->translate("GAME_NAME"), QSize(672, 280));
+    prompt_box = new Window("", QSize(672, 280));
     prompt_box->setOpacity(0);
     prompt_box->setFlag(QGraphicsItem::ItemIsMovable);
     prompt_box->shift();
     prompt_box->setZValue(10);
     prompt_box->keepWhenDisappear();
+    prompt_box->setFullOpacity(0.8);
 
     /*prompt_box_widget = new PromptInfoItem();
     addItem(prompt_box_widget);
@@ -288,7 +309,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     prompt_box_widget = new QGraphicsTextItem(prompt_box);
     prompt_box_widget->setParent(prompt_box);
     prompt_box_widget->setPos(40, 45);
-    prompt_box_widget->setDefaultTextColor(Qt::white);
+    prompt_box_widget->setDefaultTextColor(Qt::black);
 
     QTextDocument *prompt_doc = ClientInstance->getPromptDoc();
     prompt_doc->setTextWidth(prompt_box->boundingRect().width() - 80);
@@ -632,16 +653,6 @@ QGraphicsPixmapItem *RoomScene::createDashboardButtons()
     QGraphicsPixmapItem *widget = new QGraphicsPixmapItem(G_ROOM_SKIN.getPixmap(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG)
         .scaled(G_DASHBOARD_LAYOUT.m_buttonSetSize));
 
-    ok_button = new QSanButton("platter", "confirm", widget);
-    ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonArea);
-    cancel_button = new QSanButton("platter", "cancel", widget);
-    cancel_button->setRect(G_DASHBOARD_LAYOUT.m_cancelButtonArea);
-    discard_button = new QSanButton("platter", "discard", widget);
-    discard_button->setRect(G_DASHBOARD_LAYOUT.m_discardButtonArea);
-    connect(ok_button, SIGNAL(clicked()), this, SLOT(doOkButton()));
-    connect(cancel_button, SIGNAL(clicked()), this, SLOT(doCancelButton()));
-    connect(discard_button, SIGNAL(clicked()), this, SLOT(doDiscardButton()));
-
     trust_button = new QSanButton("platter", "trust", widget);
     trust_button->setStyle(QSanButton::S_STYLE_TOGGLE);
     trust_button->setRect(G_DASHBOARD_LAYOUT.m_trustButtonArea);
@@ -649,9 +660,6 @@ QGraphicsPixmapItem *RoomScene::createDashboardButtons()
     connect(Self, SIGNAL(state_changed()), this, SLOT(updateTrustButton()));
 
     // set them all disabled
-    ok_button->setEnabled(false);
-    cancel_button->setEnabled(false);
-    discard_button->setEnabled(false);
     trust_button->setEnabled(false);
     return widget;
 }
@@ -683,10 +691,11 @@ ReplayerControlBar::ReplayerControlBar(Dashboard *dashboard)
     speed_up->setPos(step * 3, 0);
 
     time_label = new QLabel;
-    time_label->setAttribute(Qt::WA_NoSystemBackground);
-    time_label->setText("-----------------------------------------------------");
+    //time_label->setAttribute(Qt::WA_NoSystemBackground);
+    time_label->setText("--------------------");
     QPalette palette;
-    palette.setColor(QPalette::WindowText, Config.TextEditColor);
+    palette.setColor(QPalette::WindowText, QColor(0,0,0,255));
+    palette.setColor(QPalette::Window, QColor(255,255,255,100));
     time_label->setPalette(palette);
 
     QGraphicsProxyWidget *widget = new QGraphicsProxyWidget(this);
@@ -1024,6 +1033,15 @@ void RoomScene::updateTable()
         prompt_box_widget->setPos(progressBarRect.x() - xShift,
             progressBarRect.y() - promptBoxHeight);
     }*/
+    if (NULL != button_box_widget) {
+        QRectF promptBoxRect = button_box_widget->boundingRect();
+        int promptBoxWidth = promptBoxRect.width();
+        int promptBoxHeight = promptBoxRect.height();
+        QRectF progressBarRect = dashboard->getProgressBarSceneBoundingRect();
+        int xShift = (promptBoxWidth - progressBarRect.width()) / 2;
+        button_box_widget->setPos(progressBarRect.x() - xShift,
+            progressBarRect.y() - promptBoxHeight);
+    }
 
     pausing_text->setPos(m_tableCenterPos - pausing_text->boundingRect().center());
     pausing_item->setRect(sceneRect());
@@ -1137,7 +1155,7 @@ void RoomScene::arrangeSeats(const QList<const ClientPlayer *> &seats)
             break;
         }
     }
-    if (all_robot)
+    if (all_robot || (is_replay && Config.HideRecordBubble))
         setChatBoxVisible(false);
 
     //update the positions of bubbles after setting seats
@@ -3059,6 +3077,31 @@ void RoomScene::doDiscardButton()
 {
     dashboard->stopPending();
     dashboard->unselectAll();
+
+    /*QLabel * label = new QLabel(main_window);
+    QMovie * movie = new QMovie(":/image/animate/heli.gif");//加载gif图片
+    //设置label自动适应gif的大小
+    label->setScaledContents(true);
+
+    label->setMovie(movie);
+    //这里为了调用move方便，进行resize，需要知道的是gif的大小本来也就是150*150
+    label->resize(150,150);
+    //设置鼠标穿透
+    label->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    //close后清除
+    label->setAttribute(Qt::WA_DeleteOnClose);
+    //让label的中心在当前鼠标双击位置
+    label->move(QCursor::pos().x()-label->width()/2,QCursor::pos().y()-label->height()/2);
+    //开始播放gif
+    movie->start();
+
+    label->show();
+
+    //绑定QMovie的信号，判断gif播放次数
+    connect(movie, &QMovie::frameChanged, [=](int frameNumber) {
+        if (frameNumber == movie->frameCount() - 1)//gif播放次数为1，关闭标签
+            label->close();
+    });*/
 
     if (card_container->retained()) card_container->clear();
     if (ClientInstance->getStatus() == Client::Playing)
@@ -5080,6 +5123,7 @@ void RoomScene::appendChatEdit(QString txt)
 void RoomScene::showBubbleChatBox(const QString &who, const QString &line)
 {
     if (Config.BubbleChatBoxKeepTime == 0) return;
+    if (is_replay && Config.HideRecordBubble) return;
     if (!bubbleChatBoxes.keys().contains(who)) {
         BubbleChatBox *bubbleChatBox = new BubbleChatBox(getBubbleChatBoxShowArea(who));
         addItem(bubbleChatBox);
@@ -5204,7 +5248,7 @@ void RoomScene::updateVolumeConfig()
 void RoomScene::redrawDashboardButtons()
 {
     ok_button->redraw();
-    ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonArea);
+    ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonAreaNew);
 
     cancel_button->redraw();
     cancel_button->setRect(G_DASHBOARD_LAYOUT.m_cancelButtonArea);

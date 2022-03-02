@@ -969,6 +969,10 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
     case FinishRetrial: {
         JudgeStruct *judge = data.value<JudgeStruct *>();
 
+        judge->result_objname = judge->card->objectName();
+        judge->result_number = judge->card->getNumber();
+        judge->result_suit = judge->card->getSuit();
+
         LogMessage log;
         log.type = "$JudgeResult";
         log.from = player;

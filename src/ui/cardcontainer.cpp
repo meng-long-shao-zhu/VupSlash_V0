@@ -14,13 +14,13 @@ CardContainer::CardContainer()
     close_button = new CloseButton;
     close_button->setParentItem(this);
     //close_button->setPos(517, 21);
-    close_button->setPos(730, 10);
+    close_button->setPos(710, 17);
     close_button->hide();
     connect(close_button, SIGNAL(clicked()), this, SLOT(clear()));
 
     log_button = new LogButton;
     log_button->setParentItem(this);
-    log_button->setPos(10, 10);
+    log_button->setPos(30, 17);
     log_button->hide();
 }
 
@@ -56,8 +56,8 @@ void CardContainer::fillCards(const QList<int> &card_ids, const QList<int> &disa
         card_items = _createCards(card_ids);
 
     int card_width = G_COMMON_LAYOUT.m_cardNormalWidth;
-    QPointF pos1(30 + card_width / 2, 40 + G_COMMON_LAYOUT.m_cardNormalHeight / 2);
-    QPointF pos2(30 + card_width / 2, 184 + G_COMMON_LAYOUT.m_cardNormalHeight / 2);
+    QPointF pos1(30 + card_width / 2, 60 + G_COMMON_LAYOUT.m_cardNormalHeight / 2);
+    QPointF pos2(30 + card_width / 2, 204 + G_COMMON_LAYOUT.m_cardNormalHeight / 2);
     int skip = 102;
     int column = 7;
     qreal whole_width = skip * (column-1);

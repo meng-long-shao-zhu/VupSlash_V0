@@ -54,6 +54,8 @@ Dashboard::Dashboard(QGraphicsPixmapItem *widget)
 
     _m_sort_menu = new QMenu(RoomSceneInstance->mainWindow());
     _m_shefu_menu = new QMenu(RoomSceneInstance->mainWindow());
+
+    auto_sort = Config.EnableAutoSort;
 }
 
 bool Dashboard::isAvatarUnderMouse()
@@ -320,7 +322,8 @@ bool Dashboard::_addCardItems(QList<CardItem *> &card_items, const CardsMoveStru
     else if (place == Player::PlaceHand)
         addHandCards(card_items);
 
-    adjustCards(true);
+    QList<CardItem *> null_items;
+    adjustCards2(place == Player::PlaceHand ? card_items : null_items, true);
     return false;
 }
 
@@ -371,6 +374,10 @@ void Dashboard::_addHandCard(CardItem *card_item, bool prepend, const QString &f
         m_handCards.prepend(card_item);
     else
         m_handCards.append(card_item);
+
+    if (auto_sort) {
+        autoSorting();
+    }
 
     connect(card_item, SIGNAL(clicked()), this, SLOT(onCardItemClicked()));
     connect(card_item, SIGNAL(double_clicked()), this, SLOT(onCardItemDoubleClicked()));
@@ -794,12 +801,24 @@ void Dashboard::_setEquipBorderAnimation(int index, bool turnOn)
 
 void Dashboard::adjustCards(bool playAnimation)
 {
-    _adjustCards();
+    QList<CardItem *> null_items;
+    adjustCards2(null_items, playAnimation);
+}
+
+void Dashboard::adjustCards2(QList<CardItem *> &card_items, bool playAnimation)
+{
+    _adjustCards2(card_items);
     foreach(CardItem *card, m_handCards)
         card->goBack(playAnimation);
 }
 
 void Dashboard::_adjustCards()
+{
+    QList<CardItem *> null_items;
+    _adjustCards2(null_items);
+}
+
+void Dashboard::_adjustCards2(QList<CardItem *> &card_items)
 {
     int maxCards = Config.MaxCards;
 
@@ -820,7 +839,8 @@ void Dashboard::_adjustCards()
         row.push_back(m_handCards[i]);
 
     _m_highestZ = n;
-    _disperseCards(row, rowRect, Qt::AlignLeft, true, true);
+    //_disperseCards(row, rowRect, Qt::AlignLeft, true, true);
+    _disperseCards(row, rowRect, Qt::AlignCenter, true, true, card_items, 1);
 
     row.clear();
     rowRect.translate(0, 1.5 * S_PENDING_OFFSET_Y);
@@ -828,7 +848,8 @@ void Dashboard::_adjustCards()
         row.push_back(m_handCards[i]);
 
     _m_highestZ = 0;
-    _disperseCards(row, rowRect, Qt::AlignLeft, true, true);
+    //_disperseCards(row, rowRect, Qt::AlignLeft, true, true);
+    _disperseCards(row, rowRect, Qt::AlignCenter, true, true, card_items, 1);
 
     for (int i = 0; i < n; i++) {
         CardItem *card = m_handCards[i];
@@ -978,8 +999,14 @@ void Dashboard::sortCards()
     menu->setTitle(tr("Sort handcards"));
 
     if (m_player->hasSkills("shuoyi")) {
+        auto_sort = false;
         QToolTip::showText(QCursor::pos(), Sanguosha->translate("SORTCARDS_BANNED"));
     } else {
+        QAction *action_switch = menu->addAction(Sanguosha->translate(auto_sort ? "auto_sort_off" : "auto_sort_on"));
+        action_switch->setData((int)AutoSort);
+
+        menu->addSeparator();
+
         QAction *action1 = menu->addAction(tr("Sort by type"));
         action1->setData((int)ByType);
 
@@ -989,9 +1016,21 @@ void Dashboard::sortCards()
         QAction *action3 = menu->addAction(tr("Sort by number"));
         action3->setData((int)ByNumber);
 
+        QAction *action4 = menu->addAction(Sanguosha->translate("Shuffle_handcards"));
+        action4->setData((int)Shuffle);
+
+        if (auto_sort) {
+            action1->setEnabled(false);
+            action2->setEnabled(false);
+            action3->setEnabled(false);
+            action4->setEnabled(false);
+        }
+
+        connect(action_switch, SIGNAL(triggered()), this, SLOT(beginSorting()));
         connect(action1, SIGNAL(triggered()), this, SLOT(beginSorting()));
         connect(action2, SIGNAL(triggered()), this, SLOT(beginSorting()));
         connect(action3, SIGNAL(triggered()), this, SLOT(beginSorting()));
+        connect(action4, SIGNAL(triggered()), this, SLOT(beginSorting()));
 
         QPointF posf = QCursor::pos();
         menu->popup(QPoint(posf.x(), posf.y()));
@@ -1009,7 +1048,27 @@ void Dashboard::beginSorting()
     case ByType: qSort(m_handCards.begin(), m_handCards.end(), CompareByType); break;
     case BySuit: qSort(m_handCards.begin(), m_handCards.end(), CompareBySuit); break;
     case ByNumber: qSort(m_handCards.begin(), m_handCards.end(), CompareByNumber); break;
+    case AutoSort:
+        auto_sort = !auto_sort;
+        if (auto_sort) {
+            autoSorting();
+        }
+
+        break;
+    case Shuffle: qShuffle(m_handCards); break;
     default: Q_ASSERT(false);
+    }
+
+    adjustCards();
+}
+
+void Dashboard::autoSorting()
+{
+    if (m_player->hasSkills("shuoyi")) {
+        auto_sort = false;
+    }
+    if (auto_sort) {
+        qSort(m_handCards.begin(), m_handCards.end(), CompareByType);
     }
 
     adjustCards();

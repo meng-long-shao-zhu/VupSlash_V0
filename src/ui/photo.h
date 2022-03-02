@@ -55,6 +55,7 @@ public:
     qreal Z_rotate() const;
     qreal m_x;
     qreal m_y;
+    QString seat_str;
 
 public slots:
     void updatePhase();

@@ -202,9 +202,19 @@ QString General::getSkillDescription(bool include_name, bool include_difficulty)
             name.prepend("<img src='image/system/bonus_star.png' height = 17/>");
         name.prepend(QString("<img src='image/kingdom/icon/%1.png' height=32/>    ").arg(kingdom));
 
+        QString gender("  <img src='image/gender/%1.png' height=17 />");
+        if (isMale())
+            name.append(gender.arg("male"));
+        else if (isFemale())
+            name.append(gender.arg("female"));
+        else if (isNeuter())
+            name.append(gender.arg("neuter"));
+        else if (isSexless())
+            name.append(gender.arg("sexless"));
+
         int start_hp = getStartHp();
         //start_hp = qMin(start_hp, max_hp);
-        if (start_hp < max_hp) {
+        /*if (start_hp < max_hp) {
             for (int i = 0; i < start_hp; i++)
                 name.append("<img src='image/system/magatamas/5.png' height = 12/>");
             for (int i = 0; i < max_hp - start_hp; i++)
@@ -217,17 +227,18 @@ QString General::getSkillDescription(bool include_name, bool include_difficulty)
         } else {
             for (int i = 0; i < max_hp; i++)
                 name.append("<img src='image/system/magatamas/5.png' height = 12/>");
+        }*/
+        name.append("  <img src='image/system/magatama_icon.png' height = 15/>");
+        if (start_hp == max_hp) {
+            if (start_hp >= 5) {
+                name.append(QString("<b>%1</b>").arg(start_hp));
+            } else {
+                for (int i = 1; i < start_hp; i++)
+                    name.append("<img src='image/system/magatama_icon.png' height = 14/>");
+            }
+        } else {
+            name.append(QString("<b>%1/%2</b>").arg(start_hp).arg(max_hp));
         }
-
-        QString gender("  <img src='image/gender/%1.png' height=17 />");
-        if (isMale())
-            name.append(gender.arg("male"));
-        else if (isFemale())
-            name.append(gender.arg("female"));
-        else if (isNeuter())
-            name.append(gender.arg("neuter"));
-        else if (isSexless())
-            name.append(gender.arg("sexless"));
 
         if (include_difficulty) {
             name.prepend("<table width='100%'><tr valign='baseline'><th align='left'>");

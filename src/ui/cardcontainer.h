@@ -103,9 +103,9 @@ private:
     int up_limit;
     int down_limit;
 
-    static const int start_x = 76;
-    static const int start_y1 = 105;
-    static const int start_y2 = 249;
+    static const int start_x = 75;
+    static const int start_y1 = 115;
+    static const int start_y2 = 259;
     static const int middle_y = 173;
     static const int skip = 102;
 };

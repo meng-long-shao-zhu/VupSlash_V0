@@ -50,6 +50,7 @@ Window::Window(const QString &title, const QSizeF &size, const QString &path)
     setTransformations(transforms);
 
     this->setOpacity(0.0);
+    full_opacity = 1.0;
 
     titleItem = new QGraphicsTextItem(this);
     setTitle(title);
@@ -124,7 +125,7 @@ void Window::appear()
 
     scale_x->setEndValue(1);
     scale_y->setEndValue(1);
-    opacity->setEndValue(1.0);
+    opacity->setEndValue(1.0*full_opacity);
     group->addAnimation(scale_x);
     group->addAnimation(scale_y);
     group->addAnimation(opacity);
@@ -153,16 +154,21 @@ void Window::disappear()
         connect(group, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
+void Window::setFullOpacity(qreal value)
+{
+    full_opacity = value;
+}
+
 void Window::setTitle(const QString &title)
 {
     QString style;
     style.append("font-size:18pt; ");
-    style.append("color:#87CEFA; ");
+    style.append("color:#414141; ");
     style.append(QString("font-family: %1").arg(Config.SmallFont.family()));
 
     QString content;
     content.append(QString("<h style=\"%1\">%2</h>").arg(style).arg(title));
 
     titleItem->setHtml(content);
-    titleItem->setPos(size.width() / 2 - titleItem->boundingRect().width() / 2, 10);
+    titleItem->setPos(size.width() / 2 - titleItem->boundingRect().width() / 2, 5);
 }

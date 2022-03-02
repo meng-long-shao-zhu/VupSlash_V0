@@ -403,6 +403,9 @@ struct JudgeStruct
     bool negative;
     bool play_animation;
     ServerPlayer *retrial_by_response; // record whether the current judge card is provided by a response retrial
+    Card::Suit result_suit;
+    int result_number;
+    QString result_objname;
 
 private:
     enum TrialResult

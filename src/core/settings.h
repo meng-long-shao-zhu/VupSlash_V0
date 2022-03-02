@@ -75,6 +75,7 @@ public:
     bool EnableIntellectualSelection;
     bool EnableDoubleClick;
     bool EnableSuperDrag;
+    bool EnableAutoSort;
     bool EnableAutoBackgroundChange;
     int OperationTimeout;
     bool OperationNoLimit;
@@ -83,6 +84,7 @@ public:
     bool EnableBgMusic;
     float BGMVolume;
     float EffectVolume;
+    bool HideRecordBubble;
 
     QString BackgroundImage;
     int BubbleChatBoxKeepTime;

@@ -49,37 +49,14 @@ bool GenericCardContainer::_horizontalPosLessThan(const CardItem *card1, const C
 }
 
 void GenericCardContainer::_disperseCards(QList<CardItem *> &cards, QRectF fillRegion,
-    Qt::Alignment align, bool useHomePos, bool keepOrder)
+    Qt::Alignment align, bool useHomePos, bool keepOrder, int type)
 {
-    int numCards = cards.size();
-    if (numCards == 0) return;
-    if (!keepOrder) qSort(cards.begin(), cards.end(), GenericCardContainer::_horizontalPosLessThan);
-    double maxWidth = fillRegion.width();
-    int cardWidth = G_COMMON_LAYOUT.m_cardNormalWidth;
-    double step = qMin((double)cardWidth, (maxWidth - cardWidth) / (numCards - 1));
-    align &= Qt::AlignHorizontal_Mask;
-    for (int i = 0; i < numCards; i++) {
-        CardItem *card = cards[i];
-        double newX = 0;
-        if (align == Qt::AlignHCenter)
-            newX = fillRegion.center().x() + step * (i - (numCards - 1) / 2.0);
-        else if (align == Qt::AlignLeft)
-            newX = fillRegion.left() + step * i + card->boundingRect().width() / 2.0;
-        else if (align == Qt::AlignRight)
-            newX = fillRegion.right() + step * (i - numCards) + card->boundingRect().width() / 2.0;
-        else
-            continue;
-        QPointF newPos = QPointF(newX, fillRegion.center().y());
-        if (useHomePos)
-            card->setHomePos(newPos);
-        else
-            card->setPos(newPos);
-        card->setZValue(_m_highestZ++);
-    }
+    QList<CardItem *> null_items;
+    _disperseCards(cards, fillRegion, align, useHomePos, keepOrder, null_items, type);
 }
 
 void GenericCardContainer::_disperseCards(QList<CardItem *> &cards, QRectF fillRegion,
-    Qt::Alignment align, bool useHomePos, bool keepOrder, QList<CardItem *> &new_items)
+    Qt::Alignment align, bool useHomePos, bool keepOrder, QList<CardItem *> &new_items, int type)
 {
     int numCards = cards.size();
     if (numCards == 0) return;
@@ -91,6 +68,7 @@ void GenericCardContainer::_disperseCards(QList<CardItem *> &cards, QRectF fillR
     for (int i = 0; i < numCards; i++) {
         CardItem *card = cards[i];
         double newX = 0;
+        double offsetY = 0;
         if (align == Qt::AlignHCenter)
             newX = fillRegion.center().x() + step * (i - (numCards - 1) / 2.0);
         else if (align == Qt::AlignLeft)
@@ -99,9 +77,16 @@ void GenericCardContainer::_disperseCards(QList<CardItem *> &cards, QRectF fillR
             newX = fillRegion.right() + step * (i - numCards) + card->boundingRect().width() / 2.0;
         else
             continue;
-        QPointF newPos = QPointF(newX, fillRegion.center().y());
+        if (type == 1) {
+            /*float pos = i - (numCards - 1) / 2.0;
+            if (pos < 0)
+                card->setRotation(-15*(1-qPow(1.1, -pos)));
+            else
+                card->setRotation(15*(1-qPow(1.1, pos)));*/
+        }
+        QPointF newPos = QPointF(newX, fillRegion.center().y() + offsetY);
         if (useHomePos) {
-            card->setHomePos(newPos, 0, new_items.contains(card) ? 1.2 : 0);
+            card->setHomePos(newPos, 0, new_items.contains(card) ? 1.2 : 0, (type == 1 && new_items.contains(card)) ? 1 : 0);
             if (new_items.contains(card) && card->X_rotate() == 0 && card->Y_rotate() == 0) {
                 if (newPos.y() > card->y())
                     card->setX_rotate(40*(1-qPow(1.1, (-newPos.y() + card->y()))));
@@ -263,8 +248,12 @@ void PlayerCardContainer::updateAvatar()
         // this is just avatar general, perhaps game has not started yet.
         if (m_player->getGeneral() != NULL) {
             QString kingdom = m_player->getKingdom();
-            _paintPixmap(_m_kingdomIcon, _m_layout->m_kingdomIconArea,
-                G_ROOM_SKIN.getPixmap(QSanRoomSkin::S_SKIN_KEY_KINGDOM_ICON, kingdom), _getAvatarParent());
+            if (kingdom != m_player->getKingdom(true)) {
+                _paintPixmap(_m_kingdomIcon, _m_layout->m_kingdomIconArea,
+                    G_ROOM_SKIN.getPixmap(QSanRoomSkin::S_SKIN_KEY_KINGDOM_ICON, kingdom), _getAvatarParent());
+            } else {
+                _clearPixmap(_m_kingdomIcon);
+            }
             QString keyKingdomColorMask = (inherits("Photo")) ? QSanRoomSkin::S_SKIN_KEY_KINGDOM_COLOR_MASK : QSanRoomSkin::S_SKIN_KEY_DASHBOARD_KINGDOM_COLOR_MASK;
             _paintPixmap(_m_kingdomColorMaskIcon, _m_layout->m_kingdomMaskArea,
                 G_ROOM_SKIN.getPixmap(keyKingdomColorMask, kingdom), _getAvatarParent());
@@ -272,7 +261,7 @@ void PlayerCardContainer::updateAvatar()
                 _getPixmap(QSanRoomSkin::S_SKIN_KEY_HANDCARDNUM, kingdom), _getAvatarParent());
             _m_layout->m_avatarNameFont.paintText(_m_avatarNameItem,
                 _m_layout->m_avatarNameArea,
-                Qt::AlignLeft | Qt::AlignJustify, general->getBriefName());
+                Qt::AlignCenter | Qt::AlignJustify, general->getBriefName());
         } else {
             _paintPixmap(_m_handCardBg, _m_layout->m_handCardArea,
                 _getPixmap(QSanRoomSkin::S_SKIN_KEY_HANDCARDNUM, QString(QSanRoomSkin::S_SKIN_KEY_DEFAULT_SECOND)),

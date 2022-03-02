@@ -910,6 +910,7 @@ bool QSanRoomSkin::_loadLayoutConfig(const QVariant &layout)
     tryParse(config["onlineStatusArea"], _m_photoLayout.m_onlineStatusArea);
     tryParse(config["onlineStatusBgColor"], _m_photoLayout.m_onlineStatusBgColor);
     _m_photoLayout.m_onlineStatusFont.tryParse(config["onlineStatusFont"]);
+    tryParse(config["seatStatusArea"], _m_photoLayout.m_seatStatusArea);
     tryParse(config["cardMoveArea"], _m_photoLayout.m_cardMoveRegion);
     tryParse(config["skillNameArea"], _m_photoLayout.m_skillNameArea);
     _m_photoLayout.m_skillNameFont.tryParse(config["skillNameFont"]);
@@ -922,6 +923,7 @@ bool QSanRoomSkin::_loadLayoutConfig(const QVariant &layout)
     tryParse(config["focusFrameArea"], _m_dashboardLayout.m_focusFrameArea);
     tryParse(config["buttonSetSize"], _m_dashboardLayout.m_buttonSetSize);
     tryParse(config["confirmButtonArea"], _m_dashboardLayout.m_confirmButtonArea);
+    tryParse(config["confirmButtonAreaNew"], _m_dashboardLayout.m_confirmButtonAreaNew);
     tryParse(config["cancelButtonArea"], _m_dashboardLayout.m_cancelButtonArea);
     tryParse(config["discardButtonArea"], _m_dashboardLayout.m_discardButtonArea);
     tryParse(config["trustButtonArea"], _m_dashboardLayout.m_trustButtonArea);

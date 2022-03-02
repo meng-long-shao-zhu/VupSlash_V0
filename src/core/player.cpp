@@ -828,9 +828,9 @@ int Player::getMaxCards() const
     return qMax(origin + rule + extra, 0);
 }
 
-QString Player::getKingdom() const
+QString Player::getKingdom(bool original) const
 {
-    if (kingdom.isEmpty() && general)
+    if (original || (kingdom.isEmpty() && general))
         return general->getKingdom();
     else
         return kingdom;

@@ -209,15 +209,25 @@ void MagatamasBoxItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         }
     } else {
         painter->drawPixmap(m_imageArea, _icons[imageIndex]);
-        QRect rect(xStep, yStep, m_imageArea.width(), m_imageArea.height());
+        QRect rect(xStep, yStep, m_imageArea.width() * 1.2, m_imageArea.height() * 1.2);
+        QRect rect_wide(xStep - m_imageArea.width() * 0.4, yStep, m_imageArea.width() * 2, m_imageArea.height() * 1.2);
         rect.translate(m_imageArea.topLeft());
-        if (this->m_orientation == Qt::Horizontal)
-            rect.translate(xStep * 0.5, yStep * 0.5);
-        G_COMMON_LAYOUT.m_hpFont[imageIndex].paintText(painter, rect, Qt::AlignCenter, QString::number(m_hp));
-        rect.translate(xStep, yStep);
+        rect_wide.translate(m_imageArea.topLeft());
+        if (this->m_orientation == Qt::Horizontal) {
+            rect.translate(xStep * 0.5 * 1.2, yStep * 0.5 * 1.2);
+            rect_wide.translate(xStep * 0.5 * 1.2, yStep * 0.5 * 1.2);
+        }
+
+        QString hp = QString::number(m_hp);
+        QString maxHp = QString::number(m_maxHp);
+
+        G_COMMON_LAYOUT.m_hpFont[imageIndex].paintText(painter, (hp.length()>1)?rect_wide:rect, Qt::AlignCenter, hp);
+        rect.translate(xStep * 1.2, yStep * 1.2);
+        rect_wide.translate(xStep * 1.2, yStep * 1.2);
         G_COMMON_LAYOUT.m_hpFont[imageIndex].paintText(painter, rect, Qt::AlignCenter, "/");
-        rect.translate(xStep, yStep);
-        G_COMMON_LAYOUT.m_hpFont[imageIndex].paintText(painter, rect, Qt::AlignCenter, QString::number(m_maxHp));
+        rect.translate(xStep * 1.2, yStep * 1.2);
+        rect_wide.translate(xStep * 1.2, yStep * 1.2);
+        G_COMMON_LAYOUT.m_hpFont[imageIndex].paintText(painter, (maxHp.length()>1)?rect_wide:rect, Qt::AlignCenter, maxHp);
     }
 }
 

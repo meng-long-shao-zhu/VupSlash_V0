@@ -85,7 +85,7 @@
      <item>
       <widget class="QFrame" name="frame">
        <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
+        <item alignment="Qt::AlignHCenter">
          <widget class="QLabel" name="generalPhoto">
           <property name="text">
            <string/>
@@ -138,10 +138,22 @@
         </item>
         <item>
          <widget class="QTextEdit" name="skillTextEdit">
-          <property name="maximumSize">
+          <property name="minimumSize">
            <size>
             <width>211</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>9999</width>
             <height>16777215</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>211</width>
+            <height>0</height>
            </size>
           </property>
           <property name="readOnly">
@@ -250,7 +262,7 @@
              <x>0</x>
              <y>0</y>
              <width>271</width>
-             <height>397</height>
+             <height>362</height>
             </rect>
            </property>
           </widget>
@@ -267,6 +279,13 @@
          <widget class="QPushButton" name="returnButton">
           <property name="text">
            <string>Return...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="winrateButton">
+          <property name="text">
+           <string>胜率统计...</string>
           </property>
          </widget>
         </item>

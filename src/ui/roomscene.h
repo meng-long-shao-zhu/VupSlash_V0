@@ -284,6 +284,7 @@ private:
     QGraphicsProxyWidget *log_box_widget;
     QGraphicsProxyWidget *chat_edit_widget;
     QGraphicsTextItem *prompt_box_widget;
+    QGraphicsPixmapItem *button_box_widget;
     ChatWidget *chat_widget;
     QPixmap m_rolesBoxBackground;
     QGraphicsPixmapItem *m_rolesBox;
@@ -376,6 +377,7 @@ private:
     // re-layout attempts
     bool game_started;
     void _dispersePhotos(QList<Photo *> &photos, QRectF disperseRegion, Qt::Orientation orientation, Qt::Alignment align);
+    bool is_replay;
 
     void _cancelAllFocus();
     // for miniscenes

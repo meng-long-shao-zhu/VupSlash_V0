@@ -29,7 +29,7 @@ class Dashboard : public PlayerCardContainer
 public:
     enum SortType
     {
-        ByType, BySuit, ByNumber
+        ByType, BySuit, ByNumber, AutoSort, Shuffle
     };
 
     Dashboard(QGraphicsPixmapItem *button_widget);
@@ -71,6 +71,7 @@ public:
     void enableAllCards();
 
     void adjustCards(bool playAnimation = true);
+    void adjustCards2(QList<CardItem *> &card_items, bool playAnimation = true);
 
     virtual QGraphicsItem *getMouseClickReceiver();
 
@@ -144,6 +145,7 @@ public slots:
 
     void sortCards();
     void beginSorting();
+    void autoSorting();
     void changeShefuState();
     void reverseSelection();
     void viewMaxcards();
@@ -213,6 +215,7 @@ protected:
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void _addHandCard(CardItem *card_item, bool prepend = false, const QString &footnote = QString());
     void _adjustCards();
+    void _adjustCards2(QList<CardItem *> &card_items);
     void _adjustCards(const QList<CardItem *> &list, int y);
 
     int _m_width;
@@ -233,6 +236,7 @@ protected:
 
     CardItem *selected;
     QList<CardItem *> m_handCards;
+    bool auto_sort = false;
 
     QGraphicsPathItem *trusting_item;
     QGraphicsSimpleTextItem *trusting_text;

@@ -90,7 +90,7 @@ public:
 
     int getMaxCards() const;
 
-    QString getKingdom() const;
+    QString getKingdom(bool original = false) const;
     void setKingdom(const QString &kingdom);
 
     void setRole(const QString &role);

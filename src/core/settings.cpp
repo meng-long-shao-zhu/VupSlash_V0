@@ -2,6 +2,10 @@
 #include "photo.h"
 #include "card.h"
 #include "engine.h"
+#ifdef Q_OS_WIN32
+    #include "windows.h"
+    #pragma comment(lib,"Gdi32.lib")
+#endif
 
 Settings Config;
 
@@ -32,6 +36,8 @@ void Settings::init()
     if (!qApp->arguments().contains("-server")) {
         QString font_path = value("DefaultFontPath", "font/simli.ttf").toString();
         int font_id = QFontDatabase::addApplicationFont(font_path);
+        AddFontResourceA("font/simli.ttf");     //Add Font for Windows System
+        AddFontResourceA("font/kill_font.ttf");
         if (font_id != -1) {
             QString font_family = QFontDatabase::applicationFontFamilies(font_id).first();
             BigFont.setFamily(font_family);
@@ -119,6 +125,7 @@ void Settings::init()
     EnableIntellectualSelection = value("EnableIntellectualSelection", true).toBool();
     EnableDoubleClick = value("EnableDoubleClick", false).toBool();
     EnableSuperDrag = value("EnableSuperDrag", false).toBool();
+    EnableAutoSort = value("EnableAutoSort", false).toBool();
     EnableAutoBackgroundChange = value("EnableAutoBackgroundChange", true).toBool();
     NullificationCountDown = value("NullificationCountDown", 8).toInt();
     //LuckCardTimes = value("LuckCardTimes", 0).toInt();
@@ -129,6 +136,7 @@ void Settings::init()
     EnableBgMusic = value("EnableBgMusic", true).toBool();
     BGMVolume = value("BGMVolume", 1.0f).toFloat();
     EffectVolume = value("EffectVolume", 1.0f).toFloat();
+    HideRecordBubble = value("HideRecordBubble", false).toBool();
 
     BackgroundImage = value("BackgroundImage", "image/system/backdrop/new-version.jpg").toString();
 

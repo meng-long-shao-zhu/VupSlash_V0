@@ -693,6 +693,9 @@ struct JudgeStruct {
     QString reason;
     bool time_consuming;
     ServerPlayer *retrial_by_response; // record whether the current judge card is provided by a response retrial
+    Card::Suit result_suit;
+    int result_number;
+    QString result_objname;
 };
 
 struct PindianStruct {

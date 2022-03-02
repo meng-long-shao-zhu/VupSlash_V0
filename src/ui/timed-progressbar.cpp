@@ -17,6 +17,7 @@ void TimedProgressBar::show()
     this->setMaximum(m_max);
     this->setValue(m_val);
     QProgressBar::show();
+    QProgressBar::setTextVisible(true);
     m_mutex.unlock();
 }
 

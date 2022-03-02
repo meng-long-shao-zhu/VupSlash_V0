@@ -321,7 +321,7 @@ bool Slash::targetFilter(const QList<const Player *> &targets, const Player *to_
 
     if (Self->getOffensiveHorse() && subcards.contains(Self->getOffensiveHorse()->getId()))
         rangefix += 1;
-    if (getSkillName() == "lianglunche")
+    if (getSkillName() == "lianglunche" || (Self->getTreasure() && subcards.contains(Self->getTreasure()->getId()) && Self->getTreasure()->isKindOf("Lianglunche")))
         rangefix += 1;
 
     bool has_specific_assignee = false;
@@ -1240,7 +1240,9 @@ bool Snatch::targetFilter(const QList<const Player *> &targets, const Player *to
     int rangefix = 0;
     if (Self->getOffensiveHorse() && subcards.contains(Self->getOffensiveHorse()->getId()))
         rangefix += 1;
-    if (getSkillName() == "jixi" || getSkillName() == "lianglunche")
+    if (getSkillName() == "lianglunche" || (Self->getTreasure() && subcards.contains(Self->getTreasure()->getId()) && Self->getTreasure()->isKindOf("Lianglunche")))
+        rangefix += 1;
+    if (getSkillName() == "jixi")
         rangefix += 1;
 
     if (Self->distanceTo(to_select, rangefix) > distance_limit)

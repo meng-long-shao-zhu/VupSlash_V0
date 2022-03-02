@@ -1476,14 +1476,14 @@ void ServerPlayer::marshal(ServerPlayer *player) const
     }
 
     foreach (QString mark_name, marks.keys()) {
-        if (mark_name.startsWith("@") || mark_name.startsWith("&")) {
+        //if (mark_name.startsWith("@") || mark_name.startsWith("&")) {
             int value = getMark(mark_name);
             if (value > 0) {
                 JsonArray arg;
                 arg << objectName() << mark_name << value;
                 room->doNotify(player, S_COMMAND_SET_MARK, arg);
             }
-        }
+        //}
     }
 
     foreach (const Skill *skill, getVisibleSkillList(true)) {

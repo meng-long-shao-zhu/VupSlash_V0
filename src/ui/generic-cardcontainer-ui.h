@@ -37,8 +37,8 @@ protected:
     virtual bool _addCardItems(QList<CardItem *> &card_items, const CardsMoveStruct &moveInfo) = 0;
     QList<CardItem *> _createCards(QList<int> card_ids);
     CardItem *_createCard(int card_id);
-    void _disperseCards(QList<CardItem *> &cards, QRectF fillRegion, Qt::Alignment align, bool useHomePos, bool keepOrder);
-    void _disperseCards(QList<CardItem *> &cards, QRectF fillRegion, Qt::Alignment align, bool useHomePos, bool keepOrder, QList<CardItem *> &new_items);
+    void _disperseCards(QList<CardItem *> &cards, QRectF fillRegion, Qt::Alignment align, bool useHomePos, bool keepOrder, int type = 0);
+    void _disperseCards(QList<CardItem *> &cards, QRectF fillRegion, Qt::Alignment align, bool useHomePos, bool keepOrder, QList<CardItem *> &new_items, int type = 0);
     void _playMoveCardsAnimation(QList<CardItem *> &cards, bool destroyCards);
     int _m_highestZ;
 

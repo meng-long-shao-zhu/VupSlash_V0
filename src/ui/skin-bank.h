@@ -192,6 +192,7 @@ public:
         QRect m_mainFrameArea;
         QRect m_cardMoveRegion;
         QRect m_onlineStatusArea;
+        QRect m_seatStatusArea;
         QSanShadowTextFont m_onlineStatusFont;
         QSanShadowTextFont m_SeatFont;
         QColor m_onlineStatusBgColor;
@@ -205,6 +206,7 @@ public:
         int m_floatingAreaHeight;
         QSize m_buttonSetSize;
         QRect m_confirmButtonArea;
+        QRect m_confirmButtonAreaNew;
         QRect m_cancelButtonArea;
         QRect m_discardButtonArea;
         QRect m_trustButtonArea;

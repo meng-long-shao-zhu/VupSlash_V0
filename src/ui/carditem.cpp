@@ -111,9 +111,10 @@ const Card *CardItem::getCard() const
     return Sanguosha->getCard(m_cardId);
 }
 
-void CardItem::setX_rotate(qreal val)
+void CardItem::setX_rotate(qreal val, bool fixed)
 {
     x_rotate = val;
+    x_fixed = fixed;
     //以x轴进行旋转
     QTransform transform;
     transform.rotate(x_rotate, Qt::XAxis);
@@ -127,9 +128,10 @@ qreal CardItem::X_rotate() const
     return x_rotate;
 }
 
-void CardItem::setY_rotate(qreal val)
+void CardItem::setY_rotate(qreal val, bool fixed)
 {
     y_rotate = val;
+    y_fixed = fixed;
     //以y轴进行旋转
     QTransform transform;
     transform.rotate(x_rotate, Qt::XAxis);
@@ -143,11 +145,12 @@ qreal CardItem::Y_rotate() const
     return y_rotate;
 }
 
-void CardItem::setHomePos(QPointF home_pos, float rotate_angle, float slap)
+void CardItem::setHomePos(QPointF home_pos, float rotate_angle, float slap, float is_hand)
 {
     this->home_pos = home_pos;
     this->rotate_angle = rotate_angle;
     this->slap = slap;
+    this->is_hand = is_hand;
 }
 
 QPointF CardItem::homePos() const
@@ -155,8 +158,13 @@ QPointF CardItem::homePos() const
     return home_pos;
 }
 
-void CardItem::goBack(bool playAnimation, bool doFade)
+void CardItem::goBack(bool playAnimation, bool doFade, int type)
 {
+    if (type == 1) {
+        z_fixed = true;
+    } else {
+        z_fixed = false;
+    }
     if (playAnimation) {
         getGoBackAnimation(doFade);
         if (m_currentAnimation != NULL)
@@ -187,13 +195,20 @@ QAbstractAnimation *CardItem::getGoBackAnimation(bool doFade, bool smoothTransit
     goback->setEndValue(home_pos);
     goback->setEasingCurve(QEasingCurve::OutQuad);
     goback->setDuration(duration);
+    if (is_hand){
+        QPoint check_pos = QPoint(home_pos.x(), home_pos.y() - 120.0);
+        goback->setKeyValueAt(0.55, check_pos);
+        goback->setKeyValueAt(0.75, check_pos);
+    }
     group->addAnimation(goback);
 
-    QPropertyAnimation *rotation = new QPropertyAnimation(this, "rotation");
-    rotation->setEndValue(rotate_angle);
-    rotation->setEasingCurve(QEasingCurve::OutQuad);
-    rotation->setDuration(duration);
-    group->addAnimation(rotation);
+    if (!z_fixed){
+        QPropertyAnimation *rotation = new QPropertyAnimation(this, "rotation");
+        rotation->setEndValue(rotate_angle);
+        rotation->setEasingCurve(QEasingCurve::OutQuad);
+        rotation->setDuration(duration);
+        group->addAnimation(rotation);
+    }
 
     QPropertyAnimation *scale = new QPropertyAnimation(this, "scale");
     scale->setEndValue(1.0);
@@ -203,12 +218,12 @@ QAbstractAnimation *CardItem::getGoBackAnimation(bool doFade, bool smoothTransit
         scale->setEasingCurve(QEasingCurve::InBack);
         scale->setDuration(duration);
     } else {
-        rotation->setEasingCurve(QEasingCurve::OutQuad);
+        scale->setEasingCurve(QEasingCurve::OutQuad);
         scale->setDuration(duration/2);
     }
     group->addAnimation(scale);
 
-    if (x_rotate != 0) {
+    if (x_rotate != 0 && !x_fixed) {
         QPropertyAnimation *anim_x = new QPropertyAnimation(this, "X_rotate");
 
         //anim_x->setKeyValueAt(0.5, 90);
@@ -220,7 +235,7 @@ QAbstractAnimation *CardItem::getGoBackAnimation(bool doFade, bool smoothTransit
         group->addAnimation(anim_x);
     }
 
-    if (y_rotate != 0) {
+    if (y_rotate != 0 && !y_fixed) {
         QPropertyAnimation *anim_y = new QPropertyAnimation(this, "Y_rotate");
 
         //anim_y->setKeyValueAt(0.5, 90);

@@ -31,11 +31,11 @@ public:
     }
 
     // For move card animation
-    void setHomePos(QPointF home_pos, float rotate_angle = 0, float slap = 0);
+    void setHomePos(QPointF home_pos, float rotate_angle = 0, float slap = 0, float is_hand = 0);
     QPointF homePos() const;
     QAbstractAnimation *getGoBackAnimation(bool doFadeEffect, bool smoothTransition = false,
         int duration = Config.S_MOVE_CARD_ANIMATION_DURATION);
-    void goBack(bool playAnimation, bool doFade = true);
+    void goBack(bool playAnimation, bool doFade = true, int type = 0);
     inline QAbstractAnimation *getCurrentAnimation(bool)
     {
         return m_currentAnimation;
@@ -61,11 +61,14 @@ public:
     void changeGeneral(const QString &general_name);
     void setFootnote(const QString &desc);
     qreal x_rotate = 0;
-    void setX_rotate(qreal val);
+    void setX_rotate(qreal val, bool fixed = false);
     qreal X_rotate() const;
+    bool x_fixed = false;
     qreal y_rotate = 0;
-    void setY_rotate(qreal val);
+    void setY_rotate(qreal val, bool fixed = false);
     qreal Y_rotate() const;
+    bool y_fixed = false;
+    bool z_fixed = false;
 
     inline bool isSelected() const
     {
@@ -138,6 +141,7 @@ private:
     bool m_isMine;
     float rotate_angle;
     float slap;
+    float is_hand;
 
 signals:
     void toggle_discards();

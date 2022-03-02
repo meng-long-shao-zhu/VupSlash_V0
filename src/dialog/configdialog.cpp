@@ -40,6 +40,7 @@ ConfigDialog::ConfigDialog(QWidget *parent)
     ui->intellectualSelectionCheckBox->setChecked(Config.EnableIntellectualSelection);
     ui->doubleClickCheckBox->setChecked(Config.EnableDoubleClick);
     ui->superDragCheckBox->setChecked(Config.EnableSuperDrag);
+    ui->autoSortCheckBox->setChecked(Config.EnableAutoSort);
     ui->bubbleChatBoxKeepSpinBox->setSuffix(tr(" millisecond"));
     ui->bubbleChatBoxKeepSpinBox->setValue(Config.BubbleChatBoxKeepTime);
     ui->backgroundChangeCheckBox->setChecked(Config.EnableAutoBackgroundChange);
@@ -47,6 +48,7 @@ ConfigDialog::ConfigDialog(QWidget *parent)
     connect(ui->checkBoxRecorderAutoSave, SIGNAL(toggled(bool)), ui->checkBoxRecorderNetworkOnly, SLOT(setEnabled(bool)));
     ui->checkBoxRecorderAutoSave->setChecked(Config.value("recorder/autosave", true).toBool());
     ui->checkBoxRecorderNetworkOnly->setChecked(Config.value("recorder/networkonly", true).toBool());
+    ui->hideRecordBubble->setChecked(Config.HideRecordBubble);
 
     connect(this, SIGNAL(accepted()), this, SLOT(saveConfig()));
 
@@ -146,6 +148,9 @@ void ConfigDialog::saveConfig()
     Config.EnableSuperDrag = ui->superDragCheckBox->isChecked();
     Config.setValue("EnableSuperDrag", Config.EnableSuperDrag);
 
+    Config.EnableAutoSort = ui->autoSortCheckBox->isChecked();
+    Config.setValue("EnableAutoSort", Config.EnableAutoSort);
+
     Config.BubbleChatBoxKeepTime = ui->bubbleChatBoxKeepSpinBox->value();
     Config.setValue("BubbleChatBoxKeepTime", Config.BubbleChatBoxKeepTime);
 
@@ -156,6 +161,9 @@ void ConfigDialog::saveConfig()
     Config.setValue("recorder/autosave", enabled);
     enabled = ui->checkBoxRecorderNetworkOnly->isChecked();
     Config.setValue("recorder/networkonly", enabled);
+    Config.HideRecordBubble = ui->hideRecordBubble->isChecked();
+    Config.setValue("HideRecordBubble", Config.HideRecordBubble);
+
 
     /*if (RoomSceneInstance)
         RoomSceneInstance->updateVolumeConfig();*/

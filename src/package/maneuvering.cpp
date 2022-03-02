@@ -529,7 +529,7 @@ bool SupplyShortage::targetFilter(const QList<const Player *> &targets, const Pl
     int rangefix = 0;
     if (Self->getOffensiveHorse() && subcards.contains(Self->getOffensiveHorse()->getId()))
         rangefix += 1;
-    if (getSkillName() == "lianglunche")
+    if (getSkillName() == "lianglunche" || (Self->getTreasure() && subcards.contains(Self->getTreasure()->getId()) && Self->getTreasure()->isKindOf("Lianglunche")))
         rangefix += 1;
 
     if (Self->distanceTo(to_select, rangefix) > distance_limit)
