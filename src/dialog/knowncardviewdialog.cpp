@@ -83,6 +83,11 @@ void KnowncardViewDialog::refreshCards()
     ui->hand_list->clear();
 
     if (!from) return;
+    if (from->hasSkills("#characteristic_bukerenzhi") && !Self->canSeeHandcard(from)) {
+        QString card_info = Sanguosha->translate("bukerenzhi_log"+QString::number(qrand() % 10));
+        QListWidgetItem *name_item = new QListWidgetItem(card_info, ui->hand_list);
+        return;
+    }
 
     QList<const Card *> known = from->getHandcards();
     if (Self->canSeeHandcard(from) && from->getHandcardNum() > 0) {

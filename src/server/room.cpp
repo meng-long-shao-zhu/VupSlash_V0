@@ -7960,8 +7960,14 @@ void Room::setOvertCard(ServerPlayer *player, int card_id, bool can)
 {
     if (getCardOwner(card_id) != player) return;
 
-    if (can)
-        showCard(player, card_id, NULL, true, true, true);
+    if (can) {
+        if (player->hasSkills("#characteristic_bukerenzhi")) {
+            showCard(player, card_id, NULL, true, true, false);
+            return;
+        } else {
+            showCard(player, card_id, NULL, true, true, true);
+        }
+    }
 
     Sanguosha->getCard(card_id)->setOvert(can);
 
@@ -7996,8 +8002,14 @@ void Room::setOvertCard(ServerPlayer *player, int card_id, bool can)
 
 void Room::setOvertCards(ServerPlayer *player, QList<int> ids, bool can)
 {
-    if (can)
-        showCards(player, ids, false, true);
+    if (can) {
+        if (player->hasSkills("#characteristic_bukerenzhi")) {
+            showCards(player, ids, false, false);
+            return;
+        } else {
+            showCards(player, ids, false, true);
+        }
+    }
 
     foreach (int id, ids) {
         Sanguosha->getCard(id)->setOvert(can);

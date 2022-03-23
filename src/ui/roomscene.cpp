@@ -1561,8 +1561,11 @@ void RoomScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
                 }
                 //if (!ServerInfo.EnableCheat && !Self->canSeeHandcard(player))
                 //    known.clear();
-
-                if (known.isEmpty() || player->isKongcheng()) {
+                if (player->hasSkills("#characteristic_bukerenzhi") && !Self->canSeeHandcard(player)) {
+                    QMenu *submenu = known_cards->addMenu(ClientInstance->getPlayerName(player->objectName()));
+                    submenu->addSeparator();
+                    submenu->addAction(Sanguosha->translate("bukerenzhi_log"+QString::number(qrand() % 10)));
+                } else if (known.isEmpty() || player->isKongcheng()) {
                     known_cards->addAction(ClientInstance->getPlayerName(player->objectName()))->setEnabled(false);
                 } else {
                     QMenu *submenu = known_cards->addMenu(ClientInstance->getPlayerName(player->objectName()));

@@ -798,7 +798,7 @@ public:
     {
         if (player->getMark("Qingcheng" + skill->objectName()) > 0)
             return false;
-        else if (player->getMark("&fushen_target") > 0 || player->getMark("&shenyu") > 0 || player->getMark("&fahun") > 0)
+        else if (player->getMark("&fushen_target") > 0 || player->getMark("&shenyu") > 0 || player->getMark("&fahun") > 0 || player->getMark("skill_banned") > 0)
             return false;
 
         return true;
