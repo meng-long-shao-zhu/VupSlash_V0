@@ -104,6 +104,8 @@ public:
     void maxhpChange(const QVariant &change_str);
     void resetPiles(const QVariant &arg);
     void addRound(const QVariant &);
+    void setCardUnknown(const QVariant &pattern_str);
+    void killSelected(const QVariant &pattern_str);
     void setPileNumber(const QVariant &pile_str);
     void synchronizeDiscardPile(const QVariant &discard_pile);
     void refreshSwapAndRoundNums(const QVariant &args);
@@ -366,6 +368,7 @@ signals:
     void start_in_xs();
 
     void skill_updated(const QString &skill_name);
+    void selected_killed(const QString &who, const QString &general);
 };
 
 extern Client *ClientInstance;

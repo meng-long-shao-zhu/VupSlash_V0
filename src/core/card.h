@@ -96,12 +96,14 @@ public:
     virtual bool isOvert() const;
     virtual bool noIndicator() const;
     virtual bool isCopy() const;
+    virtual bool isUnknownCard() const;
     virtual bool hasPreAction() const;
     virtual Card::HandlingMethod getHandlingMethod() const;
     void setCanRecast(bool can);
     void setOvert(bool can);
     void setIndicatorHide(bool can);
     void setCopy(bool can);
+    void setUnknownCard(bool can);
 
     virtual void setFlags(const QString &flag) const;
     inline virtual void setFlags(const QStringList &fs)
@@ -209,6 +211,7 @@ protected:
     bool is_overt;
     bool no_indicator;
     bool is_copy;
+    bool is_unknown_card;
 
     mutable QStringList flags;
 };

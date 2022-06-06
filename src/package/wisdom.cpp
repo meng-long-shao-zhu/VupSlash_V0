@@ -231,8 +231,8 @@ public:
             if (!players.isEmpty())
                 target = room->askForPlayerChosen(jiangwei, players, objectName());
 
-            if (target == NULL && !jiangwei->isProhibited(jiangwei, slash))
-                target = jiangwei;
+            //if (target == NULL && !jiangwei->isProhibited(jiangwei, slash))
+            //    target = jiangwei;
 
             CardUseStruct use;
             use.card = slash;

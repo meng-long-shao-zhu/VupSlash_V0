@@ -9,6 +9,7 @@
 #include "roomthread3v3.h"
 #include "roomthreadxmode.h"
 #include "roomthread1v1.h"
+#include "roomthreadif.h"
 #include "server.h"
 #include "generalselector.h"
 #include "json.h"
@@ -458,13 +459,13 @@ void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason, HpLostStruct *
 
             static QStringList continue_list;
             if (continue_list.isEmpty())
-                continue_list << "02_1v1" << "04_1v3" << "06_XMode";
+                continue_list << "02_1v1" << "04_1v3" << "06_XMode" << "04_if";
             if (continue_list.contains(Config.GameMode))
                 return;
 
             if (Config.AlterAIDelayAD)
                 Config.AIDelay = Config.AIDelayAD;
-            if (victim->isOnline() && Config.SurrenderAtDeath && mode != "02_1v1" && mode != "06_XMode"
+            if (victim->isOnline() && Config.SurrenderAtDeath && mode != "02_1v1" && mode != "04_if" && mode != "06_XMode"
                 && askForSkillInvoke(victim, "surrender", "yes"))
                 makeSurrender(victim);
         }
@@ -630,8 +631,13 @@ void Room::slashResult(const SlashEffectStruct &effect, const Card *jink)
         }
         if (effect.slash)
             effect.to->removeQinggangTag(effect.slash);
-        thread->trigger(EffectResponded, this, effect.from, data);
-        thread->trigger(EffectOffsetted, this, effect.from, data);
+        CardEffectStruct to_effect;
+        to_effect.card = effect.slash;
+        to_effect.from = effect.from;
+        to_effect.to = effect.to;
+        QVariant _data = QVariant::fromValue(to_effect);
+        thread->trigger(EffectResponded, this, effect.from, _data);
+        thread->trigger(EffectOffsetted, this, effect.from, _data);
         thread->trigger(SlashMissed, this, effect.from, data);
     }
 }
@@ -908,6 +914,7 @@ bool Room::doRequest(ServerPlayer *player, QSanProtocol::CommandType command, co
     if (player->getMark("Response_Time_Fix")>0) {                       //response time control
         timeOut = player->getMark("Response_Time_Fix");
     }
+    timeOut = timeOut * 1.2;
     return doRequest(player, command, arg, timeOut, wait);
 }
 
@@ -2662,6 +2669,7 @@ int Room::drawCard(bool isTop)
 
 void Room::prepareForStart()
 {
+    bool lord_first = true;
     if (scenario) {
         QStringList generals, roles;
         scenario->assign(generals, roles);
@@ -2765,7 +2773,26 @@ void Room::prepareForStart()
         if (Config.RandomSeat)
             qShuffle(m_players);
         assignRoles();
-    } else if (!Config.EnableHegemony && Config.EnableCheat && Config.value("FreeAssign", false).toBool()) {
+    } else if (mode == "04_if") {
+        lord_first = false;
+
+        qShuffle(m_players);
+        for (int i = 0; i < m_players.length(); i++) {
+            ServerPlayer *player = m_players[i];
+            if (i != 1 && player->getState() == "robot" && player->screenName() == Sanguosha->translate("ice_leader")) {
+                m_players.swap(i, 1);
+                break;
+            }
+        }
+        for (int i = 0; i < m_players.length(); i++) {
+            ServerPlayer *player = m_players[i];
+            if (i != 3 && player->getState() == "robot" && player->screenName() == Sanguosha->translate("fire_leader")) {
+                m_players.swap(i, 3);
+                break;
+            }
+        }
+        assignRoles();
+    } else if (!Config.EnableHegemony && Config.EnableCheat && Config.value("FreeAssign", false).toBool() && mode != "04_tt") {
         ServerPlayer *owner = getOwner();
         notifyMoveFocus(owner, S_COMMAND_CHOOSE_ROLE);
         if (owner && owner->isOnline()) {
@@ -2797,7 +2824,7 @@ void Room::prepareForStart()
                     if (role == "lord" && !ServerInfo.EnableHegemony)
                         broadcastProperty(player, "role", "lord");
                     else {
-                        if (mode == "04_1v3" || mode == "04_boss" || mode == "08_defense" || mode == "03_1v2" || mode == "04_tt")
+                        if (mode == "04_1v3" || mode == "04_boss" || mode == "08_defense" || mode == "03_1v2" || mode == "04_tt" || mode == "04_if")
                             broadcastProperty(player, "role", role);
                         else
                             notifyProperty(player, player, "role");
@@ -2840,7 +2867,7 @@ void Room::prepareForStart()
         assignRoles();
     }
 
-    adjustSeats();
+    adjustSeats(lord_first);
 }
 
 void Room::reportDisconnection()
@@ -3124,6 +3151,43 @@ void Room::addRobotCommand(ServerPlayer *player, const QVariant &arg)
         broadcastProperty(robot, "state");
 
         return;
+    } else if (add_num == -4) { //for icefire mode
+        if (isFull())
+            return;
+        ServerPlayer *robot = new ServerPlayer(this);
+        robot->setState("robot");
+
+        m_players << robot;
+
+        const QString robot_name = Sanguosha->translate("ice_leader");
+        n++;
+        const QString robot_avatar = "tianxixi_leader";
+        signup(robot, robot_name, robot_avatar, true);
+
+        //QString greeting = Sanguosha->translate("boss_greeting").toUtf8().toBase64();
+        //speakCommand(robot, greeting);
+
+        broadcastProperty(robot, "state");
+
+
+        if (isFull())
+            return;
+        ServerPlayer *robot2 = new ServerPlayer(this);
+        robot2->setState("robot");
+
+        m_players << robot2;
+
+        const QString robot2_name = Sanguosha->translate("fire_leader");
+        n++;
+        const QString robot2_avatar = "xiaoxiayu_leader";
+        signup(robot2, robot2_name, robot2_avatar, true);
+
+        //QString greeting = Sanguosha->translate("boss_greeting").toUtf8().toBase64();
+        //speakCommand(robot, greeting);
+
+        broadcastProperty(robot2, "state");
+
+        return;
     }
 
     for (int i = 0; i < add_num; i++) {
@@ -3201,6 +3265,8 @@ void Room::signup(ServerPlayer *player, const QString &screen_name, const QStrin
             addRobotCommand(player, QVariant::fromValue(-2));
         } else if (mode == "pve-saver") {
             addRobotCommand(player, QVariant::fromValue(-3));
+        } else if (mode == "04_if") {
+            addRobotCommand(player, QVariant::fromValue(-4));
         }
     }
 }
@@ -3545,6 +3611,12 @@ void Room::run()
 
         connect(thread_1v1, SIGNAL(finished()), this, SLOT(startGame()));
         connect(thread_1v1, SIGNAL(finished()), thread_1v1, SLOT(deleteLater()));
+    } else if (mode == "04_if") {
+        thread_if = new RoomThreadif(this);
+        thread_if->start();
+
+        connect(thread_if, SIGNAL(finished()), this, SLOT(startGame()));
+        connect(thread_if, SIGNAL(finished()), thread_if, SLOT(deleteLater()));
     } else if (mode == "04_1v3") {
         ServerPlayer *lord = m_players.first();
         setPlayerProperty(lord, "general", "shenlvbu1");
@@ -3627,6 +3699,9 @@ void Room::assignRoles()
     } else if (mode == "04_tt") {
         roles.clear();
         roles << "loyalist" << "rebel" << "rebel" << "loyalist";
+    } else if (mode == "04_if") {
+        roles.clear();
+        roles << "loyalist" << "renegade" << "rebel" << "lord";
     } else if (mode != "08_defense")
         qShuffle(roles);
 
@@ -3636,7 +3711,7 @@ void Room::assignRoles()
 
         player->setRole(role);
         if ((role == "lord" && !ServerInfo.EnableHegemony)
-            || mode == "04_1v3" || mode == "04_boss" || mode == "08_defense" || mode == "03_1v2" || mode == "04_2v2" || mode == "04_tt")
+            || mode == "04_1v3" || mode == "04_boss" || mode == "08_defense" || mode == "03_1v2" || mode == "04_2v2" || mode == "04_tt"|| mode == "04_if")
             broadcastProperty(player, "role", player->getRole());
         else
             notifyProperty(player, player, "role");
@@ -3671,20 +3746,22 @@ void Room::swapSeat(ServerPlayer *a, ServerPlayer *b)
     }
 }
 
-void Room::adjustSeats()
+void Room::adjustSeats(bool lord_first)
 {
-    QList<ServerPlayer *> players;
-    int i = 0;
-    for (i = 0; i < m_players.length(); i++) {
-        if (m_players.at(i)->getRoleEnum() == Player::Lord)
-            break;
-    }
-    for (int j = i; j < m_players.length(); j++)
-        players << m_players.at(j);
-    for (int j = 0; j < i; j++)
-        players << m_players.at(j);
+    if (lord_first) {
+        QList<ServerPlayer *> players;
+        int i = 0;
+        for (i = 0; i < m_players.length(); i++) {
+            if (m_players.at(i)->getRoleEnum() == Player::Lord)
+                break;
+        }
+        for (int j = i; j < m_players.length(); j++)
+            players << m_players.at(j);
+        for (int j = 0; j < i; j++)
+            players << m_players.at(j);
 
-    m_players = players;
+        m_players = players;
+    }
 
     for (int i = 0; i < m_players.length(); i++)
         m_players.at(i)->setSeat(i + 1);
@@ -4476,44 +4553,47 @@ void Room::reconnect(ServerPlayer *player, ClientSocket *socket)
     broadcastProperty(player, "state");
 }
 
-void Room::marshal(ServerPlayer *player)
+void Room::marshal(ServerPlayer *player, bool update_only)
 {
-    notifyProperty(player, player, "objectName");
-    notifyProperty(player, player, "role");
-    notifyProperty(player, player, "flags", "marshalling");
+    if (!update_only) {
 
-    foreach (ServerPlayer *p, m_players) {
-        if (p != player)
-            p->introduceTo(player);
+        notifyProperty(player, player, "objectName");
+        notifyProperty(player, player, "role");
+        notifyProperty(player, player, "flags", "marshalling");
+
+        foreach (ServerPlayer *p, m_players) {
+            if (p != player)
+                p->introduceTo(player);
+        }
+
+        QStringList player_circle;
+        foreach(ServerPlayer *player, m_players)
+            player_circle << player->objectName();
+        doNotify(player, S_COMMAND_ARRANGE_SEATS, JsonUtils::toJsonArray(player_circle));
+
+        doNotify(player, S_COMMAND_START_IN_X_SECONDS, QVariant(0));
+
+        foreach (ServerPlayer *p, m_players) {
+            notifyProperty(player, p, "general");
+
+            if (p->getGeneral2())
+                notifyProperty(player, p, "general2");
+
+            notifyProperty(player, p, "state");
+        }
+
+        if (game_started) {
+            doNotify(player, S_COMMAND_GAME_START, QVariant());
+
+            QList<int> drawPile = Sanguosha->getRandomCards();
+            doNotify(player, S_COMMAND_AVAILABLE_CARDS, JsonUtils::toJsonArray(drawPile));
+        }
+
+        foreach(ServerPlayer *p, m_players)
+            p->marshal(player);
+
+        notifyProperty(player, player, "flags", "-marshalling");
     }
-
-    QStringList player_circle;
-    foreach(ServerPlayer *player, m_players)
-        player_circle << player->objectName();
-    doNotify(player, S_COMMAND_ARRANGE_SEATS, JsonUtils::toJsonArray(player_circle));
-
-    doNotify(player, S_COMMAND_START_IN_X_SECONDS, QVariant(0));
-
-    foreach (ServerPlayer *p, m_players) {
-        notifyProperty(player, p, "general");
-
-        if (p->getGeneral2())
-            notifyProperty(player, p, "general2");
-
-        notifyProperty(player, p, "state");
-    }
-
-    if (game_started) {
-        doNotify(player, S_COMMAND_GAME_START, QVariant());
-
-        QList<int> drawPile = Sanguosha->getRandomCards();
-        doNotify(player, S_COMMAND_AVAILABLE_CARDS, JsonUtils::toJsonArray(drawPile));
-    }
-
-    foreach(ServerPlayer *p, m_players)
-        p->marshal(player);
-
-    notifyProperty(player, player, "flags", "-marshalling");
 
     if (game_started) {
         doNotify(player, S_COMMAND_UPDATE_PILE, QVariant(m_drawPile->length()));
@@ -4531,6 +4611,32 @@ void Room::marshal(ServerPlayer *player)
         arg << getTag("SwapPile");
         arg << getTag("TurnLengthCount");
         doNotify(player, S_COMMAND_REFRESH_SWAP_AND_ROUND_NUMS, arg);
+
+        if (getMode() == "04_if") {
+            ServerPlayer *first = getPlayers().at(2), *next = getPlayers().at(0);
+
+            QStringList all_selected_f = first->tag["if_selected"].toStringList();
+            for (int i=0;i<all_selected_f.length();i++) {
+                doNotify(player, S_COMMAND_REVEAL_GENERAL, JsonUtils::toJsonArray(QStringList() << first->objectName() << all_selected_f.at(i)));
+                if (!first->getSelected().contains(all_selected_f.at(i))) {
+                    JsonArray arg;
+                    arg << first->objectName();
+                    arg << all_selected_f.at(i);
+                    doNotify(player, S_COMMAND_KILL_SELECTED, arg);
+                }
+            }
+
+            QStringList all_selected_n = next->tag["if_selected"].toStringList();
+            for (int i=0;i<all_selected_n.length();i++) {
+                doNotify(player, S_COMMAND_REVEAL_GENERAL, JsonUtils::toJsonArray(QStringList() << next->objectName() << all_selected_n.at(i)));
+                if (!next->getSelected().contains(all_selected_n.at(i))) {
+                    JsonArray arg;
+                    arg << next->objectName();
+                    arg << all_selected_n.at(i);
+                    doNotify(player, S_COMMAND_KILL_SELECTED, arg);
+                }
+            }
+        }
     }
 }
 
@@ -4605,7 +4711,7 @@ void Room::startGame()
     doBroadcastNotify(S_COMMAND_UPDATE_PILE, QVariant(m_drawPile->length()));
 
     thread = new RoomThread(this);
-    if (mode != "02_1v1" && mode != "06_3v3" && mode != "06_XMode")
+    if (mode != "02_1v1" && mode != "06_3v3" && mode != "06_XMode" && mode != "04_if")
         _m_roomState.reset();
     connect(thread, SIGNAL(started()), this, SIGNAL(game_start()));
 
@@ -8094,4 +8200,36 @@ Card *Room::copyCard(const Card *card)
     broadcastResetCard(getAllPlayers(true), copy_card->getId());
 
     return copy_card;
+}
+
+void Room::addRound(int add)
+{
+    if (!game_started) return ;
+
+    for (int i = 0; i < add; i++) {
+        int n = getTag("TurnLengthCount").toInt();
+        setTag("TurnLengthCount", n + 1);
+        doBroadcastNotify(QSanProtocol::S_COMMAND_ADD_ROUND, QVariant());
+    }
+}
+
+void Room::setCardUnknown(const Card *card, bool can, ServerPlayer *who)
+{
+    Sanguosha->getCard(card->getEffectiveId())->setUnknownCard(can);
+
+    if (!card->isVirtualCard())
+        setCardUnknown(card->getEffectiveId(), can, who);
+}
+
+void Room::setCardUnknown(int card_id, bool can, ServerPlayer *who)
+{
+    Sanguosha->getCard(card_id)->setUnknownCard(can);
+
+    JsonArray arg;
+    arg << card_id;
+    arg << can;
+    if (who)
+        doNotify(who, S_COMMAND_SET_CARD_UNKNOWN, arg);
+    else
+        doBroadcastNotify(S_COMMAND_SET_CARD_UNKNOWN, arg);
 }

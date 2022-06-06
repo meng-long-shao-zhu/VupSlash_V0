@@ -101,7 +101,7 @@ bool Player::isWounded() const
 
     if (isChained()){
         foreach (const Player *p, getAliveSiblings()) {
-            if (p->hasSkill("bingfu"))
+            if (p->hasSkill("bingfu") && p->canEffect(this ,"bingfu"))
                 return true;
         }
     }
@@ -155,9 +155,16 @@ void Player::setSeat(int seat)
 bool Player::isAdjacentTo(const Player *another) const
 {
     int alive_length = 1 + getAliveSiblings().length();
-    return qAbs(seat - another->seat) == 1
+    if (!alive || !another->isAlive())
+        return false;
+    if (getMark("chaoyuan_"+another->objectName()) > 0 || another->getMark("chaoyuan_"+objectName()) > 0)
+        return true;
+    if (qAbs(seat - another->seat) == 1
         || (seat == 1 && another->seat == alive_length)
-        || (seat == alive_length && another->seat == 1);
+        || (seat == alive_length && another->seat == 1)) {
+        return true;
+    }
+    return false;
 }
 
 bool Player::isAlive() const
@@ -255,6 +262,11 @@ bool Player::inMyAttackRange(const Player *other, int distance_fix, bool chengwu
                 return true;
         }
     }
+
+    // for chaoyuan
+
+    if (getMark("chaoyuan_"+other->objectName()) > 0)
+        return true;
 
     // end
     if (attack_range_pair.contains(other)) return true;
@@ -515,7 +527,7 @@ bool Player::hasLordSkill(const QString &skill_name, bool include_lose) const
         return true;
 
     QString mode = getGameMode();
-    if (mode == "06_3v3" || mode == "06_XMode" || mode == "02_1v1" || Config.value("WithoutLordskill", false).toBool())
+    if (mode == "06_3v3" || mode == "06_XMode" || mode == "02_1v1" || mode == "04_if" || Config.value("WithoutLordskill", false).toBool())
         return false;
 
     if (ServerInfo.EnableHegemony)
@@ -1192,6 +1204,28 @@ QStringList Player::getAcquiredSkills() const
 QString Player::getSkillDescription() const
 {
     QString description = QString();
+
+    QString property_str = QString();
+    property_str.append("<table border='1'>");
+    //property_str.append("<tr><th colspan='2'>" + Sanguosha->translate("PLAYER_DESCRIPTION") + "</th></tr>");
+    property_str.append("<tr><th>" + Sanguosha->translate("PLAYER_DESCRIPTION_GENDER") + "</th><td>");
+    QString gender_str("  <img src='image/gender/%1.png' height=17 />");
+    if (isMale())
+        property_str.append(gender_str.arg("male") + Sanguosha->translate("male"));
+    else if (isFemale())
+        property_str.append(gender_str.arg("female") + Sanguosha->translate("female"));
+    else if (isNeuter())
+        property_str.append(gender_str.arg("neuter") + Sanguosha->translate("neuter"));
+    else if (isSexless())
+        property_str.append(gender_str.arg("sexless") + Sanguosha->translate("sexless"));
+
+    property_str.append("</td></tr><tr><th>" + Sanguosha->translate("PLAYER_DESCRIPTION_KINGDOM") + "</th><td>");
+    QString color_str = Sanguosha->getKingdomColor(kingdom).name();
+    QString kingdom_str = QString("<font color=%1>%2</font>     ").arg(color_str).arg(Sanguosha->translate(kingdom));
+    kingdom_str.prepend(QString("<img src='image/kingdom/icon/%1.png' height=17/>    ").arg(kingdom));
+    property_str.append(kingdom_str);
+    property_str.append("</td></tr></table><br/><br/>");
+
     QList<const Skill *> skill_list = getVisibleSkillList();
     QList<const Skill *> basara_list;
     if (getGeneralName() == "anjiang" || getGeneral2Name() == "anjiang") {
@@ -1228,7 +1262,12 @@ QString Player::getSkillDescription() const
         }
     }
 
-    if (description.isEmpty()) description = tr("No skills");
+    if (description.isEmpty())
+        description = tr("No skills");
+    else {
+        description.prepend(property_str);
+
+    }
     return description;
 }
 
@@ -1581,12 +1620,31 @@ bool Player::canBePindianed(bool except_self) const
     return false;
 }
 
-bool Player::isYourFriend(const Player *fri) const
+bool Player::canEffect(const Player *target, QString skill_name) const  //判断target是否不受player技能的影响，暂时不考虑“不受自己技能影响”，这种太麻烦了
 {
-    QString role = isLord() ? "loyalist" : getRole();
-    QString f_role = fri->isLord() ? "loyalist" : fri->getRole();
-    if (f_role == role && f_role != "renegade" && getRole() != "renegade")
-         return true;
+    if (!target || this == target) return true;
+    if (target->getMark("Invincible") > 0) return false;
+    return true;
+}
+
+bool Player::isYourFriend(const Player *fri, QString mode) const
+{
+    if (mode == NULL || mode == "")
+        mode = ServerInfo.GameMode;
+    if (mode == "04_2v2" || mode == "04_tt") {
+        QString role = isLord() ? "loyalist" : getRole();
+        QString f_role = fri->isLord() ? "loyalist" : fri->getRole();
+        if (f_role == role && f_role != "renegade" && getRole() != "renegade")
+             return true;
+        return false;
+    } else if (mode == "04_if") {
+        QString role = getRole();
+        QString f_role = fri->getRole();
+        if (role == f_role) return true;
+        if ((role == "lord" && f_role == "loyalist") || (f_role == "lord" && role == "loyalist")) return true;
+        if ((role == "rebel" && f_role == "renegade") || (f_role == "rebel" && role == "renegade")) return true;
+        return false;
+    }
     return false;
 }
 
@@ -1694,7 +1752,7 @@ bool Player::inYinniState() const
 bool Player::canSeeHandcard(const Player *player) const
 {
     if (this == player) return true;
-    if ((ServerInfo.GameMode == "04_2v2" or ServerInfo.GameMode == "04_tt") && isYourFriend(player)) return true;
+    if ((ServerInfo.GameMode == "04_2v2" || ServerInfo.GameMode == "04_tt" || ServerInfo.GameMode == "04_if") && isYourFriend(player, ServerInfo.GameMode)) return true;
     foreach (QString mark, player->getMarkNames()) {
         if (mark.startsWith("HandcardVisible_ALL") && player->getMark(mark) > 0)
             return true;

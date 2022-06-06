@@ -252,7 +252,8 @@ public:
     bool canPindian(const Player *target, bool except_self = true) const;
     bool canPindian(bool except_self = true) const;
     bool canBePindianed(bool except_self = true) const;
-    bool isYourFriend(const Player *fri) const;
+    bool canEffect(const Player *target, QString skill_name) const;
+    bool isYourFriend(const Player *fri, QString mode = "") const;
     bool isWeidi() const;
     int getChangeSkillState(const QString &skill_name) const;
     int getLevelSkillState(const QString &skill_name) const;

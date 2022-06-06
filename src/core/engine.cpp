@@ -326,6 +326,7 @@ Engine::Engine(bool isManualMode)
     modes["03_1v2"] = tr("3 players (Dou Di Zhu)");
     modes["04p"] = tr("4 players");
     modes["04_tt"] = Sanguosha->translate("04_tt_modename");
+    modes["04_if"] = Sanguosha->translate("04_if_modename");
     //modes["04_1v3"] = tr("4 players (Hulao Pass)");
     modes["04_boss"] = tr("4 players(Boss)");
     modes["04_2v2"] = tr("4 players (Happy)");
@@ -581,6 +582,10 @@ int Engine::getRoleIndex() const
         return 4;
     } else if (ServerInfo.EnableHegemony) {
         return 5;
+    } else if (ServerInfo.GameMode == "04_if") {
+        return 6;
+    } else if (ServerInfo.GameMode == "04_tt") {
+        return 7;
     } else
         return 1;
 }
@@ -1117,6 +1122,8 @@ QString Engine::getRoles(const QString &mode) const
         return "CFFC";
     } else if (mode == "04_tt") {
         return "CFFC";
+    } else if (mode == "04_if") {
+        return "CNFZ";
     } else if (mode == "04_1v3" || mode == "04_boss") {
         return "ZFFF";
     } else if (mode == "08_defense") {

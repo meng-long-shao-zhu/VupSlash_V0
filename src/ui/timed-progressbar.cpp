@@ -38,7 +38,7 @@ void TimedProgressBar::timerEvent(QTimerEvent *)
     bool doHide = false;
     int val = 0;
     m_mutex.lock();
-    m_val += m_step;
+    m_val += m_step * 1.25;
     if (m_val >= m_max) {
         m_val = m_max;
         if (m_autoHide)

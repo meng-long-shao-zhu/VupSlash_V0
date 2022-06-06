@@ -141,7 +141,7 @@ AI::Relation AI::relationTo(const ServerPlayer *other) const
     if (scenario)
         return scenario->relationTo(self, other);
 
-    if (room->getMode() == "06_3v3" || room->getMode() == "06_XMode" || room->getMode() == "08_defense" || room->getMode() == "04_2v2")
+    if (room->getMode() == "06_3v3" || room->getMode() == "06_XMode" || room->getMode() == "08_defense" || room->getMode() == "04_2v2" || room->getMode() == "04_if")
         return GetRelation3v3(self, other);
     else if (room->getMode() == "04_tt")
         return GetRelation2v2(self, other);

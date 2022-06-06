@@ -21,7 +21,7 @@ Slash::Slash(Suit suit, int number) : BasicCard(suit, number)
     damage_card = true;
 }
 
-bool Slash::IsAvailable(const Player *player, const Card *slash, bool considerSpecificAssignee)
+bool Slash::IsAvailable(const Player *player, const Card *slash, bool considerSpecificAssignee, bool ignore_reason_limit)
 {
     Slash *newslash = new Slash(Card::NoSuit, 0);
     newslash->setFlags("Global_SlashAvailabilityChecker");
@@ -30,7 +30,7 @@ bool Slash::IsAvailable(const Player *player, const Card *slash, bool considerSp
     if (player->isCardLimited(THIS_SLASH, Card::MethodUse))
         return false;
 
-    if (player->getPhase() == Player::Play && Sanguosha->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY) {
+    if (player->getPhase() == Player::Play && (Sanguosha->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY || ignore_reason_limit)) {
         QList<int> ids;
         if (slash) {
             if (slash->isVirtualCard()) {

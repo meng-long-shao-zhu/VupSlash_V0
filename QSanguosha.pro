@@ -152,7 +152,8 @@ SOURCES += \
     src/dialog/knowncardviewdialog.cpp \
     src/dialog/winrateviewdialog.cpp \
     src/scenario/pve-saver-scenario.cpp \
-    src/dialog/titlebar.cpp
+    src/dialog/titlebar.cpp \
+    src/server/roomthreadif.cpp
 
 HEADERS += \
     src/client/aux-skills.h \
@@ -290,7 +291,8 @@ HEADERS += \
     src/dialog/knowncardviewdialog.h \
     src/dialog/winrateviewdialog.h \
     src/scenario/pve-saver-scenario.h \
-    src/dialog/titlebar.h
+    src/dialog/titlebar.h \
+    src/server/roomthreadif.h
 
 FORMS += \
     src/dialog/cardoverview.ui \

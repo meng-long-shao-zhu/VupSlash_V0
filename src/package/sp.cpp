@@ -50,8 +50,23 @@ public:
         ServerPlayer *target = room->askForPlayerChosen(player, targets, objectName(), "@sp_moonspear", true, true);
         if (!target) return false;
         room->setEmotion(player, "weapon/moonspear");
-        if (!room->askForCard(target, "jink", "@moon-spear-jink", QVariant(), Card::MethodResponse, player))
-            room->damage(DamageStruct(objectName(), player, target));
+        room->getThread()->delay(250);
+        room->broadcastSkillInvoke("audio_effect", 29);
+        if (!room->askForCard(target, "jink", "@moon-spear-jink", QVariant(), Card::MethodResponse, player)){
+            DamageStruct dmg = DamageStruct(objectName(), player, target);
+            if (player->getWeapon() && player->getWeapon()->isKindOf("SPMoonSpear"))
+                dmg.card = player->getWeapon();
+            room->damage(dmg);
+        } else {
+            CardEffectStruct effect;
+            effect.from = player;
+            effect.to = target;
+            if (player->getWeapon() && player->getWeapon()->isKindOf("SPMoonSpear"))
+                effect.card = player->getWeapon();
+            QVariant data = QVariant::fromValue(effect);
+            room->getThread()->trigger(EffectResponded, room, player, data);
+            room->getThread()->trigger(EffectOffsetted, room, player, data);
+        }
         return false;
     }
 };

@@ -2044,19 +2044,36 @@ void ServerPlayer::removeViewAsEquip(const QString &equip_name, bool remove_all_
     room->setPlayerProperty(this, "View_As_Equips_List", equips);
 }
 
-bool ServerPlayer::canUse(const Card *card, QList<ServerPlayer *> players, bool ignore_limit)
+bool ServerPlayer::canUse(const Card *card, QList<ServerPlayer *> players, bool ignore_limit, bool ignore_slash_reason)
 {
     QList<ServerPlayer *> new_players = players;
     if (new_players.isEmpty()) new_players = room->getAlivePlayers();
 
-    if (!card || new_players.isEmpty() || !ignore_limit && !card->isAvailable(this)) return false;
-    if (!ignore_limit && card->isKindOf("Slash") && !Slash::IsAvailable(this)) return false;
-    if (!ignore_limit && card->isKindOf("Analeptic") && !Analeptic::IsAvailable(this)) return false;
+    if (!card || new_players.isEmpty()) return false;
+    //for cards that have use-time limit
+    if (card->isKindOf("Slash") || card->isKindOf("Analeptic")) {
+        if (!ignore_limit && card->isKindOf("Slash") && !Slash::IsAvailable(this, card, true, ignore_slash_reason)) return false;
+        if (!ignore_limit && card->isKindOf("Analeptic") && !Analeptic::IsAvailable(this)) return false;
+    } else {
+        if (!card->isAvailable(this)) return false;
+    }
 
-    if (card->targetFixed()) {
+    if (card->targetFixed()) {  //只能分类讨论（目前默认装备只能对自己用，以及固定自己用的只有装备、无中、桃、酒、闪电
         if (!isLocked(card)) {
-            if (card->isKindOf("AOE") || card->isKindOf("GlobalEffect") || !isProhibited(this, card))
-                return true;
+            if (card->isKindOf("AOE") || card->isKindOf("GlobalEffect")) {
+                foreach (ServerPlayer *p, new_players) {
+                    if ((card->isKindOf("GlobalEffect") || p->objectName() != this->objectName()) && !isProhibited(p, card))
+                        return true;
+                }
+            } else if (card->isKindOf("EquipCard") || card->isKindOf("ExNihilo") || card->isKindOf("Peach") || card->isKindOf("Analeptic") || card->isKindOf("Lightning")) {
+                if (new_players.contains(this) && !isProhibited(this, card))
+                    return true;
+            } else {
+                foreach (ServerPlayer *p, new_players) {
+                    if (!isProhibited(p, card))
+                        return true;
+                }
+            }
         }
     } else {
         foreach (ServerPlayer *p, new_players) {
@@ -2067,11 +2084,11 @@ bool ServerPlayer::canUse(const Card *card, QList<ServerPlayer *> players, bool 
     return false;
 }
 
-bool ServerPlayer::canUse(const Card *card, ServerPlayer *player, bool ignore_limit)
+bool ServerPlayer::canUse(const Card *card, ServerPlayer *player, bool ignore_limit, bool ignore_slash_reason)
 {
     QList<ServerPlayer*> players;
     players << player;
-    return this->canUse(card, players, ignore_limit);
+    return this->canUse(card, players, ignore_limit, ignore_slash_reason);
 }
 
 void ServerPlayer::endPlayPhase(bool sendLog)

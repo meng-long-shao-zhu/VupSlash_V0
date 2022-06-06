@@ -77,6 +77,8 @@ Client::Client(QObject *parent, const QString &filename)
     m_callbacks[S_COMMAND_SYNCHRONIZE_DISCARD_PILE] = &Client::synchronizeDiscardPile;
     m_callbacks[S_COMMAND_REFRESH_SWAP_AND_ROUND_NUMS] = &Client::refreshSwapAndRoundNums;
     m_callbacks[S_COMMAND_CARD_FLAG] = &Client::setCardFlag;
+    m_callbacks[S_COMMAND_SET_CARD_UNKNOWN] = &Client::setCardUnknown;
+    m_callbacks[S_COMMAND_KILL_SELECTED] = &Client::killSelected;
 
     // interactive methods
     m_interactions[S_COMMAND_CHOOSE_GENERAL] = &Client::askForGeneral;
@@ -1573,11 +1575,11 @@ void Client::askForSinglePeach(const QVariant &arg)
     QStringList pattern;
     pattern << "peach";
     if (dying == Self) {
-        prompt_doc->setHtml(tr("You are dying, please provide %1 peach(es)(or analeptic) to save yourself").arg(peaches));
+        prompt_doc->setHtml(Sanguosha->translate("DyingLog_Self").arg(peaches));
         pattern << "analeptic";
     } else {
         QString dying_general = getPlayerName(dying->objectName());
-        prompt_doc->setHtml(tr("%1 is dying, please provide %2 peach(es) to save him").arg(dying_general).arg(peaches));
+        prompt_doc->setHtml(Sanguosha->translate("DyingLog_Others").arg(dying_general).arg(peaches));
     }
     if (Self->getMark("Global_PreventPeach") > 0) {
         bool has_skill = false;
@@ -2151,4 +2153,28 @@ void Client::addRound(const QVariant &)
     add_round++;
     updatePileNum();
     //emit round_add();
+}
+
+void Client::setCardUnknown(const QVariant &pattern_str)
+{
+    JsonArray pattern = pattern_str.value<JsonArray>();
+    if (pattern.size() != 2 || !JsonUtils::isNumber(pattern[0]) || !JsonUtils::isBool(pattern[1])) return;
+
+    int id = pattern[0].toInt();
+    bool can = pattern[1].toBool();
+
+    Card *card = Sanguosha->getCard(id);
+    if (card != NULL)
+        card->setUnknownCard(can);
+}
+
+void Client::killSelected(const QVariant &pattern_str)
+{
+    JsonArray pattern = pattern_str.value<JsonArray>();
+    if (pattern.size() != 2 || !JsonUtils::isString(pattern[0]) || !JsonUtils::isString(pattern[1])) return;
+
+    QString who = pattern[0].toString();
+    QString general = pattern[1].toString();
+
+    emit selected_killed(who, general);
 }

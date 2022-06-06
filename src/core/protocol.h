@@ -144,6 +144,8 @@ namespace QSanProtocol {
         S_COMMAND_REFRESH_OVERT_PILE,
         S_COMMAND_REFRESH_SWAP_AND_ROUND_NUMS,
         S_COMMAND_SELECT_FINISHED,
+        S_COMMAND_SET_CARD_UNKNOWN,
+        S_COMMAND_KILL_SELECTED,
     };
 
     enum GameEventType

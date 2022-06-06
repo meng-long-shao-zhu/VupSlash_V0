@@ -643,7 +643,7 @@ public:
                     break;
                 }
             }
-            if (current && current->hasSkill("huoshui")
+            if (current && current->hasSkill("huoshui") && current->canEffect(player, "huoshui")
                 && player->getHp() > (player->getMaxHp() + 1) / 2 && !skill->isAttachedLordSkill())
                 return false;
         }

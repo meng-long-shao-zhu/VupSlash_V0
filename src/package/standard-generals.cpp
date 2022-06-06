@@ -957,8 +957,18 @@ public:
 
     bool isSkillValid(const Player *player, const Skill *skill) const
     {
-        return player->getMark("@skill_invalidity") == 0 || skill->getFrequency(player) == Skill::Compulsory ||
-                skill->getFrequency(player) == Skill::Wake || skill->isAttachedLordSkill();
+        if (skill->getFrequency(player) != Skill::Compulsory && skill->getFrequency(player) != Skill::Wake && !skill->isAttachedLordSkill()) {
+            if (player->getMark("@skill_invalidity") > 0)
+                return false;
+            if (player->isChained()) {
+                if (player->hasSkill("chen_rose"))
+                    return false;
+                foreach(const Player *p, player->getSiblings())
+                    if (p->hasSkill("chen_rose") && p->canEffect(player, "chen_rose"))
+                        return false;
+            }
+        }
+        return true;
     }
 };
 

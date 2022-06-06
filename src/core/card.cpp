@@ -23,7 +23,7 @@ Card::Card(Suit suit, int number, bool target_fixed)
     :target_fixed(target_fixed), mute(false),
     will_throw(true), has_preact(false), can_recast(false),
     m_suit(suit), m_number(number), m_id(-1),
-    is_gift(false), damage_card(false), is_overt(false), no_indicator(false), is_copy(false)
+    is_gift(false), damage_card(false), is_overt(false), no_indicator(false), is_copy(false), is_unknown_card(false)
 {
     handling_method = will_throw ? Card::MethodDiscard : Card::MethodUse;
 }
@@ -325,7 +325,19 @@ QString Card::getLogName() const
     if (m_number > 0 && m_number <= 13)
         number_string = getNumberString();
 
-    return QString("%1[%2%3]").arg(getName()).arg(suit_char).arg(number_string);
+    QString name = QString("");
+    if (is_unknown_card){
+        if (isKindOf("BasicCard"))
+            name = Sanguosha->translate("basic");
+        else if (isKindOf("TrickCard"))
+            name = Sanguosha->translate("trick");
+        else if (isKindOf("EquipCard"))
+            name = Sanguosha->translate("equip");
+    } else {
+        name = getName();
+    }
+
+    return QString("%1[%2%3]").arg(name).arg(suit_char).arg(number_string);
 }
 
 QString Card::getCommonEffectName() const
@@ -890,6 +902,16 @@ bool Card::isCopy() const
 void Card::setCopy(bool can)
 {
     is_copy = can;
+}
+
+bool Card::isUnknownCard() const
+{
+    return is_unknown_card;
+}
+
+void Card::setUnknownCard(bool can)
+{
+    is_unknown_card = can;
 }
 
 void Card::setCanRecast(bool can)

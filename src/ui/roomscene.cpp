@@ -175,6 +175,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     connect(ClientInstance, SIGNAL(animated(int, QStringList)), this, SLOT(doAnimation(int, QStringList)));
     connect(ClientInstance, SIGNAL(role_state_changed(QString)), this, SLOT(updateRoles(QString)));
     connect(ClientInstance, SIGNAL(event_received(const QVariant)), this, SLOT(handleGameEvent(const QVariant)));
+    connect(ClientInstance, SIGNAL(selected_killed(QString, QString)), this, SLOT(killSelected(QString, QString)));
 
     connect(ClientInstance, SIGNAL(game_started()), this, SLOT(onGameStart()));
     connect(ClientInstance, SIGNAL(game_over()), this, SLOT(onGameOver()));
@@ -218,7 +219,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     enemy_box = NULL;
     self_box = NULL;
 
-    if (ServerInfo.GameMode == "06_3v3" || ServerInfo.GameMode == "02_1v1" || ServerInfo.GameMode == "06_XMode" || ServerInfo.GameMode == "pve-saver") {
+    if (ServerInfo.GameMode == "06_3v3" || ServerInfo.GameMode == "02_1v1" || ServerInfo.GameMode == "04_if" || ServerInfo.GameMode == "06_XMode" || ServerInfo.GameMode == "pve-saver") {
         if (ServerInfo.GameMode != "06_XMode") {
             connect(ClientInstance, SIGNAL(generals_filled(QStringList)), this, SLOT(fillGenerals(QStringList)));
             connect(ClientInstance, SIGNAL(general_asked()), this, SLOT(startGeneralSelection()));
@@ -230,7 +231,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
 
         arrange_button = NULL;
 
-        if (ServerInfo.GameMode == "02_1v1") {
+        if (ServerInfo.GameMode == "02_1v1" || ServerInfo.GameMode == "04_if") {
             enemy_box = new KOFOrderBox(false, this);
             self_box = new KOFOrderBox(true, this);
 
@@ -1058,6 +1059,8 @@ void RoomScene::updateTable()
     } else if (ServerInfo.GameMode == "04_tt" && game_started) {
         seatToRegion = ttSeatIndex[Self->getSeat() - 1];
         //pkMode = true;
+    } else if (ServerInfo.GameMode == "04_if" && game_started) {
+        seatToRegion = ttSeatIndex[Self->getSeat() - 1];
     } else {
         seatToRegion = regularSeatIndex[photos.length() - 1];
     }
@@ -2390,6 +2393,7 @@ void RoomScene::updateSkillButtons(bool isPrepare)
             || ServerInfo.GameMode == "06_3v3"
             || ServerInfo.GameMode == "06_XMode"
             || ServerInfo.GameMode == "02_1v1"
+            || ServerInfo.GameMode == "04_if"
             || Config.value("WithoutLordskill", false).toBool()))
             continue;
 
@@ -3677,7 +3681,7 @@ void RoomScene::killPlayer(const QString &who)
         dashboard->update();
         general = Self->getGeneral();
         item2player.remove(dashboard);
-        if (ServerInfo.GameMode == "02_1v1") self_box->killPlayer(general->objectName());
+        if (ServerInfo.GameMode == "02_1v1" || ServerInfo.GameMode == "04_if") self_box->killPlayer(Sanguosha->translate("parent:"+general->objectName()) != "parent:"+general->objectName() ? Sanguosha->translate("parent:"+general->objectName()) : general->objectName());
     } else {
         Photo *photo = name2photo[who];
         photo->killPlayer();
@@ -3685,7 +3689,7 @@ void RoomScene::killPlayer(const QString &who)
         photo->update();
         item2player.remove(photo);
         general = photo->getPlayer()->getGeneral();
-        if (ServerInfo.GameMode == "02_1v1") enemy_box->killPlayer(general->objectName());
+        if (ServerInfo.GameMode == "02_1v1" || ServerInfo.GameMode == "04_if") enemy_box->killPlayer(Sanguosha->translate("parent:"+general->objectName()) != "parent:"+general->objectName() ? Sanguosha->translate("parent:"+general->objectName()) : general->objectName());
     }
 
     if (Config.EnableEffects && Config.EnableLastWord && !Self->hasFlag("marshalling"))
@@ -4034,7 +4038,7 @@ void RoomScene::onGameStart()
         QString id = Config.GameMode;
         id.replace("_mini_", "");
         _m_currentStage = id.toInt();
-    } else if (ServerInfo.GameMode == "06_3v3" || ServerInfo.GameMode == "06_XMode" || ServerInfo.GameMode == "02_1v1") {
+    } else if (ServerInfo.GameMode == "06_3v3" || ServerInfo.GameMode == "06_XMode" || ServerInfo.GameMode == "02_1v1" || ServerInfo.GameMode == "04_if") {
         log_box->show();
 
         if (self_box && enemy_box) {
@@ -4689,6 +4693,8 @@ void RoomScene::fillGenerals(const QStringList &names)
         fillGenerals3v3(names, true);
     else if (ServerInfo.GameMode == "02_1v1")
         fillGenerals1v1(names);
+    else if (ServerInfo.GameMode == "04_if")
+        fillGenerals1v1(names);
 }
 
 void RoomScene::bringToFront(QGraphicsItem *front_item)
@@ -4746,7 +4752,7 @@ void RoomScene::takeGeneral(const QString &who, const QString &name, const QStri
     general_item->goBack(true);
 
     if ((((ServerInfo.GameMode == "06_3v3" || ServerInfo.GameMode == "pve-saver") && Self->getRole() != "lord" && Self->getRole() != "renegade")
-        || (ServerInfo.GameMode == "02_1v1" && rule == "2013"))
+        || (ServerInfo.GameMode == "02_1v1" && rule == "2013") || ServerInfo.GameMode == "04_if")
         && general_items.isEmpty()) {
         if (selector_box) {
             selector_box->hide();
@@ -4825,7 +4831,7 @@ void RoomScene::startArrange(const QString &to_arrange)
     } else if (ServerInfo.GameMode == "pve-saver") {
         mode = "pve";
         positions << QPointF(279, 356) << QPointF(407, 356) << QPointF(535, 356);
-    } else if (ServerInfo.GameMode == "02_1v1") {
+    } else if (ServerInfo.GameMode == "02_1v1" || ServerInfo.GameMode == "04_if") {
         mode = "1v1";
         if (down_generals.length() == 5)
             positions << QPointF(130, 335) << QPointF(260, 335) << QPointF(390, 335);
@@ -5327,4 +5333,17 @@ void PromptInfoItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, 
 void RoomScene::clearTablePile()
 {
     m_tablePile->clear(false);
+}
+
+void RoomScene::killSelected(const QString &who, const QString &general)
+{
+    m_roomMutex.lock();
+
+    if (who == Self->objectName()) {
+        self_box->killPlayer(Sanguosha->translate("parent:"+general) != "parent:"+general ? Sanguosha->translate("parent:"+general) : general);
+    } else {
+        enemy_box->killPlayer(Sanguosha->translate("parent:"+general) != "parent:"+general ? Sanguosha->translate("parent:"+general) : general);
+    }
+
+    m_roomMutex.unlock();
 }

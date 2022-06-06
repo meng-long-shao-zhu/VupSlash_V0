@@ -8,6 +8,7 @@ class Scenario;
 class RoomThread3v3;
 class RoomThreadXMode;
 class RoomThread1v1;
+class RoomThreadif;
 class TrickCard;
 
 struct lua_State;
@@ -35,6 +36,7 @@ public:
     friend class RoomThread3v3;
     friend class RoomThreadXMode;
     friend class RoomThread1v1;
+    friend class RoomThreadif;
 
     typedef void (Room::*Callback)(ServerPlayer *, const QVariant &);
     typedef bool (Room::*ResponseVerifyFunction)(ServerPlayer *, const QVariant &, void *);
@@ -134,6 +136,10 @@ public:
     void setOvertCards(ServerPlayer *player, QList<int> ids, bool can = true);
     QString askForChooseCardName(ServerPlayer *player, const QString &type, bool refusable, const QString &reason);
     Card *copyCard(const Card *card);
+    void addRound(int add = 1);
+    void setCardUnknown(const Card *card, bool can = false, ServerPlayer *who = NULL);
+    void setCardUnknown(int card_id, bool can = false, ServerPlayer *who = NULL);
+
     void retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge,
         const QString &skill_name, bool exchange = false);
 
@@ -277,7 +283,7 @@ public:
 
     void acquireSkill(ServerPlayer *player, const Skill *skill, bool open = true, bool getmark = true, bool event_and_log = true);
     void acquireSkill(ServerPlayer *player, const QString &skill_name, bool open = true, bool getmark = true, bool event_and_log = true);
-    void adjustSeats();
+    void adjustSeats(bool lord_first = true);
     void swapPile(bool add_times = true);
     inline QList<int> getDiscardPile()
     {
@@ -310,7 +316,7 @@ public:
     void updateStateItem();
 
     void reconnect(ServerPlayer *player, ClientSocket *socket);
-    void marshal(ServerPlayer *player);
+    void marshal(ServerPlayer *player, bool update_only = false);
 
     void sortByActionOrder(QList<ServerPlayer *> &players);
 
@@ -580,6 +586,7 @@ private:
     RoomThread3v3 *thread_3v3;
     RoomThreadXMode *thread_xmode;
     RoomThread1v1 *thread_1v1;
+    RoomThreadif *thread_if;
     QSemaphore _m_semRaceRequest; // When race starts, server waits on his semaphore for the first replier
     QSemaphore _m_semRoomMutex; // Provide per-room  (rather than per-player) level protection of any shared variables
 

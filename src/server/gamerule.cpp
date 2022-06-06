@@ -234,6 +234,8 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                         room->getThread()->trigger(GameStart, room, p);
                 }
                 foreach(ServerPlayer *p, room->getAlivePlayers())
+                    room->getThread()->trigger(BeforeRoundStart, room, p, rsdata);
+                foreach(ServerPlayer *p, room->getAlivePlayers())
                     room->getThread()->trigger(RoundStart, room, p, rsdata);
             }
         }
@@ -928,6 +930,35 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
             else
                 player->setFlags("Global_DebutFlag");
             return false;
+        } else if (room->getMode() == "04_if") {
+            QStringList selected = player->getSelected();
+            selected.removeOne(Sanguosha->translate("parent:"+player->getGeneralName()) != "parent:"+player->getGeneralName() ? Sanguosha->translate("parent:"+player->getGeneralName()) : player->getGeneralName());
+            if (selected.length() > 0) {
+                QString general_name = room->askForGeneral(player, selected);
+                room->revivePlayer(player);
+                room->changeHero(player, general_name, true, true);
+                room->setPlayerProperty(player, "kingdom", player->getRole() == "loyalist" ? "team_fire" : "team_ice");
+                player->clearSelected();
+                for (int i=0;i<selected.length();i++)
+                    player->addToSelected(selected.at(i));
+
+                room->setTag("FirstRound", true); //For Manjuan
+                int draw_num = 4;
+                QVariant data = draw_num;
+                room->getThread()->trigger(DrawInitialCards, room, player, data);
+                draw_num = data.toInt();
+                try {
+                    player->drawCards(draw_num);
+                    room->setTag("FirstRound", false);
+                }
+                catch (TriggerEvent triggerEvent) {
+                    if (triggerEvent == TurnBroken || triggerEvent == StageChange)
+                        room->setTag("FirstRound", false);
+                    throw triggerEvent;
+                }
+                QVariant _drawnum = draw_num;
+                room->getThread()->trigger(AfterDrawInitialCards, room, player, _drawnum);
+            }
         } else if (room->getMode() == "06_XMode") {
             changeGeneralXMode(player);
             if (death.damage != NULL)
@@ -1433,8 +1464,13 @@ void GameRule::rewardAndPunish(ServerPlayer *killer, ServerPlayer *victim) const
     if (room->getMode() == "03_1v2") {
         if (victim->getRole() == "rebel") {
             foreach (ServerPlayer *p, room->getOtherPlayers(victim)) {
-                if (p->getRole() == "rebel" && room->askForChoice(p, "doudizhu", "draw+cancel") == "draw")
-                    p->drawCards(2);
+                if (p->getRole() == "rebel") {
+                    QString result = room->askForChoice(p, "doudizhu", "draw+recover+cancel");
+                    if (result == "draw")
+                        p->drawCards(2);
+                    else if (result == "recover")
+                        room->recover(p, RecoverStruct(p, NULL, 1));
+                }
             }
         }
         return;
@@ -1455,6 +1491,9 @@ void GameRule::rewardAndPunish(ServerPlayer *killer, ServerPlayer *victim) const
                 }
             }
         }
+        return;
+    } else if (room->getMode() == "04_if") {
+
         return;
     }
 
@@ -1481,7 +1520,7 @@ QString GameRule::getWinner(ServerPlayer *victim) const
     Room *room = victim->getRoom();
     QString winner;
 
-    if (room->getMode() == "06_3v3") {
+    if (room->getMode() == "06_3v3" || room->getMode() == "04_if") {
         switch (victim->getRoleEnum()) {
         case Player::Lord: winner = "renegade+rebel"; break;
         case Player::Renegade: winner = "lord+loyalist"; break;
@@ -1729,6 +1768,8 @@ bool HulaoPassMode::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer 
                         foreach(ServerPlayer *p, room->getAlivePlayers())
                             room->getThread()->trigger(GameStart, room, p);
                     }
+                    foreach(ServerPlayer *p, room->getAlivePlayers())
+                        room->getThread()->trigger(BeforeRoundStart, room, p, rsdata);
                     foreach(ServerPlayer *p, room->getAlivePlayers())
                         room->getThread()->trigger(RoundStart, room, p, rsdata);
                 }

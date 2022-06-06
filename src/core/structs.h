@@ -612,6 +612,7 @@ enum TriggerEvent
     BeforeGameStart,
     BeforeGameOver,
     BeforeCardFinished,
+    BeforeRoundStart,
 
     Appear, // For yinni only
 

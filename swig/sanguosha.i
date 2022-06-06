@@ -267,7 +267,8 @@ public:
     bool canPindian(const Player *target, bool except_self = true) const;
     bool canPindian(bool except_self = true) const;
 	bool canBePindianed(bool except_self = true) const;
-    bool isYourFriend(const Player *fri) const;
+    bool canEffect(const Player *target, QString skill_name) const;
+    bool isYourFriend(const Player *fri, QString mode = "") const;
 	bool isWeidi() const;
 	int getChangeSkillState(const char *skill_name) const;
 	int getLevelSkillState(const char *skill_name) const;
@@ -419,8 +420,8 @@ public:
 	bool isLowestHpPlayer(bool only = false);
 	void ViewAsEquip(const char *equip_name, bool can_duplication = false);
     void removeViewAsEquip(const char *equip_name, bool remove_all_duplication = true);
-	bool canUse(const Card *card, QList<ServerPlayer *> players = QList<ServerPlayer *>(), bool ignore_limit = false);
-    bool canUse(const Card *card, ServerPlayer *player, bool ignore_limit = false);
+	bool canUse(const Card *card, QList<ServerPlayer *> players = QList<ServerPlayer *>(), bool ignore_limit = false, bool ignore_slash_reason = false);
+    bool canUse(const Card *card, ServerPlayer *player, bool ignore_limit = false, bool ignore_slash_reason = false);
 	void endPlayPhase(bool sendLog = true);
 	void breakYinniState();
 };
@@ -556,6 +557,7 @@ struct CardEffectStruct {
     ServerPlayer *from;
     ServerPlayer *to;
 
+	bool multiple;
     bool nullified;
 	bool no_respond;
     bool no_offset;
@@ -855,6 +857,7 @@ enum TriggerEvent {
 	BeforeGameStart,
 	BeforeGameOver,
 	BeforeCardFinished,
+	BeforeRoundStart,
 
 	Appear, // For yinni only
 
@@ -946,12 +949,14 @@ public:
     bool isOvert() const;
     bool noIndicator() const;
     bool isCopy() const;
+    bool isUnknownCard() const;
     bool hasPreAction() const;
     Card::HandlingMethod getHandlingMethod() const;
     void setCanRecast(bool can);
     void setOvert(bool can);
     void setIndicatorHide(bool can);
     void setCopy(bool can);
+    void setUnknownCard(bool can);
 
     void setFlags(const char *flag) const;
     bool hasFlag(const char *flag) const;
@@ -1284,6 +1289,9 @@ public:
     void setOvertCards(ServerPlayer *player, QList<int> ids, bool can = true);
 	QString askForChooseCardName(ServerPlayer *player, const char *type, bool refusable, const char *reason);
 	Card *copyCard(const Card *card);
+	void addRound(int add = 1);
+    void setCardUnknown(const Card *card, bool can = false, ServerPlayer *who = NULL);
+    void setCardUnknown(int card_id, bool can = false, ServerPlayer *who = NULL);
     void retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge, const char *skill_name, bool exchange = false);
     void notifySkillInvoked(ServerPlayer *player, const char *skill_name);
     void broadcastSkillInvoke(const char *skillName);
@@ -1316,7 +1324,7 @@ public:
 
     void acquireSkill(ServerPlayer *player, const Skill *skill, bool open = true, bool getmark = true, bool event_and_log = true);
     void acquireSkill(ServerPlayer *player, const char *skill_name, bool open = true, bool getmark = true, bool event_and_log = true);
-    void adjustSeats();
+    void adjustSeats(bool lord_first = false);
     void swapPile(bool add_times = true);
     QList<int> getDiscardPile();
     QList<int> &getDrawPile();
@@ -1339,6 +1347,7 @@ public:
     ServerPlayer *getFront(ServerPlayer *a, ServerPlayer *b) const;
     void signup(ServerPlayer *player, const char *screen_name, const char *avatar, bool is_robot);
     ServerPlayer *getOwner() const;
+    void marshal(ServerPlayer *player, bool update_only = false);
 
     void sortByActionOrder(QList<ServerPlayer *> &players);
 

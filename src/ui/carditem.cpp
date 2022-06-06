@@ -61,10 +61,26 @@ void CardItem::setCard(const Card *card)
         const Card *engineCard = Sanguosha->getEngineCard(m_cardId);
         Q_ASSERT(engineCard != NULL);
         setObjectName(engineCard->objectName());
+        if (card->isUnknownCard()) {
+            if (card->isKindOf("BasicCard"))
+                setObjectName("unknown_basic");
+            else if (card->isKindOf("TrickCard"))
+                setObjectName("unknown_trick");
+            else if (card->isKindOf("EquipCard"))
+                setObjectName("unknown_equip");
+        }
         m_color = engineCard->getColor();
         m_suit = engineCard->getSuit();
         m_number = engineCard->getNumber();
         QString description = engineCard->getDescription();
+        if (card->isUnknownCard()) {
+            if (card->isKindOf("BasicCard"))
+                description = Sanguosha->translate("unknown_basic_state");
+            else if (card->isKindOf("TrickCard"))
+                description = Sanguosha->translate("unknown_trick_state");
+            else if (card->isKindOf("EquipCard"))
+                description = Sanguosha->translate("unknown_equip_state");
+        }
         if (card->hasFlag("potato_mine"))
             m_isMine = true;
         if (m_isMine)

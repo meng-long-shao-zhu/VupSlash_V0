@@ -213,6 +213,7 @@ public slots:
     void doAddRobotAction();
     void fillRobots();
     void clearTablePile();
+    void killSelected(const QString &who, const QString &general);
 
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
