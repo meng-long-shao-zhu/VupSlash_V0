@@ -215,6 +215,9 @@ public slots:
     void clearTablePile();
     void killSelected(const QString &who, const QString &general);
 
+    void speak(QString text = "");
+
+
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
@@ -428,8 +431,6 @@ private slots:
     void showCard(const QString &player_name, int card_id, bool is_overt = false);
     void viewDistance();
     void viewKnowncard();
-
-    void speak();
 
     void onGameStart();
     void onGameOver();

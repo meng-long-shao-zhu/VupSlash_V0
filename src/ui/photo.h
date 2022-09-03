@@ -35,6 +35,7 @@ public:
     void die_throw(double off_x, double off_y);
     void revive();
     void showSkillName(const QString &skill_name);
+    void showDamage(const QString &damage_str);
 
     enum FrameType
     {
@@ -61,6 +62,7 @@ public slots:
     void updatePhase();
     void hideEmotion();
     void hideSkillName();
+    void hideDamage();
     virtual void updateDuanchang();
     virtual void refresh(bool killed = false);
 
@@ -123,6 +125,7 @@ protected:
     QGraphicsPixmapItem *_m_onlineStatusItem;
     QGraphicsPixmapItem *_m_seatStatusItem;
     QGraphicsRectItem *_m_duanchangMask;
+    QGraphicsPixmapItem *_m_damageItem;
 };
 
 #endif

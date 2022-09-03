@@ -394,7 +394,7 @@ QWidget *ServerDialog::createMiscTab()
     game_start_spinbox->setSuffix(tr(" seconds"));
 
     nullification_spinbox = new QSpinBox;
-    nullification_spinbox->setRange(5, 15);
+    nullification_spinbox->setRange(5, 30);
     nullification_spinbox->setValue(Config.NullificationCountDown);
     nullification_spinbox->setSuffix(tr(" seconds"));
 
@@ -450,7 +450,7 @@ QWidget *ServerDialog::createMiscTab()
 
     QVBoxLayout *tablayout = new QVBoxLayout;
     tablayout->addLayout(HLay(new QLabel(tr("Game start count down")), game_start_spinbox));
-    tablayout->addLayout(HLay(new QLabel(tr("Nullification count down")), nullification_spinbox));
+    tablayout->addLayout(HLay(new QLabel(Sanguosha->translate("NULLIFICATION_WARMUP_TIME_SET")), nullification_spinbox));
     tablayout->addWidget(minimize_dialog_checkbox);
     tablayout->addWidget(surrender_at_death_checkbox);
     tablayout->addWidget(luck_card_checkbox);

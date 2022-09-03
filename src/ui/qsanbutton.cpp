@@ -201,6 +201,26 @@ void QSanSkillButton::_setSkillType(SkillType type)
 void QSanSkillButton::onMouseClick()
 {
     if (_m_skill == NULL) return;
+
+    _m_viewAsSkill = ViewAsSkill::parseViewAsSkill(_m_skill);
+    Skill::Frequency freq = _m_skill->getFrequency(Self);
+
+    if (freq == Skill::Frequent
+            || (freq == Skill::NotFrequent && _m_skill->inherits("TriggerSkill") && !_m_skill->inherits("WeaponSkill")
+            && !_m_skill->inherits("ArmorSkill") && !_m_skill->inherits("TreasureSkill") && _m_viewAsSkill == NULL)) {
+
+        QString down_word = "SKILL_BUTTON_DOWN";
+        QString up_word = "SKILL_BUTTON_UP";
+        if (_m_skill->isWarmupSkill()) {
+            down_word = "WARMUP_BUTTON_DOWN";
+            up_word = "WARMUP_BUTTON_UP";
+        }
+        if (isDown()) {
+            QToolTip::showText(QCursor::pos(), QString("<b>"+Sanguosha->translate(_m_skill->objectName())+"</b><br>"+Sanguosha->translate(down_word)));
+        } else if (!isDown()) {
+            QToolTip::showText(QCursor::pos(), QString("<b>"+Sanguosha->translate(_m_skill->objectName())+"</b><br>"+Sanguosha->translate(up_word)));
+        }
+    }
     if ((_m_style == S_STYLE_TOGGLE && isDown() && _m_emitActivateSignal) || _m_style == S_STYLE_PUSH) {
         emit skill_activated();
         emit skill_activated(_m_skill);
@@ -224,7 +244,7 @@ void QSanSkillButton::setSkill(const Skill *skill)
     Skill::Frequency freq = skill->getFrequency(Self);
     if (freq == Skill::Frequent
         || (freq == Skill::NotFrequent && skill->inherits("TriggerSkill") && !skill->inherits("WeaponSkill")
-        && !skill->inherits("ArmorSkill") && _m_viewAsSkill == NULL)) {
+        && !skill->inherits("ArmorSkill") && !skill->inherits("TreasureSkill") && _m_viewAsSkill == NULL)) {
         setStyle(QSanButton::S_STYLE_TOGGLE);
         setState(freq == Skill::Frequent ? QSanButton::S_STATE_DOWN : QSanButton::S_STATE_UP);
         if (skill->isChangeSkill()) {
@@ -233,7 +253,11 @@ void QSanSkillButton::setSkill(const Skill *skill)
         } else if (skill->isLimitedSkill()) {
             _setSkillType(QSanInvokeSkillButton::S_SKILL_ONEOFF_SPELL);
         } else {
-            _setSkillType(QSanInvokeSkillButton::S_SKILL_FREQUENT);
+            if (skill->isWarmupSkill()) {
+                _setSkillType(QSanInvokeSkillButton::S_SKILL_FREQUENT_WARMUP);
+            } else {
+                _setSkillType(QSanInvokeSkillButton::S_SKILL_FREQUENT);
+            }
         }
         _m_emitActivateSignal = false;
         _m_emitDeactivateSignal = false;
@@ -298,7 +322,7 @@ void QSanSkillButton::setSkill(const Skill *skill)
     } else Q_ASSERT(false);
     setToolTip(skill->getDescription());
 
-    Q_ASSERT((int)_m_skillType <= 8 && _m_state <= 3);
+    Q_ASSERT((int)_m_skillType <= 9 && _m_state <= 3);  //_m_skill_Type -> S_NUM_SKILL_TYPES
     _repaint();
 }
 

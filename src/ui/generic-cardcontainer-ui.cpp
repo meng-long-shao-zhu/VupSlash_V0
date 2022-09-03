@@ -350,6 +350,8 @@ void PlayerCardContainer::updateHp()
     _m_hpBox->update();
     if (m_player->getHp() > 0 || m_player->getMaxHp() == 0)
         _m_saveMeIcon->setVisible(false);
+    _m_smallAvatarArea->setToolTip(m_player->getSkillDescription());
+    _m_avatarArea->setToolTip(m_player->getSkillDescription());
 }
 
 static bool CompareByNumber(const Card *card1, const Card *card2)
@@ -1286,4 +1288,74 @@ bool PlayerCardContainer::canBeSelected()
 {
     QGraphicsItem *item1 = getMouseClickReceiver();
     return item1 && isEnabled() && (flags() & QGraphicsItem::ItemIsSelectable);
+}
+
+void PlayerCardContainer::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    if (!m_player) return;
+    if (m_player == Self) return;
+
+    //if (!miscellaneous_menu) {
+        menu = new QMenu();
+    //}
+
+    //QMenu *menu = miscellaneous_menu;
+    menu->clear();
+    menu->setTitle(tr("Miscellaneous"));
+
+    QMenu *known_cards = menu->addMenu(Sanguosha->translate("KNOWNCARD_VIEW"));
+
+    QList<const Card *> known = m_player->getHandcards();
+    if (Self->canSeeHandcard(m_player)) {
+        known.clear();
+        QStringList handcard = m_player->property("My_Visible_HandCards").toString().split("+");
+        foreach (QString id, handcard)
+            known << Sanguosha->getEngineCard(id.toInt());
+    }
+    //if (!ServerInfo.EnableCheat && !Self->canSeeHandcard(m_player))
+    //    known.clear();
+    if (m_player->hasSkills("#characteristic_bukerenzhi") && !Self->canSeeHandcard(m_player)) {
+        known_cards->addAction(Sanguosha->translate("bukerenzhi_log"+QString::number(qrand() % 10)));
+    } else if (known.isEmpty() || m_player->isKongcheng()) {
+        known_cards->setEnabled(false);
+    } else {
+        foreach (const Card *card, known) {
+            const Card *engine_card = Sanguosha->getEngineCard(card->getId());
+            if (m_player->getPublicCards().contains(card))
+                known_cards->addAction(G_ROOM_SKIN.getCardSuitPixmap(engine_card->getSuit()), engine_card->getFullName() + " " + Sanguosha->translate("OVERT"));
+            else
+                known_cards->addAction(G_ROOM_SKIN.getCardSuitPixmap(engine_card->getSuit()), engine_card->getFullName());
+        }
+    }
+    menu->addSeparator();
+
+    QMenu *interactive_menu = menu->addMenu(Sanguosha->translate("INTERACTIVE"));
+
+    if (Config.NoInteractive) {
+        interactive_menu->setEnabled(false);
+    } else {
+        QAction *flower = interactive_menu->addAction(Sanguosha->translate("SEND_FLOWER"));
+        connect(flower, SIGNAL(triggered()), this, SLOT(sendFlower()));
+        QAction *egg = interactive_menu->addAction(Sanguosha->translate("SEND_EGG"));
+        connect(egg, SIGNAL(triggered()), this, SLOT(sendEgg()));
+    }
+
+    QPointF posf = QCursor::pos();
+    menu->popup(QPoint(posf.x(), posf.y()));
+}
+
+void PlayerCardContainer::sendFlower()
+{
+    if (!m_player) return;
+
+    QString text = ".SendFlower="+m_player->objectName();
+    RoomSceneInstance->speak(text);
+}
+
+void PlayerCardContainer::sendEgg()
+{
+    if (!m_player) return;
+
+    QString text = ".SendEgg="+m_player->objectName();
+    RoomSceneInstance->speak(text);
 }

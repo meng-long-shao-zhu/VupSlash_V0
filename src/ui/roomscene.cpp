@@ -604,7 +604,11 @@ void RoomScene::handleGameEvent(const QVariant &args)
         ClientPlayer *player = ClientInstance->getPlayer(player_name);
         //if (!player || !player->hasSkill(skill_name)) return;
         //if (player != Self) {
-        if (player && (player->hasSkill(skill_name, true) || player->hasEquipSkill(skill_name)) && player != Self) {
+        if (skill_name.startsWith("-")) {
+            PlayerCardContainer *container = (PlayerCardContainer *)_getGenericCardContainer(Player::PlaceHand, player);
+            Photo *photo = qobject_cast<Photo *>(container);
+            if (photo) photo->showDamage(skill_name);
+        } else if (player && (player->hasSkill(skill_name, true) || player->hasEquipSkill(skill_name)) /*&& player != Self*/) {
             PlayerCardContainer *container = (PlayerCardContainer *)_getGenericCardContainer(Player::PlaceHand, player);
             Photo *photo = qobject_cast<Photo *>(container);
             if (photo) photo->showSkillName(skill_name);
@@ -2832,9 +2836,18 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
                 return;
             }
         }
+        foreach (QSanSkillButton *button, m_skillButtons) {
+            if (button->getSkill()->objectName() == skill_name && button->getSkill()->isWarmupSkill()) {
+                if (button->getStyle() == QSanSkillButton::S_STYLE_TOGGLE
+                    && button->isEnabled() && !button->isDown()) {
+                    ClientInstance->onPlayerInvokeSkill(false);
+                    return;
+                }
+            }
+        }
         dashboard->highlightEquip(skill_name, true);
         foreach (QSanSkillButton *button, m_skillButtons) {
-            if (button->getSkill()->objectName() == skill_name) {
+            if (button->getSkill()->objectName() == skill_name && !button->getSkill()->isWarmupSkill()) {
                 if (button->getStyle() == QSanSkillButton::S_STYLE_TOGGLE
                     && button->isEnabled() && button->isDown()) {
                     ClientInstance->onPlayerInvokeSkill(true);
@@ -3844,14 +3857,15 @@ void RoomScene::viewKnowncard()
     dialog->show();
 }
 
-void RoomScene::speak()
+void RoomScene::speak(QString text)
 {
-    if (game_started && ServerInfo.DisableChat)
+    if (game_started && ServerInfo.DisableChat && text == "")
         chat_box->append(tr("This room does not allow chatting!"));
     else {
         bool broadcast = true;
         bool show_in_chatbox = true;
-        QString text = chat_edit->text();
+        if (text == "")
+            text = chat_edit->text();
         if (text == ".StartBgMusic") {
             broadcast = false;
             Config.EnableBgMusic = true;
@@ -3888,7 +3902,7 @@ void RoomScene::speak()
             Audio::stopBGM();
 #endif
         }
-        if (text.startsWith("bubble:")) {
+        if (text.startsWith("bubble:") || text.startsWith(".SendEgg=") || text.startsWith(".SendFlower=")) {
             show_in_chatbox = false;
             //text = text.remove(0, 7);  remove at client
         }
@@ -4215,6 +4229,8 @@ QGraphicsObject *RoomScene::getAnimationObject(const QString &name) const
 
 void RoomScene::doMovingAnimation(const QString &name, const QStringList &args)
 {
+    if (Config.NoInteractive && (name == "flower" || name == "egg")) return;
+
     QSanSelectableItem *item = new QSanSelectableItem(QString("image/system/animation/%1.png").arg(name));
     item->setZValue(10086.0);
     addItem(item);
@@ -4222,29 +4238,73 @@ void RoomScene::doMovingAnimation(const QString &name, const QStringList &args)
     QGraphicsObject *fromItem = getAnimationObject(args.at(0));
     QGraphicsObject *toItem = getAnimationObject(args.at(1));
 
-    QPointF from = fromItem->scenePos();
-    QPointF to = toItem->scenePos();
+    QPointF from = fromItem->scenePos()+QPointF(fromItem->boundingRect().width()/2, fromItem->boundingRect().height()/2)-QPointF(item->boundingRect().width()/2, item->boundingRect().height()/2);
+    QPointF to = toItem->scenePos()+QPointF(toItem->boundingRect().width()/2, toItem->boundingRect().height()/2)-QPointF(item->boundingRect().width()/2, item->boundingRect().height()/2);
     if (fromItem == dashboard)
         from.setX(fromItem->boundingRect().width() / 2);
     if (toItem == dashboard)
         to.setX(toItem->boundingRect().width() / 2);
 
+    item->setTransformOriginPoint(item->boundingRect().width()/2, item->boundingRect().height()/2);
+
+    QSanSelectableItem *item2 = new QSanSelectableItem(QString("image/system/animation/egg2.png"));
+    item2->setZValue(10086.1);
+    addItem(item2);
+    QPointF to2 = toItem->scenePos()+QPointF(toItem->boundingRect().width()/2, toItem->boundingRect().height()/2)-QPointF(item2->boundingRect().width()/2, item2->boundingRect().height()/2);
+    if (toItem == dashboard)
+        to2.setX(toItem->boundingRect().width() / 2);
+    item2->setPos(to2);
+    item2->setTransformOriginPoint(item2->boundingRect().width()/2, item2->boundingRect().height()/2);
+    item2->setOpacity(0);
+
     QSequentialAnimationGroup *group = new QSequentialAnimationGroup;
+    QParallelAnimationGroup *group2 = new QParallelAnimationGroup;
+    QParallelAnimationGroup *group3 = new QParallelAnimationGroup;
 
     QPropertyAnimation *move = new QPropertyAnimation(item, "pos");
     move->setStartValue(from);
     move->setEndValue(to);
     move->setDuration(1000);
+    if (name == "flower") {
+        move->setEasingCurve(QEasingCurve::OutQuad);
+    } else if (name == "egg") {
+        move->setEasingCurve(QEasingCurve::InQuad);
+    }
+
+    QPropertyAnimation *rotate = new QPropertyAnimation(item, "rotation");
+    rotate->setStartValue(0);
+    rotate->setEndValue(0);
+    rotate->setDuration(1000);
+    if (name == "egg") {
+        rotate->setEndValue(1440);
+        rotate->setEasingCurve(QEasingCurve::InQuad);
+    }
+
+    group2->addAnimation(move);
+    group2->addAnimation(rotate);
 
     QPropertyAnimation *disappear = new QPropertyAnimation(item, "opacity");
     disappear->setEndValue(0.0);
     disappear->setDuration(1000);
 
-    group->addAnimation(move);
-    group->addAnimation(disappear);
+    group3->addAnimation(disappear);
+
+    if (name == "egg") {
+        QPropertyAnimation *disappear2 = new QPropertyAnimation(item2, "opacity");
+        disappear2->setStartValue(100.0);
+        disappear2->setEndValue(0.0);
+        disappear2->setDuration(1000);
+        disappear2->setEasingCurve(QEasingCurve::InQuad);
+
+        group3->addAnimation(disappear2);
+    }
+
+    group->addAnimation(group2);
+    group->addAnimation(group3);
 
     group->start(QAbstractAnimation::DeleteWhenStopped);
     connect(group, SIGNAL(finished()), item, SLOT(deleteLater()));
+    connect(group, SIGNAL(finished()), item2, SLOT(deleteLater()));
 }
 
 void RoomScene::doAppearingAnimation(const QString &name, const QStringList &args)
@@ -4272,6 +4332,10 @@ void RoomScene::doAppearingAnimation(const QString &name, const QStringList &arg
     QPropertyAnimation *disappear = new QPropertyAnimation(item, "opacity");
     disappear->setEndValue(0.0);
     disappear->setDuration(1000);
+    if (name == "pic_animation") {
+        disappear->setDuration(2000);
+        disappear->setEasingCurve(QEasingCurve::InQuart);
+    }
 
     disappear->start(QAbstractAnimation::DeleteWhenStopped);
     connect(disappear, SIGNAL(finished()), item, SLOT(deleteLater()));
@@ -4516,6 +4580,8 @@ void RoomScene::doAnimation(int name, const QStringList &args)
     static QMap<AnimateType, AnimationFunc> map;
     if (map.isEmpty()) {
         map[S_ANIMATE_NULLIFICATION] = &RoomScene::doMovingAnimation;
+        map[S_ANIMATE_FLOWER] = &RoomScene::doMovingAnimation;
+        map[S_ANIMATE_EGG] = &RoomScene::doMovingAnimation;
 
         map[S_ANIMATE_FIRE] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_LIGHTNING] = &RoomScene::doAppearingAnimation;
@@ -4536,6 +4602,8 @@ void RoomScene::doAnimation(int name, const QStringList &args)
     static QMap<AnimateType, QString> anim_name;
     if (anim_name.isEmpty()) {
         anim_name[S_ANIMATE_NULLIFICATION] = "nullification";
+        anim_name[S_ANIMATE_FLOWER] = "flower";
+        anim_name[S_ANIMATE_EGG] = "egg";
 
         anim_name[S_ANIMATE_FIRE] = "fire";
         anim_name[S_ANIMATE_LIGHTNING] = "lightning";

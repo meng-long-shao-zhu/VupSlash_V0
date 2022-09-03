@@ -198,6 +198,8 @@ public:
         QColor m_onlineStatusBgColor;
         QRect m_skillNameArea;
         QSanShadowTextFont m_skillNameFont;
+        QRect m_damageArea;
+        QSanShadowTextFont m_damageFont;
     };
 
     struct DashboardLayout : public PlayerCardContainerLayout

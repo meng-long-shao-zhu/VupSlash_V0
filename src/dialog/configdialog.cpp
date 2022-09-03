@@ -26,7 +26,8 @@ ConfigDialog::ConfigDialog(QWidget *parent)
     ui->enableBgMusicCheckBox->setChecked(Config.EnableBgMusic);
 
     bool enabled_full = QFile::exists("skins/fulldefaultSkin.layout.json");
-    ui->fullSkinCheckBox->setEnabled(enabled_full);
+    //ui->fullSkinCheckBox->setEnabled(enabled_full);
+    ui->fullSkinCheckBox->setEnabled(false);
     ui->fullSkinCheckBox->setChecked(enabled_full && Config.value("UseFullSkin", true).toBool());
     ui->noIndicatorCheckBox->setChecked(Config.value("NoIndicator", false).toBool());
     ui->noEquipAnimCheckBox->setChecked(Config.value("NoEquipAnim", false).toBool());
@@ -49,6 +50,7 @@ ConfigDialog::ConfigDialog(QWidget *parent)
     ui->checkBoxRecorderAutoSave->setChecked(Config.value("recorder/autosave", true).toBool());
     ui->checkBoxRecorderNetworkOnly->setChecked(Config.value("recorder/networkonly", true).toBool());
     ui->hideRecordBubble->setChecked(Config.HideRecordBubble);
+    ui->noInteractiveCheckBox->setChecked(Config.NoInteractive);
 
     connect(this, SIGNAL(accepted()), this, SLOT(saveConfig()));
 
@@ -163,6 +165,9 @@ void ConfigDialog::saveConfig()
     Config.setValue("recorder/networkonly", enabled);
     Config.HideRecordBubble = ui->hideRecordBubble->isChecked();
     Config.setValue("HideRecordBubble", Config.HideRecordBubble);
+
+    Config.NoInteractive = ui->noInteractiveCheckBox->isChecked();
+    Config.setValue("NoInteractive", Config.NoInteractive);
 
 
     /*if (RoomSceneInstance)

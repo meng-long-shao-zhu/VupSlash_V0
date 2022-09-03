@@ -16,6 +16,7 @@ struct ServerInfoStruct
     QString GameRuleMode;
     int OperationTimeout;
     int NullificationCountDown;
+    //int WarmupCountDown;
     QStringList Extensions;
     bool RandomSeat;
     bool EnableCheat;

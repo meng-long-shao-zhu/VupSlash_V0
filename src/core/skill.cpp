@@ -14,7 +14,7 @@
 
 Skill::Skill(const QString &name, Frequency frequency)
     : frequency(frequency), limit_mark(QString()), lord_skill(false), attached_lord_skill(false), change_skill(false), limited_skill(false),
-      hide_skill(false), level_skill(false)
+      hide_skill(false), level_skill(false), warmup_skill(false)
 {
     static QChar lord_symbol('$');
     static QChar attached_lord_symbol('&');
@@ -69,6 +69,16 @@ bool Skill::isLevelSkill() const
 void Skill::setLevelSkill(bool can)
 {
     level_skill = can;
+}
+
+bool Skill::isWarmupSkill() const
+{
+    return warmup_skill;
+}
+
+void Skill::setWarmupSkill(bool can)
+{
+    warmup_skill = can;
 }
 
 bool Skill::shouldBeVisible(const Player *Self) const

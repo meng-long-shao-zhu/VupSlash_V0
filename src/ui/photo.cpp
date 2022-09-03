@@ -37,6 +37,7 @@ Photo::Photo() : PlayerCardContainer()
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     setTransform(QTransform::fromTranslate(-G_PHOTO_LAYOUT.m_normalWidth / 2, -G_PHOTO_LAYOUT.m_normalHeight / 2), true);
     _m_skillNameItem = new QGraphicsPixmapItem(_m_groupMain);
+    _m_damageItem = new QGraphicsPixmapItem(_m_groupMain);
 
     emotion_item = new Sprite(_m_groupMain);
 
@@ -127,6 +128,7 @@ void Photo::_adjustComponentZValues(bool killed)
     _layBetween(_m_mainFrame, _m_faceTurnedIcon, _m_equipRegions[3]);
     _layBetween(emotion_item, _m_chainIcon, _m_roleComboBox);
     _layBetween(_m_skillNameItem, _m_chainIcon, _m_roleComboBox);
+    _layBetween(_m_damageItem, _m_chainIcon, _m_roleComboBox);
     _m_progressBarItem->setZValue(_m_groupMain->zValue() + 1);
 }
 
@@ -274,6 +276,21 @@ void Photo::showSkillName(const QString &skill_name)
 void Photo::hideSkillName()
 {
     _m_skillNameItem->hide();
+}
+
+void Photo::showDamage(const QString &damage_str)
+{
+    G_PHOTO_LAYOUT.m_damageFont.paintText(_m_damageItem,
+        G_PHOTO_LAYOUT.m_damageArea,
+        Qt::AlignCenter,
+        Sanguosha->translate(damage_str));
+    _m_damageItem->show();
+    QTimer::singleShot(1000, this, SLOT(hideDamage()));
+}
+
+void Photo::hideDamage()
+{
+    _m_damageItem->hide();
 }
 
 void Photo::hideEmotion()

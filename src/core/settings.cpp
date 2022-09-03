@@ -128,6 +128,7 @@ void Settings::init()
     EnableAutoSort = value("EnableAutoSort", false).toBool();
     EnableAutoBackgroundChange = value("EnableAutoBackgroundChange", true).toBool();
     NullificationCountDown = value("NullificationCountDown", 8).toInt();
+    //WarmupCountDown = value("WarmupCountDown", 8).toInt();
     //LuckCardTimes = value("LuckCardTimes", 0).toInt();
     OperationTimeout = value("OperationTimeout", 15).toInt();
     OperationNoLimit = value("OperationNoLimit", false).toBool();
@@ -137,6 +138,7 @@ void Settings::init()
     BGMVolume = value("BGMVolume", 1.0f).toFloat();
     EffectVolume = value("EffectVolume", 1.0f).toFloat();
     HideRecordBubble = value("HideRecordBubble", false).toBool();
+    NoInteractive = value("NoInteractive", false).toBool();
 
     BackgroundImage = value("BackgroundImage", "image/system/backdrop/new-version.jpg").toString();
 

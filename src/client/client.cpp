@@ -49,6 +49,7 @@ Client::Client(QObject *parent, const QString &filename)
     m_callbacks[S_COMMAND_MOVE_FOCUS] = &Client::moveFocus;
     m_callbacks[S_COMMAND_SET_EMOTION] = &Client::setEmotion;
     m_callbacks[S_COMMAND_INVOKE_SKILL] = &Client::skillInvoked;
+    m_callbacks[S_COMMAND_INVOKE_WARMUP_SKILL] = &Client::skillInvoked;
     m_callbacks[S_COMMAND_SHOW_ALL_CARDS] = &Client::showAllCards;
     m_callbacks[S_COMMAND_SKILL_GONGXIN] = &Client::askForGongxin;
     m_callbacks[S_COMMAND_LOG_EVENT] = &Client::handleGameEvent;
@@ -96,6 +97,7 @@ Client::Client(QObject *parent, const QString &filename)
     m_interactions[S_COMMAND_CHOOSE_KINGDOM] = &Client::askForKingdom;
     m_interactions[S_COMMAND_RESPONSE_CARD] = &Client::askForCardOrUseCard;
     m_interactions[S_COMMAND_INVOKE_SKILL] = &Client::askForSkillInvoke;
+    m_interactions[S_COMMAND_INVOKE_WARMUP_SKILL] = &Client::askForSkillInvoke;
     m_interactions[S_COMMAND_MULTIPLE_CHOICE] = &Client::askForChoice;
     m_interactions[S_COMMAND_NULLIFICATION] = &Client::askForNullification;
     m_interactions[S_COMMAND_SHOW_CARD] = &Client::askForCardShow;
@@ -814,6 +816,8 @@ void Client::onPlayerInvokeSkill(bool invoke)
 {
     if (skill_name == "surrender")
         replyToServer(S_COMMAND_SURRENDER, invoke);
+    else if (Sanguosha->getSkill(skill_name) && Sanguosha->getSkill(skill_name)->isWarmupSkill())
+        replyToServer(S_COMMAND_INVOKE_WARMUP_SKILL, invoke);
     else
         replyToServer(S_COMMAND_INVOKE_SKILL, invoke);
     setStatus(NotActive);
@@ -1896,6 +1900,8 @@ void Client::speak(const QVariant &speak)
     if (text.startsWith("bubble:")) {
         show_in_chatbox = false;
         text = text.remove(0, 7);
+    } else if (text.startsWith(".SendEgg=") || text.startsWith(".SendFlower=")) {
+        return;
     }
 
     static const QString prefix("<img width=16 height=16 src='image/system/chatface/");

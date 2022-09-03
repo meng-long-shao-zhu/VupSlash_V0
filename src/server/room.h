@@ -114,7 +114,7 @@ public:
     void sendJudgeResult(const JudgeStruct *judge);
     QList<int> getNCards(int n, bool update_pile_number = true, bool isTop = true);
     ServerPlayer *getLord() const;
-    QList<int> askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, GuanxingType guanxing_type = GuanxingBothSides, bool sendLod = true, int up_limit = 0, int down_limit = 0);
+    QList<int> askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, GuanxingType guanxing_type = GuanxingBothSides, bool sendLod = true, int up_limit = -1, int down_limit = -1);
     void returnToTopDrawPile(const QList<int> &cards);
     void returnToEndDrawPile(const QList<int> &cards);
     int doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target, QList<int> enabled_ids = QList<int>(), QString skill_name = "gongxin");
@@ -139,6 +139,7 @@ public:
     void addRound(int add = 1);
     void setCardUnknown(const Card *card, bool can = false, ServerPlayer *who = NULL);
     void setCardUnknown(int card_id, bool can = false, ServerPlayer *who = NULL);
+    void turnBroken();
 
     void retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge,
         const QString &skill_name, bool exchange = false);

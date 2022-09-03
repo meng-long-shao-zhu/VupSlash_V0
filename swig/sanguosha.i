@@ -94,7 +94,7 @@ public:
     int getLostHp() const;
     bool isWounded() const;
     General::Gender getGender() const;
-    virtual void setGender(General::Gender gender);
+    virtual void setGender(General::Gender gender = General::Sexless);
     bool isMale() const;
     bool isFemale() const;
     bool isNeuter() const;
@@ -266,6 +266,7 @@ public:
     void setJudgeArea(bool flag);
     bool canPindian(const Player *target, bool except_self = true) const;
     bool canPindian(bool except_self = true) const;
+    bool canPintian() const;
 	bool canBePindianed(bool except_self = true) const;
     bool canEffect(const Player *target, QString skill_name) const;
     bool isYourFriend(const Player *fri, QString mode = "") const;
@@ -354,6 +355,7 @@ public:
     bool pindian(ServerPlayer *target, const char *reason, const Card *card1 = NULL);
     int pindianInt(ServerPlayer *target, const char *reason, const Card *card1 = NULL);
     PindianStruct *PinDian(ServerPlayer *target, const char *reason, const Card *card1 = NULL);
+    PindianStruct *PinTian(const char *reason, const Card *card1 = NULL);
     void turnOver();
     void play(QList<Player::Phase> set_phases = QList<Player::Phase>());
     bool changePhase(Player::Phase from, Player::Phase to);
@@ -858,6 +860,8 @@ enum TriggerEvent {
 	BeforeGameOver,
 	BeforeCardFinished,
 	BeforeRoundStart,
+	BeforeDelayedTrickEffect,
+	DyingToDeath,
 
 	Appear, // For yinni only
 
@@ -1148,6 +1152,8 @@ public:
 	bool isHideSkill() const;
 	bool isLevelSkill() const;
 	void setLevelSkill(bool can = false);
+	bool isWarmupSkill() const;
+	void setWarmupSkill(bool can = false);
     QString getDescription() const;
     bool isVisible() const;
 
@@ -1267,7 +1273,7 @@ public:
     void sendJudgeResult(const JudgeStruct *judge);
     QList<int> getNCards(int n, bool update_pile_number = true, bool isTop = true);
     ServerPlayer *getLord() const;
-    QList<int> askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, GuanxingType guanxing_type = GuanxingBothSides, bool sendLod = true, int up_limit = 0, int down_limit = 0);
+    QList<int> askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, GuanxingType guanxing_type = GuanxingBothSides, bool sendLod = true, int up_limit = -1, int down_limit = -1);
     void returnToTopDrawPile(const QList<int> &cards);
 	void returnToEndDrawPile(const QList<int> &cards);
     int doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target, QList<int> enabled_ids = QList<int>(), const char *skill_name = "gongxin");
@@ -1292,6 +1298,7 @@ public:
 	void addRound(int add = 1);
     void setCardUnknown(const Card *card, bool can = false, ServerPlayer *who = NULL);
     void setCardUnknown(int card_id, bool can = false, ServerPlayer *who = NULL);
+    void turnBroken();
     void retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge, const char *skill_name, bool exchange = false);
     void notifySkillInvoked(ServerPlayer *player, const char *skill_name);
     void broadcastSkillInvoke(const char *skillName);

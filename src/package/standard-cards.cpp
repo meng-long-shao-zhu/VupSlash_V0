@@ -1387,8 +1387,8 @@ public:
 
         if (damage.card && damage.card->isKindOf("Slash") /*damage.card->objectName() == "slash"*/
             && damage.to->getMark("Equips_of_Others_Nullified_to_You") == 0
-            && !damage.to->isNude() && damage.by_user
-            && !damage.chain && !damage.transfer /*&& player->askForSkillInvoke("ice_sword", data) && damage.nature == DamageStruct::Normal*/) {
+            //&& !damage.to->isNude()
+            && damage.by_user && !damage.chain && !damage.transfer /*&& player->askForSkillInvoke("ice_sword", data) && damage.nature == DamageStruct::Normal*/) {
             room->sendCompulsoryTriggerLog(player, "ice_sword");
             room->setEmotion(player, "weapon/ice_sword");
             /*

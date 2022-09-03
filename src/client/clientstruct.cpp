@@ -18,6 +18,8 @@ time_t ServerInfoStruct::getCommandTimeout(QSanProtocol::CommandType command, QS
         timeOut = OperationTimeout * 2000;
     else if (command == QSanProtocol::S_COMMAND_NULLIFICATION)
         timeOut = NullificationCountDown * 1000;
+    else if (command == QSanProtocol::S_COMMAND_INVOKE_WARMUP_SKILL)
+        timeOut = NullificationCountDown * 1000;
     else
         timeOut = OperationTimeout * 1000;
 
@@ -45,6 +47,7 @@ bool ServerInfoStruct::parse(const QString &_str)
         }
         OperationTimeout = str.at(2).toInt();
         NullificationCountDown = str.at(3).toInt();
+        //WarmupCountDown = str.at(6).toInt();
 
         QStringList ban_packages = str.at(4).split("+");
         QList<const Package *> packages = Sanguosha->findChildren<const Package *>();

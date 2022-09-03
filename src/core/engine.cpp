@@ -1074,6 +1074,7 @@ QString Engine::getSetupString() const
         << mode
         << QString::number(timeout)
         << QString::number(Config.NullificationCountDown)
+        //<< QString::number(Config.WarmupCountDown)
         << Sanguosha->getBanPackages().join("+")
         << flags;
 
@@ -1357,7 +1358,7 @@ QStringList Engine::getRandomGenerals(int count, const QSet<QString> &ban_set, c
     QStringList all_generals = getLimitedGeneralNames(kingdom);
     QSet<QString> general_set = all_generals.toSet();
 
-    Q_ASSERT(all_generals.count() >= count);
+    Q_ASSERT(all_generals.count() >= count || count == -1);
 
     if (Config.EnableBasara)
         general_set = general_set.subtract(Config.value("Banlist/Basara", "").toStringList().toSet());
@@ -1393,7 +1394,7 @@ QStringList Engine::getRandomGenerals(int count, const QSet<QString> &ban_set, c
     qShuffle(all_generals);
 
     QStringList general_list = all_generals.mid(0, count);
-    Q_ASSERT(general_list.count() == count);
+    Q_ASSERT(general_list.count() == count || count == -1);
 
     return general_list;
 }
@@ -1497,8 +1498,9 @@ const Skill *Engine::getSkill(const EquipCard *equip) const
     const Skill *skill;
     if (equip == NULL)
         skill = NULL;
-    else
-        skill = /*Sanguosha->*/getSkill(equip->objectName());
+    else {
+        skill = getSkill(equip->objectName());
+    }
 
     return skill;
 }

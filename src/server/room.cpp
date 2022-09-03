@@ -70,6 +70,7 @@ void Room::initCallbacks()
     m_requestResponsePair[S_COMMAND_EXCHANGE_CARD] = S_COMMAND_DISCARD_CARD;
     m_requestResponsePair[S_COMMAND_CHOOSE_DIRECTION] = S_COMMAND_MULTIPLE_CHOICE;
     m_requestResponsePair[S_COMMAND_LUCK_CARD] = S_COMMAND_INVOKE_SKILL;
+    m_requestResponsePair[S_COMMAND_INVOKE_WARMUP_SKILL] = S_COMMAND_INVOKE_SKILL;
 
     // client request handlers
     m_callbacks[S_COMMAND_SURRENDER] = &Room::processRequestSurrender;
@@ -1180,7 +1181,11 @@ bool Room::notifyMoveFocus(const QList<ServerPlayer *> &players, CommandType com
 bool Room::askForSkillInvoke(ServerPlayer *player, const QString &skill_name, const QVariant &data, bool notify)
 {
     tryPause();
-    notifyMoveFocus(player, S_COMMAND_INVOKE_SKILL);
+    CommandType command = S_COMMAND_INVOKE_SKILL;
+    if (Sanguosha->getSkill(skill_name) && Sanguosha->getSkill(skill_name)->isWarmupSkill()) {
+        command = S_COMMAND_INVOKE_WARMUP_SKILL;
+    }
+    notifyMoveFocus(player, command);
 
     bool invoked = false;
     AI *ai = player->getAI();
@@ -1201,7 +1206,7 @@ bool Room::askForSkillInvoke(ServerPlayer *player, const QString &skill_name, co
             skillCommand << skill_name << data_str;
         }
 
-        if (!doRequest(player, S_COMMAND_INVOKE_SKILL, skillCommand, true)) {
+        if (!doRequest(player, command, skillCommand, true)) {
             invoked = false;
         } else {
             QVariant clientReply = player->getClientReply();
@@ -1213,7 +1218,7 @@ bool Room::askForSkillInvoke(ServerPlayer *player, const QString &skill_name, co
     if (invoked && notify) {
         JsonArray msg;
         msg << skill_name << player->objectName();
-        doBroadcastNotify(S_COMMAND_INVOKE_SKILL, msg);
+        doBroadcastNotify(command, msg);
         notifySkillInvoked(player, skill_name);
     }
 
@@ -1625,6 +1630,17 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
             JsonArray clientReply = player->getClientReply().value<JsonArray>();
             if (success && !clientReply.isEmpty())
                 card = Card::Parse(clientReply[0].toString());
+        }
+    }
+
+    if (card == NULL && pattern.endsWith("!")) {
+        ExpPattern exp_pattern(pattern.left(pattern.length()-1));
+        QList<const Card *> cards = player->getCards("he");
+        foreach(const Card *cd, cards) {
+            if (exp_pattern.match(player, cd)) {
+                card = cd;
+                break;
+            }
         }
     }
 
@@ -3868,7 +3884,7 @@ void Room::speakCommand(ServerPlayer *player, const QVariant &arg)
                                    doNotify(player, S_COMMAND_SPEAK, nbbody);\
                                }
     bool broadcast = true;
-    if (player && Config.EnableCheat) {
+    if (player /*&& Config.EnableCheat*/) {
         QString sentence = QString::fromUtf8(QByteArray::fromBase64(arg.toString().toLatin1()));
         if (sentence == ".BroadcastRoles") {
             _NO_BROADCAST_SPEAKING
@@ -3966,6 +3982,24 @@ void Room::speakCommand(ServerPlayer *player, const QVariant &arg)
                 JsonArray body;
                 body << zuoci->objectName() << huashen;
                 doNotify(player, S_COMMAND_SPEAK, body);
+            }
+        } else if (sentence.startsWith(".SendFlower=")) {
+            _NO_BROADCAST_SPEAKING
+                QString name = sentence.mid(12);
+            foreach (ServerPlayer *p, m_alivePlayers) {
+                if (p->objectName() == name || name != player->objectName()) {
+                    doAnimate(S_ANIMATE_FLOWER, player->objectName(), name);
+                    break;
+                }
+            }
+        } else if (sentence.startsWith(".SendEgg=")) {
+            _NO_BROADCAST_SPEAKING
+                QString name = sentence.mid(9);
+            foreach (ServerPlayer *p, m_alivePlayers) {
+                if (p->objectName() == name || name != player->objectName()) {
+                    doAnimate(S_ANIMATE_EGG, player->objectName(), name);
+                    break;
+                }
             }
         } else if (sentence.startsWith(".SetAIDelay=")) {
             _NO_BROADCAST_SPEAKING
@@ -6508,14 +6542,14 @@ QList<int> Room::askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, Gu
     tryPause();
     notifyMoveFocus(zhuge, S_COMMAND_SKILL_GUANXING);
 
-    if (guanxing_type == GuanxingBothSides && up_limit == 0)
+    if (guanxing_type == GuanxingBothSides && up_limit == -1)
         up_limit = cards.length();
     else if (guanxing_type == GuanxingUpOnly)
         up_limit = cards.length();
     else if (guanxing_type == GuanxingDownOnly)
         up_limit = 0;
 
-    if (guanxing_type == GuanxingBothSides && down_limit == 0)
+    if (guanxing_type == GuanxingBothSides && down_limit == -1)
         down_limit = cards.length();
     else if (guanxing_type == GuanxingUpOnly)
         down_limit = 0;
@@ -6709,7 +6743,7 @@ int Room::doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target, QList<int> e
 
 const Card *Room::askForPindian(ServerPlayer *player, ServerPlayer *from, ServerPlayer *to, const QString &reason)
 {
-    if (!from->isAlive() || !to->isAlive())
+    if (!from->isAlive() || (to && !to->isAlive()))
         return NULL;
     Q_ASSERT(!player->isKongcheng());
     tryPause();
@@ -6724,7 +6758,7 @@ const Card *Room::askForPindian(ServerPlayer *player, ServerPlayer *from, Server
         return ai->askForPindian(from, reason);
     }
 
-    bool success = doRequest(player, S_COMMAND_PINDIAN, JsonArray() << from->objectName() << to->objectName(), true);
+    bool success = doRequest(player, S_COMMAND_PINDIAN, JsonArray() << from->objectName() << (to ? to->objectName() : "drawPile"), true);
 
     JsonArray clientReply = player->getClientReply().value<JsonArray>();
     if (!success || clientReply.isEmpty() || !JsonUtils::isString(clientReply[0])) {
@@ -8169,6 +8203,12 @@ QString Room::askForChooseCardName(ServerPlayer *player, const QString &type, bo
         if (!type_list[1].contains("t") && c->isNDTrick()) continue;
         if (!type_list[1].contains("d") && c->isKindOf("DelayedTrick")) continue;
         if (!type_list[1].contains("e") && c->isKindOf("EquipCard")) continue;
+        if (type_list[1].contains("e") && c->isKindOf("EquipCard") && type_list.length() > 2 && type_list[2] != "") {
+            if (!type_list[2].contains("w") && c->isKindOf("Weapon")) continue;
+            if (!type_list[2].contains("a") && c->isKindOf("Armor")) continue;
+            if (!type_list[2].contains("h") && c->isKindOf("Horse")) continue;
+            if (!type_list[2].contains("t") && c->isKindOf("Treasure")) continue;
+        }
         if (alllist.contains(c->objectName())) continue;
         alllist << c->objectName();
         ids << id;
@@ -8232,4 +8272,14 @@ void Room::setCardUnknown(int card_id, bool can, ServerPlayer *who)
         doNotify(who, S_COMMAND_SET_CARD_UNKNOWN, arg);
     else
         doBroadcastNotify(S_COMMAND_SET_CARD_UNKNOWN, arg);
+}
+
+void Room::turnBroken()
+{
+    LogMessage log;
+    log.type = "#SkipAllPhase";
+    log.from = current;
+    sendLog(log);
+
+    throw TurnBroken;
 }

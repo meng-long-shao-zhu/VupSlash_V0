@@ -613,6 +613,8 @@ enum TriggerEvent
     BeforeGameOver,
     BeforeCardFinished,
     BeforeRoundStart,
+    BeforeDelayedTrickEffect,
+    DyingToDeath,
 
     Appear, // For yinni only
 

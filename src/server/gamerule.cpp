@@ -58,6 +58,20 @@ void GameRule::onPhaseProceed(ServerPlayer *player) const
         QList<const Card *> tricks = player->getJudgingArea();
         while (!tricks.isEmpty() && player->isAlive()) {
             const Card *trick = tricks.takeLast();
+            /*if (trick->isKindOf("Indulgence")) {
+                foreach(ServerPlayer *p, room->getAlivePlayers()) {
+                    if (player->getMark("jichong_from_"+p->objectName()+"_id_"+QString::number(trick->getEffectiveId())) > 0) {
+                        player->setFlags("jichong_from_"+p->objectName());
+                    }
+                }
+            }*/
+            QVariant data = QVariant::fromValue(trick);
+            bool broken = room->getThread()->trigger(BeforeDelayedTrickEffect, room, player, data);
+            if (broken) {
+                //CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, QString());
+                //room->throwCard(trick, reason, NULL);
+                continue;
+            }
             bool on_effect = room->cardEffect(trick, NULL, player);
             if (!on_effect)
                 trick->onNullified(player);
@@ -658,8 +672,13 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
     }
     case AskForPeachesDone: {
         if (player->getHp() <= 0 && player->isAlive()) {
-            DyingStruct dying = data.value<DyingStruct>();
-            room->killPlayer(player, dying.damage, dying.hplost);
+            if (room->getThread()->trigger(DyingToDeath, room, player, data)) {
+                room->removeTag("LastDyingData");
+                room->setPlayerFlag(player, "-Global_Dying");
+            } else {
+                DyingStruct dying = data.value<DyingStruct>();
+                room->killPlayer(player, dying.damage, dying.hplost);
+            }
         }
 
         break;
@@ -720,6 +739,10 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
         case DamageStruct::Thunder: change_str.append("T"); break;
         case DamageStruct::Ice: change_str.append("I"); break;
         default: break;
+        }
+
+        if (damage.damage > 0) {
+            room->notifySkillInvoked(damage.to, QString("-"+QString::number(damage.damage)));
         }
 
         QString audio_name = "";
@@ -936,6 +959,14 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
             if (selected.length() > 0) {
                 QString general_name = room->askForGeneral(player, selected);
                 room->revivePlayer(player);
+                foreach(const Skill *skill, player->getSkillList(false, true)) {
+                    room->detachSkillFromPlayer(player, skill->objectName(), false, false, false, true);
+                    foreach(const Skill *sub_skill, Sanguosha->getRelatedSkills(skill->objectName())) {
+                        room->detachSkillFromPlayer(player, sub_skill->objectName(), false, false, false, true);
+                    }
+                }
+                player->obtainEquipArea();
+                player->obtainJudgeArea();
                 room->changeHero(player, general_name, true, true);
                 room->setPlayerProperty(player, "kingdom", player->getRole() == "loyalist" ? "team_fire" : "team_ice");
                 player->clearSelected();

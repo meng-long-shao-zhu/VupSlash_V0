@@ -76,7 +76,7 @@ public:
     int getLostHp() const;
     bool isWounded() const;
     General::Gender getGender() const;
-    virtual void setGender(General::Gender gender);
+    virtual void setGender(General::Gender gender = General::Sexless);
     bool isMale() const;
     bool isFemale() const;
     bool isNeuter() const;
@@ -251,6 +251,7 @@ public:
     void setJudgeArea(bool flag);
     bool canPindian(const Player *target, bool except_self = true) const;
     bool canPindian(bool except_self = true) const;
+    bool canPintian() const;
     bool canBePindianed(bool except_self = true) const;
     bool canEffect(const Player *target, QString skill_name) const;
     bool isYourFriend(const Player *fri, QString mode = "") const;

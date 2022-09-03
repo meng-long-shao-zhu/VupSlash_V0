@@ -81,7 +81,7 @@ public:
     enum SkillType
     {
         S_SKILL_ATTACHEDLORD, S_SKILL_PROACTIVE, S_SKILL_FREQUENT, S_SKILL_COMPULSORY,
-        S_SKILL_AWAKEN, S_SKILL_ONEOFF_SPELL, S_SKILL_CHANGE, S_SKILL_CHANGE_FREQUENT, S_NUM_SKILL_TYPES
+        S_SKILL_AWAKEN, S_SKILL_ONEOFF_SPELL, S_SKILL_CHANGE, S_SKILL_CHANGE_FREQUENT, S_SKILL_FREQUENT_WARMUP, S_NUM_SKILL_TYPES
     };
 
     inline static QString getSkillTypeString(SkillType type)
@@ -95,6 +95,7 @@ public:
         else if (type == QSanSkillButton::S_SKILL_ATTACHEDLORD) arg1 = "attachedlord";
         else if (type == QSanSkillButton::S_SKILL_CHANGE) arg1 = "change";
         else if (type == QSanSkillButton::S_SKILL_CHANGE_FREQUENT) arg1 = "changeF";
+        else if (type == QSanSkillButton::S_SKILL_FREQUENT_WARMUP) arg1 = "warmup";
         return arg1;
     }
     virtual void setSkill(const Skill *skill);

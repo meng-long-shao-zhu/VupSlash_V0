@@ -120,6 +120,8 @@ public slots:
     void updateReformState();
     void showDistance();
     void updateScreenName(const QString &screenName);
+    void sendFlower();
+    void sendEgg();
     virtual void refresh(bool killed = false);
 
 protected:
@@ -163,6 +165,7 @@ protected:
     virtual void addDelayedTricks(QList<CardItem *> &judges);
     virtual QList<CardItem *> removeDelayedTricks(const QList<int> &cardIds);
     virtual void updateDelayedTricks();
+    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 
     // This is a dirty but easy design, we require children class to call create controls after
     // everything specific to the children has been setup (such as the frames that we attach
@@ -238,6 +241,7 @@ protected:
     QGraphicsItem *_m_huashenItem;
     QString _m_huashenGeneralName;
     QString _m_huashenSkillName;
+    QMenu *menu;
 
 protected slots:
     virtual void _onEquipSelectChanged();

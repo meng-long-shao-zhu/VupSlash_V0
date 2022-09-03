@@ -317,7 +317,7 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool 
     ui->tableWidget->clearContents();
     ui->tableWidget->setRowCount(copy_generals.length());
     ui->tableWidget->setIconSize(QSize(20, 20));
-    QIcon lord_icon("image/system/roles/lord.png");
+    QIcon lord_icon("image/system/roles/lord-1.png");
     QIcon bonus_star_icon("image/system/bonus_star.png");
 
     for (int i = 0; i < copy_generals.length(); i++) {

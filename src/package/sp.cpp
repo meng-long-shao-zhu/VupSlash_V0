@@ -49,9 +49,11 @@ public:
 
         ServerPlayer *target = room->askForPlayerChosen(player, targets, objectName(), "@sp_moonspear", true, true);
         if (!target) return false;
-        room->setEmotion(player, "weapon/moonspear");
+        room->setEmotion(player, "weapon/new_moonspear");
         room->getThread()->delay(250);
-        room->broadcastSkillInvoke("audio_effect", 29);
+        room->broadcastSkillInvoke("audio_effect", 31);
+        room->getThread()->delay(250);
+        room->broadcastSkillInvoke("guanxi", 4);
         if (!room->askForCard(target, "jink", "@moon-spear-jink", QVariant(), Card::MethodResponse, player)){
             DamageStruct dmg = DamageStruct(objectName(), player, target);
             if (player->getWeapon() && player->getWeapon()->isKindOf("SPMoonSpear"))

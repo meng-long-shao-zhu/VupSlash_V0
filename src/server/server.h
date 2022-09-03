@@ -120,6 +120,7 @@ private:
     QLineEdit *port_edit;
     QSpinBox *game_start_spinbox;
     QSpinBox *nullification_spinbox;
+    //QSpinBox *warmup_spinbox;
     QCheckBox *minimize_dialog_checkbox;
     QCheckBox *ai_enable_checkbox;
     QCheckBox *ai_chat_checkbox;

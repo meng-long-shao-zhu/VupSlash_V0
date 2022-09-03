@@ -914,6 +914,8 @@ bool QSanRoomSkin::_loadLayoutConfig(const QVariant &layout)
     tryParse(config["cardMoveArea"], _m_photoLayout.m_cardMoveRegion);
     tryParse(config["skillNameArea"], _m_photoLayout.m_skillNameArea);
     _m_photoLayout.m_skillNameFont.tryParse(config["skillNameFont"]);
+    tryParse(config["damageArea"], _m_photoLayout.m_damageArea);
+    _m_photoLayout.m_damageFont.tryParse(config["damageFont"]);
     tryParse(config["canvasArea"], _m_photoLayout.m_boundingRect);
 
     config = layoutConfig[S_SKIN_KEY_DASHBOARD].value<JsonObject>();
@@ -965,6 +967,7 @@ bool QSanRoomSkin::_loadLayoutConfig(const QVariant &layout)
         case QSanInvokeSkillButton::S_SKILL_ATTACHEDLORD: key = "attachedlordFontColor"; break;
         case QSanInvokeSkillButton::S_SKILL_CHANGE: key = "changeFontColor"; break;
         case QSanInvokeSkillButton::S_SKILL_CHANGE_FREQUENT: key = "changeFontColor"; break;
+        case QSanInvokeSkillButton::S_SKILL_FREQUENT_WARMUP: key = "frequentFontColor"; break;
         default:
             Q_ASSERT(false);
             break;

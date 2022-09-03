@@ -146,6 +146,7 @@ namespace QSanProtocol {
         S_COMMAND_SELECT_FINISHED,
         S_COMMAND_SET_CARD_UNKNOWN,
         S_COMMAND_KILL_SELECTED,
+        S_COMMAND_INVOKE_WARMUP_SKILL,
     };
 
     enum GameEventType
@@ -186,7 +187,9 @@ namespace QSanProtocol {
         S_ANIMATE_FLIP,
         S_ANIMATE_DIE_THROW,
         S_ANIMATE_REVIVE,
-        S_ANIMATE_PIC_ANIMATION
+        S_ANIMATE_PIC_ANIMATION,
+        S_ANIMATE_FLOWER,
+        S_ANIMATE_EGG
     };
 
     enum Game3v3ChooseOrderCommand

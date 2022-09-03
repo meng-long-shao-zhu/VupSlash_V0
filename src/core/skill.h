@@ -33,6 +33,8 @@ public:
     bool isHideSkill() const;
     bool isLevelSkill() const;
     void setLevelSkill(bool can = false);
+    bool isWarmupSkill() const;
+    void setWarmupSkill(bool can = false);
     virtual bool shouldBeVisible(const Player *Self) const; // usually for attached skill
     QString getDescription() const;
     QString getNotice(int index) const;
@@ -55,6 +57,7 @@ protected:
     bool limited_skill;
     bool hide_skill;
     bool level_skill;
+    bool warmup_skill;
 
 private:
     bool lord_skill;

@@ -423,10 +423,18 @@ void FireAttack::onEffect(const CardEffectStruct &effect) const
     QString prompt = QString("@fire-attack:%1::%2").arg(effect.to->objectName()).arg(suit_str);
     if (effect.from->isAlive()) {
         const Card *card_to_throw = room->askForCard(effect.from, pattern, prompt);
-        if (card_to_throw)
-            room->damage(DamageStruct(this, effect.from, effect.to, 1, DamageStruct::Fire));
-        else
+        if (card_to_throw) {
+            int damage = 1;
+            if (effect.from->hasSkill("chiling") && card_to_throw->hasFlag("chiling_select_card")) {
+                room->setCardFlag(card_to_throw, "-chiling_select_card");
+                room->sendCompulsoryTriggerLog(effect.from, "chiling");
+                room->setEmotion(effect.from, "chiling_"+QString::number((qrand() % 2) + 1));
+                damage = damage + 1;
+            }
+            room->damage(DamageStruct(this, effect.from, effect.to, damage, DamageStruct::Fire));
+        } else {
             effect.from->setFlags("FireAttackFailed_" + effect.to->objectName()); // For AI
+        }
     }
 
     if (card->isVirtualCard())

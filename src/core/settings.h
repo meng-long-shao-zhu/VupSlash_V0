@@ -24,6 +24,7 @@ public:
     QString ServerName;
     int CountDownSeconds;
     int NullificationCountDown;
+    //int WarmupCountDown;
     //int LuckCardTimes;
     bool EnableMinimizeDialog;
     QString GameMode;
@@ -85,6 +86,7 @@ public:
     float BGMVolume;
     float EffectVolume;
     bool HideRecordBubble;
+    bool NoInteractive;
 
     QString BackgroundImage;
     int BubbleChatBoxKeepTime;

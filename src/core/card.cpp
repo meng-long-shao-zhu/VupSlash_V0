@@ -695,7 +695,7 @@ void Card::onUse(Room *room, const CardUseStruct &use) const
     room->sortByActionOrder(card_use.to);
 
     QList<ServerPlayer *> targets = card_use.to;
-    if (room->getMode() == "06_3v3" && (isKindOf("AOE") || isKindOf("GlobalEffect")))
+    if ((room->getMode() == "06_3v3" && (isKindOf("AOE") || isKindOf("GlobalEffect"))) || (card_use.from && card_use.from->isAlive() && card_use.from->hasSkills("xiexing") && card_use.to.length() > 1))
         room->reverseFor3v3(this, card_use.from, targets);
     card_use.to = targets;
 

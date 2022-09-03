@@ -1139,15 +1139,36 @@ bool Player::hasEquipSkill(const QString &skill_name) const
         const Weapon *weaponc = qobject_cast<const Weapon *>(weapon->getRealCard());
         if (Sanguosha->getSkill(weaponc) && Sanguosha->getSkill(weaponc)->objectName() == skill_name)
             return true;
+        if (Sanguosha->getSkill(weaponc->objectName()+"_skill") && Sanguosha->getSkill(weaponc->objectName()+"_skill")->objectName() == skill_name)
+            return true;
     }
     if (armor) {
         const Armor *armorc = qobject_cast<const Armor *>(armor->getRealCard());
         if (Sanguosha->getSkill(armorc) && Sanguosha->getSkill(armorc)->objectName() == skill_name)
             return true;
+        if (Sanguosha->getSkill(armorc->objectName()+"_skill") && Sanguosha->getSkill(armorc->objectName()+"_skill")->objectName() == skill_name)
+            return true;
     }
+    //用马就会炸……
+    /*if (defensive_horse) {
+        const Armor *defensive_horsec = qobject_cast<const Armor *>(defensive_horse->getRealCard());
+        if (Sanguosha->getSkill(defensive_horsec) && Sanguosha->getSkill(defensive_horsec)->objectName() == skill_name)
+            return true;
+        if (Sanguosha->getSkill(defensive_horsec->objectName()+"_skill") && Sanguosha->getSkill(defensive_horsec->objectName()+"_skill")->objectName() == skill_name)
+            return true;
+    }
+    if (offensive_horse) {
+        const Armor *offensive_horsec = qobject_cast<const Armor *>(offensive_horse->getRealCard());
+        if (Sanguosha->getSkill(offensive_horsec) && Sanguosha->getSkill(offensive_horsec)->objectName() == skill_name)
+            return true;
+        if (Sanguosha->getSkill(offensive_horsec->objectName()+"_skill") && Sanguosha->getSkill(offensive_horsec->objectName()+"_skill")->objectName() == skill_name)
+            return true;
+    }*/
     if (treasure) {
         const Treasure *treasurec = qobject_cast<const Treasure *>(treasure->getRealCard());
         if (Sanguosha->getSkill(treasurec) && Sanguosha->getSkill(treasurec)->objectName() == skill_name)
+            return true;
+        if (Sanguosha->getSkill(treasurec->objectName()+"_skill") && Sanguosha->getSkill(treasurec->objectName()+"_skill")->objectName() == skill_name)
             return true;
     }
     return false;
@@ -1224,6 +1245,9 @@ QString Player::getSkillDescription() const
     QString kingdom_str = QString("<font color=%1>%2</font>     ").arg(color_str).arg(Sanguosha->translate(kingdom));
     kingdom_str.prepend(QString("<img src='image/kingdom/icon/%1.png' height=17/>    ").arg(kingdom));
     property_str.append(kingdom_str);
+    property_str.append("</td></tr><tr><th>" + Sanguosha->translate("PLAYER_DESCRIPTION_HP") + "</th><td>");
+    QString hp_str = QString("%1 / %2").arg(QString::number(hp)).arg(QString::number(max_hp));
+    property_str.append(hp_str);
     property_str.append("</td></tr></table><br/><br/>");
 
     QList<const Skill *> skill_list = getVisibleSkillList();
@@ -1264,10 +1288,10 @@ QString Player::getSkillDescription() const
 
     if (description.isEmpty())
         description = tr("No skills");
-    else {
+    //else {
         description.prepend(property_str);
 
-    }
+    //}
     return description;
 }
 
@@ -1618,6 +1642,13 @@ bool Player::canBePindianed(bool except_self) const
             return true;
     }
     return false;
+}
+
+bool Player::canPintian() const
+{
+    if (isDead() || isKongcheng()) return false;
+    //if (isPindianProhibited(NULL)) return false;
+    return true;
 }
 
 bool Player::canEffect(const Player *target, QString skill_name) const  //判断target是否不受player技能的影响，暂时不考虑“不受自己技能影响”，这种太麻烦了

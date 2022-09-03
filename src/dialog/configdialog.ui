@@ -461,7 +461,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>270</y>
+       <y>300</y>
        <width>481</width>
        <height>23</height>
       </rect>
@@ -492,7 +492,7 @@
        <x>11</x>
        <y>11</y>
        <width>481</width>
-       <height>241</height>
+       <height>271</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -578,13 +578,26 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="noInteractiveCheckBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>禁用互动表情（送花、投蛋等）</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
     <widget class="QGroupBox" name="groupBoxRecorder">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>310</y>
+       <y>340</y>
        <width>481</width>
        <height>61</height>
       </rect>
