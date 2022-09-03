@@ -239,6 +239,8 @@ void PlayerCardContainer::updateAvatar()
     }
     if (general != NULL) {
         _m_avatarArea->setToolTip(m_player->getSkillDescription());
+        if(_m_smallAvatarArea->toolTip() != "")
+            _m_smallAvatarArea->setToolTip(m_player->getSkillDescription());
         QString name = general->objectName();
         // for luboyan
         if (name == "luboyan" && m_player->isFemale())
@@ -350,8 +352,9 @@ void PlayerCardContainer::updateHp()
     _m_hpBox->update();
     if (m_player->getHp() > 0 || m_player->getMaxHp() == 0)
         _m_saveMeIcon->setVisible(false);
-    _m_smallAvatarArea->setToolTip(m_player->getSkillDescription());
     _m_avatarArea->setToolTip(m_player->getSkillDescription());
+    if(_m_smallAvatarArea->toolTip() != "")
+        _m_smallAvatarArea->setToolTip(m_player->getSkillDescription());
 }
 
 static bool CompareByNumber(const Card *card1, const Card *card2)
