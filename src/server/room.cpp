@@ -1663,6 +1663,8 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
         }
 
         if ((method == Card::MethodUse || method == Card::MethodResponse) && !isRetrial) {
+            if (!skill_name.isEmpty())
+                sendCompulsoryTriggerLog(player, skill_name);
             LogMessage log;
             log.card_str = card->toString();
             log.from = player;
@@ -5412,9 +5414,9 @@ void Room::moveCardsInToDrawpile(ServerPlayer *player, const Card *card, const Q
         card_ids << card->getEffectiveId();
     Q_ASSERT(!card_ids.isEmpty());
     int length = getDrawPile().length();
-    if (n <= 0) n = (qrand() % length) + 1;
-    if (n >= length || length == 0) return moveCardsToEndOfDrawpile(player, card_ids, skill_name, forceMoveVisible);
-    if (n == 1) return moveCardTo(card, NULL, Player::DrawPile, forceMoveVisible);
+    if (n <= 0 && length > 0) n = (qrand() % length) + 1;
+    if (n > length || length == 0) return moveCardsToEndOfDrawpile(player, card_ids, skill_name, forceMoveVisible);
+    if (n == 1 && length > 0) return moveCardTo(card, NULL, Player::DrawPile, forceMoveVisible);
     return moveCardsInToDrawpile(player, card_ids, skill_name, n, forceMoveVisible);
 }
 
@@ -5424,9 +5426,9 @@ void Room::moveCardsInToDrawpile(ServerPlayer *player, int card_id, const QStrin
     QList<int> card_ids;
     card_ids << card_id;
     int length = getDrawPile().length();
-    if (n <= 0) n = (qrand() % length) + 1;
-    if (n >= length || length == 0) return moveCardsToEndOfDrawpile(player, card_ids, skill_name, forceMoveVisible);
-    if (n == 1) return moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile, forceMoveVisible);
+    if (n <= 0 && length > 0) n = (qrand() % length) + 1;
+    if (n > length || length == 0) return moveCardsToEndOfDrawpile(player, card_ids, skill_name, forceMoveVisible);
+    if (n == 1 && length > 0) return moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile, forceMoveVisible);
     return moveCardsInToDrawpile(player, card_ids, skill_name, n, forceMoveVisible);
 }
 
@@ -5437,9 +5439,9 @@ void Room::moveCardsInToDrawpile(ServerPlayer *player, QList<int> card_ids, cons
         Q_ASSERT(id >= 0);
     }
     int length = getDrawPile().length();
-    if (n <= 0) n = (qrand() % length) + 1;
-    if (n >= length || length == 0) return moveCardsToEndOfDrawpile(player, card_ids, skill_name, forceMoveVisible);
-    if (n == 1) {
+    if (n <= 0 && length > 0) n = (qrand() % length) + 1;
+    if (n > length || length == 0) return moveCardsToEndOfDrawpile(player, card_ids, skill_name, forceMoveVisible);
+    if (n == 1 && length > 0) {
         DummyCard *dummy = new DummyCard;
         dummy->addSubcards(card_ids);
         dummy->deleteLater();
@@ -5546,8 +5548,10 @@ void Room::shuffleIntoDrawPile(ServerPlayer *player, QList<int> card_ids, const 
             dummy->addSubcard(id);
             card_ids.removeOne(id);
         }
+        CardMoveReason reason(CardMoveReason::S_REASON_SHUFFLE, player != NULL ? player->objectName() : QString(), skill_name, QString());
+        moveCardTo(dummy, NULL, Player::DrawPile, reason, forceMoveVisible);
         delete dummy;
-        return moveCardTo(dummy, NULL, Player::DrawPile, forceMoveVisible);
+        return;
     }
     QList<CardsMoveStruct> moves;
     CardMoveReason reason(CardMoveReason::S_REASON_SHUFFLE, player != NULL ? player->objectName() : QString(), skill_name, QString());
@@ -7044,6 +7048,7 @@ void Room::makeDamage(const QString &source, const QString &target, QSanProtocol
         nature_map[S_CHEAT_THUNDER_DAMAGE] = DamageStruct::Thunder;
         nature_map[S_CHEAT_FIRE_DAMAGE] = DamageStruct::Fire;
         nature_map[S_CHEAT_ICE_DAMAGE] = DamageStruct::Ice;
+        nature_map[S_CHEAT_LIGHT_DAMAGE] = DamageStruct::Light;
     }
 
     if (targetPlayer == NULL) return;

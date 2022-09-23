@@ -533,7 +533,8 @@ struct DamageStruct {
         Normal, // normal slash, duel and most damage caused by skill
         Fire,  // fire slash, fire attack and few damage skill (Yeyan, etc)
         Thunder, // lightning, thunder slash, and few damage skill (Leiji, etc)
-		Ice
+		Ice,
+		Light
     };
 
     ServerPlayer *from;
@@ -931,6 +932,7 @@ public:
     void addSubcards(const QList<const Card *> &cards);
     void addSubcards(const QList<int> &subcards_list);
     int subcardsLength() const;
+    void shuffleSubcards();
 
     virtual QString getType() const = 0;
     virtual QString getSubtype() const = 0;

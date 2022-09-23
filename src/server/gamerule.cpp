@@ -727,6 +727,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
         case DamageStruct::Fire: log.arg2 = "fire_nature"; break;
         case DamageStruct::Thunder: log.arg2 = "thunder_nature"; break;
         case DamageStruct::Ice: log.arg2 = "ice_nature"; break;
+        case DamageStruct::Light: log.arg2 = "light_nature"; break;
         }
 
         room->sendLog(log);
@@ -738,6 +739,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
         case DamageStruct::Fire: change_str.append("F"); break;
         case DamageStruct::Thunder: change_str.append("T"); break;
         case DamageStruct::Ice: change_str.append("I"); break;
+        case DamageStruct::Light: change_str.append("L"); break;
         default: break;
         }
 
@@ -758,7 +760,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
 
         room->setTag("HpChangedData", data);
 
-        if (damage.nature != DamageStruct::Normal && player->isChained() && !damage.chain) {
+        if (damage.nature != DamageStruct::Normal && damage.nature != DamageStruct::Light && player->isChained() && !damage.chain) {
             int n = room->getTag("is_chained").toInt();
             n++;
             room->setTag("is_chained", n);
@@ -772,11 +774,11 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.prevented)
             break;
-        if (damage.nature != DamageStruct::Normal && player->isChained())
+        if (damage.nature != DamageStruct::Normal && damage.nature != DamageStruct::Light && player->isChained())
             room->setPlayerChained(player);
 
         if (room->getTag("is_chained").toInt() > 0) {
-            if (damage.nature != DamageStruct::Normal && !damage.chain) {
+            if (damage.nature != DamageStruct::Normal && damage.nature != DamageStruct::Light && !damage.chain) {
                 // iron chain effect
                 int n = room->getTag("is_chained").toInt();
                 n--;
@@ -925,6 +927,12 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
         break;
     }
     case BuryVictim: {
+        int cheer_count = 0;
+        if (room->getMode() == "04_if") {
+            cheer_count = player->getMark("@Cheer_1") + player->getMark("@Cheer_2") + player->getMark("@Cheer_3") + player->getMark("@Cheer_4") + player->getMark("@Cheer_5") + player->getMark("@Cheer_6") + player->getMark("@Cheer_7") + player->getMark("@Cheer_8");
+            cheer_count = floor(cheer_count / 2.0);
+        }
+
         DeathStruct death = data.value<DeathStruct>();
         player->bury();
 
@@ -967,6 +975,11 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                 }
                 player->obtainEquipArea();
                 player->obtainJudgeArea();
+                if (player->isChained())
+                    room->setPlayerProperty(player, "chained", false);
+                if (!player->faceUp())
+                    player->turnOver();
+                room->setPlayerMark(player, "IF_gaincheer", cheer_count);
                 room->changeHero(player, general_name, true, true);
                 room->setPlayerProperty(player, "kingdom", player->getRole() == "loyalist" ? "team_fire" : "team_ice");
                 player->clearSelected();

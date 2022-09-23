@@ -3185,12 +3185,14 @@ void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nat
         else if (audio_name == "potato_mine")
                 doAnimation(S_ANIMATE_POTATO_MINE, QStringList() << who);
         else {
-            if (nature == DamageStruct::Fire)
+            if (nature == DamageStruct::Fire) {
                 doAnimation(S_ANIMATE_FIRE, QStringList() << who);
-            else if (nature == DamageStruct::Thunder)
+            } else if (nature == DamageStruct::Thunder) {
                 doAnimation(S_ANIMATE_LIGHTNING, QStringList() << who);
-            else if (nature == DamageStruct::Ice){
+            } else if (nature == DamageStruct::Ice) {
                 doAnimation(S_ANIMATE_ICE, QStringList() << who);
+            } else if (nature == DamageStruct::Light) {
+                doAnimation(S_ANIMATE_LIGHTDAMAGE, QStringList() << who);
             }
         }
     } else {
@@ -3433,6 +3435,7 @@ DamageMakerDialog::DamageMakerDialog(QWidget *parent)
     damage_nature->addItem(tr("Thunder"), S_CHEAT_THUNDER_DAMAGE);
     damage_nature->addItem(tr("Fire"), S_CHEAT_FIRE_DAMAGE);
     damage_nature->addItem(Sanguosha->translate("ice_cheat"), S_CHEAT_ICE_DAMAGE);
+    damage_nature->addItem(Sanguosha->translate("light_cheat"), S_CHEAT_LIGHT_DAMAGE);
     damage_nature->addItem(tr("Recover HP"), S_CHEAT_HP_RECOVER);
     damage_nature->addItem(tr("Lose HP"), S_CHEAT_HP_LOSE);
     damage_nature->addItem(tr("Lose Max HP"), S_CHEAT_MAX_HP_LOSE);
@@ -4586,6 +4589,7 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         map[S_ANIMATE_FIRE] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_LIGHTNING] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_ICE] = &RoomScene::doAppearingAnimation;
+        map[S_ANIMATE_LIGHTDAMAGE] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_SHOT] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_EARTH_HIT] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_POTATO_MINE] = &RoomScene::doAppearingAnimation;
@@ -4608,6 +4612,7 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         anim_name[S_ANIMATE_FIRE] = "fire";
         anim_name[S_ANIMATE_LIGHTNING] = "lightning";
         anim_name[S_ANIMATE_ICE] = "ice";
+        anim_name[S_ANIMATE_LIGHTDAMAGE] = "light";
         anim_name[S_ANIMATE_SHOT] = "shot";
         anim_name[S_ANIMATE_EARTH_HIT] = "earth_hit";
         anim_name[S_ANIMATE_POTATO_MINE] = "potato_mine";

@@ -461,6 +461,12 @@ int Card::subcardsLength() const
     return subcards.length();
 }
 
+void Card::shuffleSubcards()
+{
+    if (!subcards.isEmpty())
+        qShuffle(subcards);
+}
+
 bool Card::isVirtualCard() const
 {
     return m_id < 0;

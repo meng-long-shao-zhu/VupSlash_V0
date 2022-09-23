@@ -134,6 +134,7 @@ public:
     virtual void addSubcards(const QList<const Card *> &cards);
     virtual void addSubcards(const QList<int> &subcards_list);
     virtual int subcardsLength() const;
+    virtual void shuffleSubcards();
 
     virtual QString getType() const = 0;
     virtual QString getSubtype() const = 0;

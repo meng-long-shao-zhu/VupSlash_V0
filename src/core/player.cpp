@@ -1139,15 +1139,16 @@ bool Player::hasEquipSkill(const QString &skill_name) const
         const Weapon *weaponc = qobject_cast<const Weapon *>(weapon->getRealCard());
         if (Sanguosha->getSkill(weaponc) && Sanguosha->getSkill(weaponc)->objectName() == skill_name)
             return true;
-        if (Sanguosha->getSkill(weaponc->objectName()+"_skill") && Sanguosha->getSkill(weaponc->objectName()+"_skill")->objectName() == skill_name)
-            return true;
+        //马和宝物都出问题了干脆全注释得了……
+        //if (Sanguosha->getSkill(weaponc->objectName()+"_skill") && Sanguosha->getSkill(weaponc->objectName()+"_skill")->objectName() == skill_name)
+        //    return true;
     }
     if (armor) {
         const Armor *armorc = qobject_cast<const Armor *>(armor->getRealCard());
         if (Sanguosha->getSkill(armorc) && Sanguosha->getSkill(armorc)->objectName() == skill_name)
             return true;
-        if (Sanguosha->getSkill(armorc->objectName()+"_skill") && Sanguosha->getSkill(armorc->objectName()+"_skill")->objectName() == skill_name)
-            return true;
+        //if (Sanguosha->getSkill(armorc->objectName()+"_skill") && Sanguosha->getSkill(armorc->objectName()+"_skill")->objectName() == skill_name)
+        //    return true;
     }
     //用马就会炸……
     /*if (defensive_horse) {
@@ -1168,8 +1169,9 @@ bool Player::hasEquipSkill(const QString &skill_name) const
         const Treasure *treasurec = qobject_cast<const Treasure *>(treasure->getRealCard());
         if (Sanguosha->getSkill(treasurec) && Sanguosha->getSkill(treasurec)->objectName() == skill_name)
             return true;
-        if (Sanguosha->getSkill(treasurec->objectName()+"_skill") && Sanguosha->getSkill(treasurec->objectName()+"_skill")->objectName() == skill_name)
-            return true;
+        //用两轮车转延时锦囊会炸……反正也用得少就先注释了吧
+        //if (Sanguosha->getSkill(treasurec->objectName()+"_skill") && Sanguosha->getSkill(treasurec->objectName()+"_skill")->objectName() == skill_name)
+        //    return true;
     }
     return false;
 }

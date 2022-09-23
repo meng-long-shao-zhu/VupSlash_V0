@@ -47,7 +47,8 @@ namespace QSanProtocol {
         S_CHEAT_HP_LOSE,
         S_CHEAT_MAX_HP_LOSE,
         S_CHEAT_MAX_HP_RESET,
-        S_CHEAT_ICE_DAMAGE
+        S_CHEAT_ICE_DAMAGE,
+        S_CHEAT_LIGHT_DAMAGE
     };
 
     enum CommandType
@@ -189,7 +190,8 @@ namespace QSanProtocol {
         S_ANIMATE_REVIVE,
         S_ANIMATE_PIC_ANIMATION,
         S_ANIMATE_FLOWER,
-        S_ANIMATE_EGG
+        S_ANIMATE_EGG,
+        S_ANIMATE_LIGHTDAMAGE
     };
 
     enum Game3v3ChooseOrderCommand
