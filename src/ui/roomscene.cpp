@@ -3163,11 +3163,38 @@ void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nat
         QString damage_effect;
         QString from_general = ClientInstance->getPlayer(who)->objectName();
         log_box->appendLog("#GetHp", from_general, QStringList(), QString(), hp, maxhp);
-        switch (delta) {
+        /*switch (delta) {
         case -1: damage_effect = "injure1"; break;
         case -2: damage_effect = "injure2"; break;
         case -3:
         default: damage_effect = "injure3"; break;
+        }*/
+
+        if (nature == DamageStruct::Fire) {
+            switch (delta) {
+            case -1: damage_effect = "injuref1"; break;
+            default: damage_effect = "injuref2"; break;
+            }
+        } else if (nature == DamageStruct::Thunder) {
+            switch (delta) {
+            case -1: damage_effect = "injuret1"; break;
+            default: damage_effect = "injuret2"; break;
+            }
+        } else if (nature == DamageStruct::Ice) {
+            switch (delta) {
+            case -1: damage_effect = "injurei1"; break;
+            default: damage_effect = "injurei2"; break;
+            }
+        } else if (nature == DamageStruct::Light) {
+            switch (delta) {
+            case -1: damage_effect = "injurel1"; break;
+            default: damage_effect = "injurel2"; break;
+            }
+        } else {
+            switch (delta) {
+            case -1: damage_effect = "injure1"; break;
+            default: damage_effect = "injure2"; break;
+            }
         }
 
         Sanguosha->playSystemAudioEffect(audio_name != "" ? audio_name : damage_effect);
