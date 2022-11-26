@@ -1223,7 +1223,12 @@ void Client::askForDiscard(const QVariant &reqvar)
     if (pattern.isEmpty()) pattern = ".";
     m_cardDiscardPattern = pattern;
 
-    if (prompt.isEmpty()) {
+    if (prompt.isEmpty() || prompt == "NaturalDiscard_Overhalf") {
+        bool is_overhalf = false;
+        if (prompt == "NaturalDiscard_Overhalf") {
+            is_overhalf = true;
+            prompt.clear();
+        }
         if (m_canDiscardEquip)
             prompt = tr("Please discard %1 card(s), include equip").arg(discard_num);
         else
@@ -1231,6 +1236,10 @@ void Client::askForDiscard(const QVariant &reqvar)
         if (min_num < discard_num) {
             prompt.append("<br/>");
             prompt.append(tr("%1 %2 cards(s) are required at least").arg(min_num).arg(m_canDiscardEquip ? "" : tr("hand")));
+        }
+        if (is_overhalf) {
+            prompt.append("<br/>");
+            prompt.append(Sanguosha->translate("DISCARD_OVERHALF_HINT"));
         }
         prompt_doc->setHtml(prompt);
     } else {

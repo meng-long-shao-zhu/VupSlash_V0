@@ -1139,42 +1139,74 @@ bool Player::hasEquipSkill(const QString &skill_name) const
         const Weapon *weaponc = qobject_cast<const Weapon *>(weapon->getRealCard());
         if (Sanguosha->getSkill(weaponc) && Sanguosha->getSkill(weaponc)->objectName() == skill_name)
             return true;
-        //马和宝物都出问题了干脆全注释得了……
-        //if (Sanguosha->getSkill(weaponc->objectName()+"_skill") && Sanguosha->getSkill(weaponc->objectName()+"_skill")->objectName() == skill_name)
-        //    return true;
+        if (Sanguosha->getSkill(weapon->objectName()+"_skill") && Sanguosha->getSkill(weapon->objectName()+"_skill")->objectName() == skill_name)
+            return true;
     }
     if (armor) {
         const Armor *armorc = qobject_cast<const Armor *>(armor->getRealCard());
         if (Sanguosha->getSkill(armorc) && Sanguosha->getSkill(armorc)->objectName() == skill_name)
             return true;
-        //if (Sanguosha->getSkill(armorc->objectName()+"_skill") && Sanguosha->getSkill(armorc->objectName()+"_skill")->objectName() == skill_name)
-        //    return true;
+        if (Sanguosha->getSkill(armor->objectName()+"_skill") && Sanguosha->getSkill(armor->objectName()+"_skill")->objectName() == skill_name)
+            return true;
     }
-    //用马就会炸……
-    /*if (defensive_horse) {
-        const Armor *defensive_horsec = qobject_cast<const Armor *>(defensive_horse->getRealCard());
+    if (defensive_horse) {
+        const DefensiveHorse *defensive_horsec = qobject_cast<const DefensiveHorse *>(defensive_horse->getRealCard());
+        if (Sanguosha->getSkill(defensive_horsec) && Sanguosha->getSkill(defensive_horsec)->objectName() == skill_name)
+            return true;
+        if (Sanguosha->getSkill(defensive_horse->objectName()+"_skill") && Sanguosha->getSkill(defensive_horse->objectName()+"_skill")->objectName() == skill_name)
+            return true;
+    }
+    if (offensive_horse) {
+        const OffensiveHorse *offensive_horsec = qobject_cast<const OffensiveHorse *>(offensive_horse->getRealCard());
+        if (Sanguosha->getSkill(offensive_horsec) && Sanguosha->getSkill(offensive_horsec)->objectName() == skill_name)
+            return true;
+        if (Sanguosha->getSkill(offensive_horse->objectName()+"_skill") && Sanguosha->getSkill(offensive_horse->objectName()+"_skill")->objectName() == skill_name)
+            return true;
+    }
+    if (treasure) {
+        const Treasure *treasurec = qobject_cast<const Treasure *>(treasure->getRealCard());
+        if (Sanguosha->getSkill(treasurec) && Sanguosha->getSkill(treasurec)->objectName() == skill_name)
+            return true;
+        if (Sanguosha->getSkill(treasure->objectName()+"_skill") && Sanguosha->getSkill(treasure->objectName()+"_skill")->objectName() == skill_name)
+            return true;
+    }
+    return false;
+}
+
+//已弃用
+/*bool Player::hasEquipSkillV2(const QString &skill_name) const
+{
+    if (weapon) {
+        const Weapon *weaponc = qobject_cast<const Weapon *>(weapon->getRealCard());
+        if (Sanguosha->getSkill(weaponc->objectName()+"_skill") && Sanguosha->getSkill(weaponc->objectName()+"_skill")->objectName() == skill_name)
+            return true;
+    }
+    if (armor) {
+        const Armor *armorc = qobject_cast<const Armor *>(armor->getRealCard());
+        if (Sanguosha->getSkill(armorc->objectName()+"_skill") && Sanguosha->getSkill(armorc->objectName()+"_skill")->objectName() == skill_name)
+            return true;
+    }
+    if (defensive_horse) {
+        const DefensiveHorse *defensive_horsec = qobject_cast<const DefensiveHorse *>(defensive_horse->getRealCard());
         if (Sanguosha->getSkill(defensive_horsec) && Sanguosha->getSkill(defensive_horsec)->objectName() == skill_name)
             return true;
         if (Sanguosha->getSkill(defensive_horsec->objectName()+"_skill") && Sanguosha->getSkill(defensive_horsec->objectName()+"_skill")->objectName() == skill_name)
             return true;
     }
     if (offensive_horse) {
-        const Armor *offensive_horsec = qobject_cast<const Armor *>(offensive_horse->getRealCard());
+        const OffensiveHorse *offensive_horsec = qobject_cast<const OffensiveHorse *>(offensive_horse->getRealCard());
         if (Sanguosha->getSkill(offensive_horsec) && Sanguosha->getSkill(offensive_horsec)->objectName() == skill_name)
             return true;
         if (Sanguosha->getSkill(offensive_horsec->objectName()+"_skill") && Sanguosha->getSkill(offensive_horsec->objectName()+"_skill")->objectName() == skill_name)
             return true;
-    }*/
+    }
     if (treasure) {
         const Treasure *treasurec = qobject_cast<const Treasure *>(treasure->getRealCard());
-        if (Sanguosha->getSkill(treasurec) && Sanguosha->getSkill(treasurec)->objectName() == skill_name)
+        if (Sanguosha->getSkill(treasurec->objectName()+"_skill") && Sanguosha->getSkill(treasurec->objectName()+"_skill")->objectName() == skill_name)
             return true;
-        //用两轮车转延时锦囊会炸……反正也用得少就先注释了吧
-        //if (Sanguosha->getSkill(treasurec->objectName()+"_skill") && Sanguosha->getSkill(treasurec->objectName()+"_skill")->objectName() == skill_name)
-        //    return true;
     }
     return false;
-}
+}*/
 
 QSet<const TriggerSkill *> Player::getTriggerSkills() const
 {

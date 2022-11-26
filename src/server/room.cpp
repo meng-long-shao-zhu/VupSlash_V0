@@ -5530,6 +5530,18 @@ void Room::moveCardsInToDrawpile(ServerPlayer *player, QList<int> card_ids, cons
             if (moveOneTime.card_ids.size() == 0) continue;
             QVariant data = QVariant::fromValue(moveOneTime);
             thread->trigger(CardsMoveOneTime, this, player, data);
+
+            //reset card
+            //for (int i = 0; i < moveOneTime.card_ids.size(); i++) {
+            //    WrappedCard *card = qobject_cast<WrappedCard *>(getCard(moveOneTime.card_ids[i]));
+            //    if (card->isModified()) {
+            //        int cardId = card->getId();
+            //        resetCard(cardId);
+            //        if (!getCardOwner(cardId)) {
+            //            broadcastResetCard(m_players, cardId);
+            //        }
+            //    }
+            //}
         }
     }
 }
@@ -5638,6 +5650,18 @@ void Room::shuffleIntoDrawPile(ServerPlayer *player, QList<int> card_ids, const 
             if (moveOneTime.card_ids.size() == 0) continue;
             QVariant data = QVariant::fromValue(moveOneTime);
             thread->trigger(CardsMoveOneTime, this, player, data);
+
+            //reset card
+            //for (int i = 0; i < moveOneTime.card_ids.size(); i++) {
+            //    WrappedCard *card = qobject_cast<WrappedCard *>(getCard(moveOneTime.card_ids[i]));
+            //    if (card->isModified()) {
+            //        int cardId = card->getId();
+            //        resetCard(cardId);
+            //        if (!getCardOwner(cardId)) {
+            //            broadcastResetCard(m_players, cardId);
+            //        }
+            //    }
+            //}
         }
     }
 }
@@ -5647,7 +5671,7 @@ void Room::updateCardsOnLose(const CardsMoveStruct &move)
     for (int i = 0; i < move.card_ids.size(); i++) {
         WrappedCard *card = qobject_cast<WrappedCard *>(getCard(move.card_ids[i]));
         if (card->isModified()) {
-            if (move.to_place == Player::DiscardPile) {
+            if (move.to_place == Player::DiscardPile || move.to_place == Player::DrawPile || move.to_place == Player::PlaceTable || move.to_place == Player::PlaceSpecial) {
                 resetCard(move.card_ids[i]);
                 broadcastResetCard(getPlayers(), move.card_ids[i]);
             }
@@ -6118,6 +6142,7 @@ void Room::activate(ServerPlayer *player, CardUseStruct &card_use)
         if (diff > 0) thread->delay(diff);
     } else {
         bool success = doRequest(player, S_COMMAND_PLAY_CARD, player->objectName(), true);
+        //filterCards(player, player->getCards("he"), true);
         const QVariant &clientReply = player->getClientReply();
 
         if (m_surrenderRequestReceived) {
@@ -6398,12 +6423,16 @@ const Card *Room::askForDiscard(ServerPlayer *player, const QString &reason, int
     if (ai) {
         to_discard = ai->askForDiscard(reason, discard_num, min_num, optional, include_equip, pattern);
     } else {
+        QString client_prompt = prompt;
+        if (prompt.isEmpty() && min_num*2 > player->getHandcardNum() && player->getHandcardNum() > 2) {
+            client_prompt = "NaturalDiscard_Overhalf";
+        }
         JsonArray ask_str;
         ask_str << discard_num;
         ask_str << min_num;
         ask_str << optional;
         ask_str << include_equip;
-        ask_str << prompt;
+        ask_str << client_prompt;
         ask_str << pattern;
         bool success = doRequest(player, S_COMMAND_DISCARD_CARD, ask_str, true);
 

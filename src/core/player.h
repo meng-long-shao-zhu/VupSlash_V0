@@ -221,6 +221,7 @@ public:
     int getSlashCount() const;
 
     bool hasEquipSkill(const QString &skill_name) const;
+    //bool hasEquipSkillV2(const QString &skill_name) const;
     QSet<const TriggerSkill *> getTriggerSkills() const;
     QSet<const Skill *> getSkills(bool include_equip = false, bool visible_only = true) const;
     QList<const Skill *> getSkillList(bool include_equip = false, bool visible_only = true) const;

@@ -619,11 +619,11 @@ ManeuveringPackage::ManeuveringPackage()
 
     cards << hualiu;
 
-    for (int i=2;i<=4;i++){
-        SilverLion *small_silver_lion = new SilverLion(Card::Club, i);
-        small_silver_lion->setObjectName("small_silver_lion");
-        cards << small_silver_lion;
-    }
+    //for (int i=2;i<=4;i++){
+    //    SilverLion *small_silver_lion = new SilverLion(Card::Club, i);
+    //    small_silver_lion->setObjectName("small_silver_lion");
+    //    cards << small_silver_lion;
+    //}
 
     foreach(Card *card, cards)
         card->setParent(this);

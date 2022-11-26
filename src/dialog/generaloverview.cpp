@@ -319,6 +319,7 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool 
     ui->tableWidget->setIconSize(QSize(20, 20));
     QIcon lord_icon("image/system/roles/lord-1.png");
     QIcon bonus_star_icon("image/system/bonus_star.png");
+    QIcon new_word_icon("image/system/new_word.png");
 
     for (int i = 0; i < copy_generals.length(); i++) {
         const General *general = copy_generals[i];
@@ -339,6 +340,10 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool 
             nickname_item->setData(Qt::UserRole, general_name);
             nickname_item->setBackgroundColor(Qt::gray);
             nickname_item->setToolTip(Sanguosha->translate("bonus_locking"));
+            if (Sanguosha->translate("VERSION_NEW_CHARACTER").contains(general_name)) {
+                nickname_item->setIcon(new_word_icon);
+                //nickname_item->setToolTip(Sanguosha->translate("NEW_CHARACTER_TOOLTIP"));
+            }
 
             QTableWidgetItem *name_item = new QTableWidgetItem(name);
             name_item->setTextAlignment(Qt::AlignCenter);
@@ -425,6 +430,10 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool 
                 nickname_item->setIcon(bonus_star_icon);
                 nickname_item->setTextAlignment(Qt::AlignCenter);
                 nickname_item->setToolTip(Sanguosha->translate("bonus_unlocked"));
+            } else if (Sanguosha->translate("VERSION_NEW_CHARACTER").contains(general_name)) {
+                nickname_item->setIcon(new_word_icon);
+                nickname_item->setTextAlignment(Qt::AlignCenter);
+                nickname_item->setToolTip(Sanguosha->translate("NEW_CHARACTER_TOOLTIP"));
             }
 
             QTableWidgetItem *name_item = new QTableWidgetItem(name);
