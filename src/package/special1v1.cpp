@@ -1110,6 +1110,7 @@ Drowning::Drowning(Suit suit, int number)
     : SingleTargetTrick(suit, number)
 {
     setObjectName("drowning");
+    damage_card = true;
 }
 
 bool Drowning::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const

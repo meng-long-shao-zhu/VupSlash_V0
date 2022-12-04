@@ -5671,7 +5671,7 @@ void Room::updateCardsOnLose(const CardsMoveStruct &move)
     for (int i = 0; i < move.card_ids.size(); i++) {
         WrappedCard *card = qobject_cast<WrappedCard *>(getCard(move.card_ids[i]));
         if (card->isModified()) {
-            if (move.to_place == Player::DiscardPile || move.to_place == Player::DrawPile || move.to_place == Player::PlaceTable || move.to_place == Player::PlaceSpecial) {
+            if (move.to_place == Player::DiscardPile || move.to_place == Player::DrawPile) {
                 resetCard(move.card_ids[i]);
                 broadcastResetCard(getPlayers(), move.card_ids[i]);
             }
@@ -7391,7 +7391,7 @@ void Room::showAllCards(ServerPlayer *player, ServerPlayer *to)
     }
 }
 
-void Room::retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge, const QString &skill_name, bool exchange)
+void Room::retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge, const QString &skill_name, bool exchange, bool is_respond)
 {
     if (card == NULL) return;
 
@@ -7408,7 +7408,7 @@ void Room::retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge, c
     resp.m_isRetrial = true;
     QVariant data = QVariant::fromValue(resp);
 
-    if (triggerResponded)
+    if (is_respond && triggerResponded)
         thread->trigger(PreCardResponded, this, player, data);
 
     CardsMoveStruct move1(QList<int>(),
@@ -7449,7 +7449,7 @@ void Room::retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge, c
     moveCardsAtomic(moves, true);
     judge->updateResult();
 
-    if (triggerResponded)
+    if (is_respond && triggerResponded)
         thread->trigger(CardResponded, this, player, data);
 }
 

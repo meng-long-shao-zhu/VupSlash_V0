@@ -142,7 +142,7 @@ public:
     void turnBroken();
 
     void retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge,
-        const QString &skill_name, bool exchange = false);
+        const QString &skill_name, bool exchange = false, bool is_respond = true);
 
     // Ask a player to send a server request and returns the client response. Call is blocking until client
     // replies or server times out, whichever is earlier.

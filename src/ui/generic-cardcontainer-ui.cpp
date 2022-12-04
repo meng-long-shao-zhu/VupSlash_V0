@@ -486,7 +486,7 @@ void PlayerCardContainer::updateMark(const QString &mark_name, bool get)
                 menu = button->menu();
                 foreach (QAction* act, menu->actions()) {
                     QString act_name = act->text();
-                    if (act_name == sub_text) {
+                    if (act_name == sub_text || (sub_text.startsWith("card_id:") && Sanguosha->getCard(sub_text.mid(8).toInt()) && act_name == Sanguosha->getCard(sub_text.mid(8).toInt())->getFullName())) {
                         menu->removeAction(act);
                         break;
                     }
@@ -519,7 +519,14 @@ void PlayerCardContainer::updateMark(const QString &mark_name, bool get)
                 menu = new QMenu(button);
                 menu->setProperty("private_pile", "true");
             }
-            menu->addAction(sub_text);
+            if (sub_text.startsWith("card_id:")) {
+                int card_id = sub_text.mid(8).toInt();
+                const Card *card = Sanguosha->getCard(card_id);
+                if (card)
+                    menu->addAction(G_ROOM_SKIN.getCardSuitPixmap(card->getSuit()), card->getFullName());
+            } else {
+                menu->addAction(sub_text);
+            }
             button->setMenu(menu);
         }
     } else {

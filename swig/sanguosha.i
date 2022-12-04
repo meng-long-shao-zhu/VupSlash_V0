@@ -1301,7 +1301,7 @@ public:
     void setCardUnknown(const Card *card, bool can = false, ServerPlayer *who = NULL);
     void setCardUnknown(int card_id, bool can = false, ServerPlayer *who = NULL);
     void turnBroken();
-    void retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge, const char *skill_name, bool exchange = false);
+    void retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge, const char *skill_name, bool exchange = false, bool is_respond = true);
     void notifySkillInvoked(ServerPlayer *player, const char *skill_name);
     void broadcastSkillInvoke(const char *skillName);
     void broadcastSkillInvoke(const char *skillName, const char *category);
