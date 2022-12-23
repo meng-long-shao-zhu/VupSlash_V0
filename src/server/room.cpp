@@ -2027,6 +2027,13 @@ void Room::addPlayerHistory(ServerPlayer *player, const QString &key, int times)
         doNotify(player, S_COMMAND_ADD_HISTORY, arg);
     else
         doBroadcastNotify(S_COMMAND_ADD_HISTORY, arg);
+
+    if (key == "Analeptic") {   //酒使用次数的同步（为了将神杀的出限一的酒改为回限一，酒已修改为通过mark控制）
+        if (times == 0)
+            setPlayerMark(player, "Analeptic_used_times", 0);
+        else
+            setPlayerMark(player, "Analeptic_used_times", player->getMark("Analeptic_used_times")+times);
+    }
 }
 
 void Room::setPlayerFlag(ServerPlayer *player, const QString &flag)
@@ -7078,6 +7085,7 @@ void Room::makeDamage(const QString &source, const QString &target, QSanProtocol
         nature_map[S_CHEAT_FIRE_DAMAGE] = DamageStruct::Fire;
         nature_map[S_CHEAT_ICE_DAMAGE] = DamageStruct::Ice;
         nature_map[S_CHEAT_LIGHT_DAMAGE] = DamageStruct::Light;
+        nature_map[S_CHEAT_DARK_DAMAGE] = DamageStruct::Dark;
     }
 
     if (targetPlayer == NULL) return;
@@ -8316,4 +8324,11 @@ void Room::turnBroken()
     sendLog(log);
 
     throw TurnBroken;
+}
+
+void Room::changeBackground(const QString &path)
+{
+    JsonArray arg;
+    arg << path;
+    doBroadcastNotify(S_COMMAND_CHANGE_BACKGROUND, arg);
 }

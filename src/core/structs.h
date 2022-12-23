@@ -16,7 +16,8 @@ struct DamageStruct
         Fire,  // fire slash, fire attack and few damage skill (Yeyan, etc)
         Thunder, // lightning, thunder slash, and few damage skill (Leiji, etc)
         Ice,     // for ice slash?
-        Light
+        Light,
+        Dark
     };
 
     DamageStruct();
@@ -616,6 +617,8 @@ enum TriggerEvent
     BeforeRoundStart,
     BeforeDelayedTrickEffect,
     DyingToDeath,
+    DiscardNCards,
+    AfterDiscardNCards,
 
     Appear, // For yinni only
 

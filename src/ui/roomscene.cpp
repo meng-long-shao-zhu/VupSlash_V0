@@ -176,6 +176,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     connect(ClientInstance, SIGNAL(role_state_changed(QString)), this, SLOT(updateRoles(QString)));
     connect(ClientInstance, SIGNAL(event_received(const QVariant)), this, SLOT(handleGameEvent(const QVariant)));
     connect(ClientInstance, SIGNAL(selected_killed(QString, QString)), this, SLOT(killSelected(QString, QString)));
+    connect(ClientInstance, SIGNAL(background_change(QString)), this, SLOT(changeBackground(QString)));
 
     connect(ClientInstance, SIGNAL(game_started()), this, SLOT(onGameStart()));
     connect(ClientInstance, SIGNAL(game_over()), this, SLOT(onGameOver()));
@@ -3190,6 +3191,11 @@ void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nat
             case -1: damage_effect = "injurel1"; break;
             default: damage_effect = "injurel2"; break;
             }
+        } else if (nature == DamageStruct::Dark) {
+            switch (delta) {
+            case -1: damage_effect = "injured1"; break;
+            default: damage_effect = "injured2"; break;
+            }
         } else {
             switch (delta) {
             case -1: damage_effect = "injure1"; break;
@@ -3220,6 +3226,8 @@ void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nat
                 doAnimation(S_ANIMATE_ICE, QStringList() << who);
             } else if (nature == DamageStruct::Light) {
                 doAnimation(S_ANIMATE_LIGHTDAMAGE, QStringList() << who);
+            } else if (nature == DamageStruct::Dark) {
+                doAnimation(S_ANIMATE_DARKDAMAGE, QStringList() << who);
             }
         }
     } else {
@@ -3463,6 +3471,7 @@ DamageMakerDialog::DamageMakerDialog(QWidget *parent)
     damage_nature->addItem(tr("Fire"), S_CHEAT_FIRE_DAMAGE);
     damage_nature->addItem(Sanguosha->translate("ice_cheat"), S_CHEAT_ICE_DAMAGE);
     damage_nature->addItem(Sanguosha->translate("light_cheat"), S_CHEAT_LIGHT_DAMAGE);
+    damage_nature->addItem(Sanguosha->translate("dark_cheat"), S_CHEAT_DARK_DAMAGE);
     damage_nature->addItem(tr("Recover HP"), S_CHEAT_HP_RECOVER);
     damage_nature->addItem(tr("Lose HP"), S_CHEAT_HP_LOSE);
     damage_nature->addItem(tr("Lose Max HP"), S_CHEAT_MAX_HP_LOSE);
@@ -4617,6 +4626,7 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         map[S_ANIMATE_LIGHTNING] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_ICE] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_LIGHTDAMAGE] = &RoomScene::doAppearingAnimation;
+        map[S_ANIMATE_DARKDAMAGE] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_SHOT] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_EARTH_HIT] = &RoomScene::doAppearingAnimation;
         map[S_ANIMATE_POTATO_MINE] = &RoomScene::doAppearingAnimation;
@@ -4640,6 +4650,7 @@ void RoomScene::doAnimation(int name, const QStringList &args)
         anim_name[S_ANIMATE_LIGHTNING] = "lightning";
         anim_name[S_ANIMATE_ICE] = "ice";
         anim_name[S_ANIMATE_LIGHTDAMAGE] = "light";
+        anim_name[S_ANIMATE_DARKDAMAGE] = "dark";
         anim_name[S_ANIMATE_SHOT] = "shot";
         anim_name[S_ANIMATE_EARTH_HIT] = "earth_hit";
         anim_name[S_ANIMATE_POTATO_MINE] = "potato_mine";
@@ -5446,4 +5457,15 @@ void RoomScene::killSelected(const QString &who, const QString &general)
     }
 
     m_roomMutex.unlock();
+}
+
+void RoomScene::changeBackground(const QString &path)
+{
+    //if (m_tableBgPixmapOrig.width() == 1 || m_tableBgPixmapOrig.height() == 1)
+        m_tableBgPixmapOrig = G_ROOM_SKIN.getPixmapFromFileName(path);
+
+    m_tableBgPixmap = m_tableBgPixmapOrig.scaled(m_tablew, m_tableh, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+    m_tableBg->setPos(0, 0);
+    m_tableBg->setPixmap(m_tableBgPixmap);
 }

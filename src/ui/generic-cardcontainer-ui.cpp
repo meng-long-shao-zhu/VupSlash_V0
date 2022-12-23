@@ -775,6 +775,7 @@ void PlayerCardContainer::addDelayedTricks(QList<CardItem *> &tricks)
         if (trick_name != card->objectName()) {
             toolTip += "<br/>" + Sanguosha->translate("DELAYED_TRICK_VIEW_AS") + "<b>" + Sanguosha->translate(trick_name) + "</b>";
         }
+        toolTip += "<br/>" + ((Sanguosha->translate("effect:"+trick_name) != "effect:"+trick_name) ? Sanguosha->translate("effect:"+trick_name) : Sanguosha->translate(":"+trick_name));
         item->setToolTip(toolTip);
         _m_judgeCards.append(trick);
         _m_judgeIcons.append(item);

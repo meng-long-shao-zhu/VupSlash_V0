@@ -48,7 +48,8 @@ namespace QSanProtocol {
         S_CHEAT_MAX_HP_LOSE,
         S_CHEAT_MAX_HP_RESET,
         S_CHEAT_ICE_DAMAGE,
-        S_CHEAT_LIGHT_DAMAGE
+        S_CHEAT_LIGHT_DAMAGE,
+        S_CHEAT_DARK_DAMAGE
     };
 
     enum CommandType
@@ -148,6 +149,7 @@ namespace QSanProtocol {
         S_COMMAND_SET_CARD_UNKNOWN,
         S_COMMAND_KILL_SELECTED,
         S_COMMAND_INVOKE_WARMUP_SKILL,
+        S_COMMAND_CHANGE_BACKGROUND,
     };
 
     enum GameEventType
@@ -191,7 +193,8 @@ namespace QSanProtocol {
         S_ANIMATE_PIC_ANIMATION,
         S_ANIMATE_FLOWER,
         S_ANIMATE_EGG,
-        S_ANIMATE_LIGHTDAMAGE
+        S_ANIMATE_LIGHTDAMAGE,
+        S_ANIMATE_DARKDAMAGE
     };
 
     enum Game3v3ChooseOrderCommand

@@ -140,6 +140,7 @@ public:
     void setCardUnknown(const Card *card, bool can = false, ServerPlayer *who = NULL);
     void setCardUnknown(int card_id, bool can = false, ServerPlayer *who = NULL);
     void turnBroken();
+    void changeBackground(const QString &path = "image/system/backdrop/default.jpg");
 
     void retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge,
         const QString &skill_name, bool exchange = false, bool is_respond = true);

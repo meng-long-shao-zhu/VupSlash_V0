@@ -80,6 +80,7 @@ Client::Client(QObject *parent, const QString &filename)
     m_callbacks[S_COMMAND_CARD_FLAG] = &Client::setCardFlag;
     m_callbacks[S_COMMAND_SET_CARD_UNKNOWN] = &Client::setCardUnknown;
     m_callbacks[S_COMMAND_KILL_SELECTED] = &Client::killSelected;
+    m_callbacks[S_COMMAND_CHANGE_BACKGROUND] = &Client::changeBackground;
 
     // interactive methods
     m_interactions[S_COMMAND_CHOOSE_GENERAL] = &Client::askForGeneral;
@@ -1229,13 +1230,18 @@ void Client::askForDiscard(const QVariant &reqvar)
             is_overhalf = true;
             prompt.clear();
         }
-        if (m_canDiscardEquip)
-            prompt = tr("Please discard %1 card(s), include equip").arg(discard_num);
-        else
-            prompt = tr("Please discard %1 card(s), only hand cards is allowed").arg(discard_num);
         if (min_num < discard_num) {
-            prompt.append("<br/>");
-            prompt.append(tr("%1 %2 cards(s) are required at least").arg(min_num).arg(m_canDiscardEquip ? "" : tr("hand")));
+            //prompt.append("<br/>");
+            //prompt.append(tr("%1 %2 cards(s) are required at least").arg(min_num).arg(m_canDiscardEquip ? "" : tr("hand")));
+            if (m_canDiscardEquip)
+                prompt = Sanguosha->translate("ASKFORDISCARD_NUMAREA_WITHEQUIP").arg(min_num).arg(discard_num);
+            else
+                prompt = Sanguosha->translate("ASKFORDISCARD_NUMAREA").arg(min_num).arg(discard_num);
+        } else {
+            if (m_canDiscardEquip)
+                prompt = tr("Please discard %1 card(s), include equip").arg(discard_num);
+            else
+                prompt = tr("Please discard %1 card(s), only hand cards is allowed").arg(discard_num);
         }
         if (is_overhalf) {
             prompt.append("<br/>");
@@ -2192,4 +2198,14 @@ void Client::killSelected(const QVariant &pattern_str)
     QString general = pattern[1].toString();
 
     emit selected_killed(who, general);
+}
+
+void Client::changeBackground(const QVariant &pattern_str)
+{
+    JsonArray pattern = pattern_str.value<JsonArray>();
+    if (pattern.size() != 1 || !JsonUtils::isString(pattern[0])) return;
+
+    QString path = pattern[0].toString();
+
+    emit background_change(path);
 }

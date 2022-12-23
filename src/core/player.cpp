@@ -948,7 +948,7 @@ bool Player::containsTrick(const QString &trick_name) const
 {
     foreach (int trick_id, judging_area) {
         WrappedCard *trick = Sanguosha->getWrappedCard(trick_id);
-        if (trick->objectName() == trick_name)
+        if (trick->objectName() == trick_name || trick->getSubtype() == trick_name)
             return true;
     }
     return false;

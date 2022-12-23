@@ -214,6 +214,7 @@ public slots:
     void fillRobots();
     void clearTablePile();
     void killSelected(const QString &who, const QString &general);
+    void changeBackground(const QString &path);
 
     void speak(QString text = "");
 

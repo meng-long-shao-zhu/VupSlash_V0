@@ -58,6 +58,9 @@ void GameRule::onPhaseProceed(ServerPlayer *player) const
         QList<const Card *> tricks = player->getJudgingArea();
         while (!tricks.isEmpty() && player->isAlive()) {
             const Card *trick = tricks.takeLast();
+            if (trick->getSubtype() == "field_card") {    //场地牌不判定
+                continue;
+            }
             /*if (trick->isKindOf("Indulgence")) {
                 foreach(ServerPlayer *p, room->getAlivePlayers()) {
                     if (player->getMark("jichong_from_"+p->objectName()+"_id_"+QString::number(trick->getEffectiveId())) > 0) {
@@ -86,12 +89,14 @@ void GameRule::onPhaseProceed(ServerPlayer *player) const
         }
 
         QVariant data = num;
-        room->getThread()->trigger(DrawNCards, room, player, data);
-        int n = data.toInt();
-        if (n > 0)
-            player->drawCards(n, "draw_phase");
-        QVariant _n = n;
-        room->getThread()->trigger(AfterDrawNCards, room, player, _n);
+        if (!room->getThread()->trigger(DrawNCards, room, player, data))
+        {
+            int n = data.toInt();
+            if (n > 0)
+                player->drawCards(n, "draw_phase");
+            QVariant _n = n;
+            room->getThread()->trigger(AfterDrawNCards, room, player, _n);
+        }
         break;
     }
     case Player::Play: {
@@ -107,24 +112,6 @@ void GameRule::onPhaseProceed(ServerPlayer *player) const
     }
     case Player::Discard: {
         int handcard_num = player->getHandcardNum();
-        /*if (player->hasSkill("olyuhua")) {
-            room->sendCompulsoryTriggerLog(player, "olyuhua", true);
-            int num = 0;
-            foreach (const Card *card, player->getHandcards()) {
-                if (!card->isKindOf("BasicCard"))
-                    continue;
-                num++;
-            }
-            if (num != handcard_num) {
-                room->broadcastSkillInvoke("olyuhua");
-                handcard_num = num;
-            }
-            LogMessage msg;
-            msg.type = "#olyuhua-effect";
-            msg.from = player;
-            msg.arg = QString::number(num);
-            room->sendLog(msg);
-        }*/
         QVariantList  cardlist = player->tag["IgnoreCards"].toList();
         player->tag.remove("IgnoreCards");
         QList<int> ids = VariantList2IntList(cardlist);
@@ -139,8 +126,17 @@ void GameRule::onPhaseProceed(ServerPlayer *player) const
         }
 
         int discard_num = handcard_num - player->getMaxCards();
-        if (discard_num > 0)
-            room->askForDiscard(player, "gamerule", discard_num, discard_num);
+        //if (discard_num > 0)
+            //room->askForDiscard(player, "gamerule", discard_num, discard_num);
+        QVariant data = discard_num;
+        if (!room->getThread()->trigger(DiscardNCards, room, player, data))
+        {
+            int n = data.toInt();
+            if (n > 0)
+                room->askForDiscard(player, "gamerule", n, n);
+            QVariant _n = n;
+            room->getThread()->trigger(AfterDiscardNCards, room, player, _n);
+        }
         foreach (QString str, strlist)
             room->removePlayerCardLimitation(player, "discard", str + "$1");
         break;
@@ -342,6 +338,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
 
                     room->setPlayerMark(p, "drank", 0);
                 }
+                room->setPlayerMark(p, "Analeptic_used_times", 0);
             }
             room->setPlayerFlag(player, ".");
             room->clearPlayerCardLimitation(player, true);
@@ -728,6 +725,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
         case DamageStruct::Thunder: log.arg2 = "thunder_nature"; break;
         case DamageStruct::Ice: log.arg2 = "ice_nature"; break;
         case DamageStruct::Light: log.arg2 = "light_nature"; break;
+        case DamageStruct::Dark: log.arg2 = "dark_nature"; break;
         }
 
         room->sendLog(log);
@@ -740,6 +738,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
         case DamageStruct::Thunder: change_str.append("T"); break;
         case DamageStruct::Ice: change_str.append("I"); break;
         case DamageStruct::Light: change_str.append("L"); break;
+        case DamageStruct::Dark: change_str.append("D"); break;
         default: break;
         }
 
@@ -760,7 +759,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
 
         room->setTag("HpChangedData", data);
 
-        if (damage.nature != DamageStruct::Normal && damage.nature != DamageStruct::Light && player->isChained() && !damage.chain) {
+        if (damage.nature != DamageStruct::Normal && damage.nature != DamageStruct::Light && damage.nature != DamageStruct::Dark && player->isChained() && !damage.chain) {
             int n = room->getTag("is_chained").toInt();
             n++;
             room->setTag("is_chained", n);
@@ -774,11 +773,11 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.prevented)
             break;
-        if (damage.nature != DamageStruct::Normal && damage.nature != DamageStruct::Light && player->isChained())
+        if (damage.nature != DamageStruct::Normal && damage.nature != DamageStruct::Light && damage.nature != DamageStruct::Dark && player->isChained())
             room->setPlayerChained(player);
 
         if (room->getTag("is_chained").toInt() > 0) {
-            if (damage.nature != DamageStruct::Normal && damage.nature != DamageStruct::Light && !damage.chain) {
+            if (damage.nature != DamageStruct::Normal && damage.nature != DamageStruct::Light && damage.nature != DamageStruct::Dark && !damage.chain) {
                 // iron chain effect
                 int n = room->getTag("is_chained").toInt();
                 n--;

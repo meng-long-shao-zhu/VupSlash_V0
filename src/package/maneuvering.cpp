@@ -65,7 +65,7 @@ bool Analeptic::IsAvailable(const Player *player, const Card *analeptic)
     if (player->isCardLimited(THIS_ANALEPTIC, Card::MethodUse) || player->isProhibited(player, THIS_ANALEPTIC))
         return false;
 
-    return player->usedTimes("Analeptic") <= Sanguosha->correctCardTarget(TargetModSkill::Residue, player, THIS_ANALEPTIC, player);
+    return player->getMark("Analeptic_used_times") <= Sanguosha->correctCardTarget(TargetModSkill::Residue, player, THIS_ANALEPTIC, player);
 #undef THIS_ANALEPTIC
 }
 
@@ -84,6 +84,7 @@ void Analeptic::onUse(Room *room, const CardUseStruct &card_use) const
 
 void Analeptic::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const
 {
+    room->addPlayerMark(source, "Analeptic_used_times", 1);
     if (targets.isEmpty())
         targets << source;
     BasicCard::use(room, source, targets);
