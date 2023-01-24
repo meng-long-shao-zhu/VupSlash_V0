@@ -2193,14 +2193,14 @@ bool ServerPlayer::canUse(const Card *card, QList<ServerPlayer *> players, bool 
         if (!card->isAvailable(this)) return false;
     }
 
-    if (card->targetFixed()) {  //只能分类讨论（目前默认装备只能对自己用，以及固定自己用的只有装备、无中、桃、酒、闪电
+    if (card->targetFixed() || card->getSubtype() == "field_card") {  //只能分类讨论（目前默认装备只能对自己用，以及固定自己用的只有装备、无中、桃、酒、闪电、场地牌）
         if (!isLocked(card)) {
             if (card->isKindOf("AOE") || card->isKindOf("GlobalEffect")) {
                 foreach (ServerPlayer *p, new_players) {
                     if ((card->isKindOf("GlobalEffect") || p->objectName() != this->objectName()) && !isProhibited(p, card))
                         return true;
                 }
-            } else if (card->isKindOf("EquipCard") || card->isKindOf("ExNihilo") || card->isKindOf("Peach") || card->isKindOf("Analeptic") || card->isKindOf("Lightning")) {
+            } else if (card->isKindOf("EquipCard") || card->isKindOf("ExNihilo") || card->isKindOf("Peach") || card->isKindOf("Analeptic") || card->isKindOf("Lightning") || card->getSubtype() == "field_card") {
                 if (new_players.contains(this) && !isProhibited(this, card))
                     return true;
             } else {
@@ -2211,8 +2211,9 @@ bool ServerPlayer::canUse(const Card *card, QList<ServerPlayer *> players, bool 
             }
         }
     } else {
+        ServerPlayer *self = room->findPlayerByObjectName(this->objectName(), true);
         foreach (ServerPlayer *p, new_players) {
-            if (!isLocked(card) && !isProhibited(p, card) && card->targetFilter(QList<const Player *>(), p, this))
+            if (!isLocked(card) && !isProhibited(p, card) && card->targetFilter(QList<const Player *>(), p, self))
                 return true;
         }
     }

@@ -116,6 +116,7 @@ LuaSkillCard *LuaSkillCard::clone() const
     new_card->target_fixed = target_fixed;
     new_card->will_throw = will_throw;
     new_card->can_recast = can_recast;
+    //new_card->damage_card = damage_card;
     new_card->handling_method = handling_method;
     new_card->no_indicator = no_indicator;
 
@@ -226,6 +227,7 @@ LuaBasicCard *LuaBasicCard::clone(Card::Suit suit, int number) const
 
     new_card->target_fixed = target_fixed;
     new_card->can_recast = can_recast;
+    new_card->damage_card = damage_card;
 
     new_card->filter = filter;
     new_card->feasible = feasible;
@@ -256,6 +258,7 @@ LuaTrickCard *LuaTrickCard::clone(Card::Suit suit, int number) const
 
     new_card->target_fixed = target_fixed;
     new_card->can_recast = can_recast;
+    new_card->damage_card = damage_card;
 
     new_card->filter = filter;
     new_card->feasible = feasible;

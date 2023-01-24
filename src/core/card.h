@@ -104,6 +104,7 @@ public:
     void setIndicatorHide(bool can);
     void setCopy(bool can);
     void setUnknownCard(bool can);
+    void setDamageCard(bool flag);
 
     virtual void setFlags(const QString &flag) const;
     inline virtual void setFlags(const QStringList &fs)
@@ -141,7 +142,6 @@ public:
     virtual CardType getTypeId() const = 0;
     virtual bool isNDTrick() const;
     virtual bool isDamageCard() const;
-    virtual void setDamageCard(bool flag);
 
     // card target selection
     virtual bool targetFixed() const;

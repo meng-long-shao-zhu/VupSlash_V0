@@ -381,12 +381,6 @@ bool Card::isDamageCard() const
     return c && c->damage_card;
 }
 
-void Card::setDamageCard(bool flag)
-{
-    if (this->damage_card != flag)
-        this->damage_card = flag;
-}
-
 QString Card::getDescription() const
 {
     QString desc = Sanguosha->translate(":" + objectName());
@@ -898,6 +892,12 @@ bool Card::noIndicator() const
 void Card::setIndicatorHide(bool can)
 {
     no_indicator = can;
+}
+
+void Card::setDamageCard(bool flag)
+{
+    if (this->damage_card != flag)
+        this->damage_card = flag;
 }
 
 bool Card::isCopy() const

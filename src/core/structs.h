@@ -619,6 +619,7 @@ enum TriggerEvent
     DyingToDeath,
     DiscardNCards,
     AfterDiscardNCards,
+    IceFireDebut,
 
     Appear, // For yinni only
 

@@ -246,6 +246,7 @@ public:
     LuaBasicCard *clone(Card::Suit suit = Card::SuitToBeDecided, int number = -1) const;
     void setTargetFixed(bool target_fixed);
     void setCanRecast(bool can_recast);
+    void setDamageCard(bool damage_card);
 
     virtual void onUse(Room *room, const CardUseStruct &card_use) const;
     virtual void onEffect(const CardEffectStruct &effect) const;
@@ -276,6 +277,7 @@ public:
     LuaTrickCard *clone(Card::Suit suit = Card::SuitToBeDecided, int number = -1) const;
     void setTargetFixed(bool target_fixed);
     void setCanRecast(bool can_recast);
+    void setDamageCard(bool damage_card);
 
     virtual void onUse(Room *room, const CardUseStruct &card_use) const;
     virtual void onEffect(const CardEffectStruct &effect) const;

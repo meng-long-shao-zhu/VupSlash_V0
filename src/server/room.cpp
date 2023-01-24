@@ -2452,6 +2452,11 @@ void Room::swapPile(bool add_times)
     qShuffle(*m_drawPile);
     foreach(int card_id, *m_drawPile)
         setCardMapping(card_id, NULL, Player::DrawPile);
+
+    foreach (ServerPlayer *player, getAllPlayers()) {
+        setPlayerMark(player, "SwapPileTimes", times);
+    }
+
 }
 
 ServerPlayer *Room::findPlayer(const QString &general_name, bool include_dead) const

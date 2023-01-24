@@ -616,7 +616,7 @@ ManeuveringPackage::ManeuveringPackage()
         << new FireAttack(Card::Diamond, 12);
 
     DefensiveHorse *hualiu = new DefensiveHorse(Card::Diamond, 13);
-    hualiu->setObjectName("hualiu");
+    hualiu->setObjectName("jueying");
 
     cards << hualiu;
 

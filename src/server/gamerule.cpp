@@ -1001,6 +1001,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                 }
                 QVariant _drawnum = draw_num;
                 room->getThread()->trigger(AfterDrawInitialCards, room, player, _drawnum);
+                room->getThread()->trigger(IceFireDebut, room, player);
             }
         } else if (room->getMode() == "06_XMode") {
             changeGeneralXMode(player);

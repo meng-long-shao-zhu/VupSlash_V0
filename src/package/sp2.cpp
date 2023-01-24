@@ -1757,6 +1757,13 @@ public:
             if (player->isDead() || !player->isChained() || damage.chain) return;
             if (p->isDead() || !p->hasSkill(this)) continue;
             if (!p->askForSkillInvoke(this)) continue;
+
+            room->setPlayerMark(p, "askForSkillNullify_"+objectName(), 1);  //调用lua中的SkillNullify函数，若技能发动被无效则标记数将被改为2个（否则为0个）
+            if (p->getMark("askForSkillNullify_"+objectName()) == 2) {
+                room->setPlayerMark(p, "askForSkillNullify_"+objectName(), 0);
+                continue;
+            }
+
             room->broadcastSkillInvoke(objectName());
 
             QList<ServerPlayer *> _player;

@@ -340,7 +340,8 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool 
             nickname_item->setData(Qt::UserRole, general_name);
             nickname_item->setBackgroundColor(Qt::gray);
             nickname_item->setToolTip(Sanguosha->translate("bonus_locking"));
-            if (Sanguosha->translate("VERSION_NEW_CHARACTER").contains(general_name)) {
+            QStringList new_character_names = Sanguosha->translate("VERSION_NEW_CHARACTER").split("|");
+            if (new_character_names.contains(general_name)) {
                 nickname_item->setIcon(new_word_icon);
                 //nickname_item->setToolTip(Sanguosha->translate("NEW_CHARACTER_TOOLTIP"));
             }
@@ -430,10 +431,13 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool 
                 nickname_item->setIcon(bonus_star_icon);
                 nickname_item->setTextAlignment(Qt::AlignCenter);
                 nickname_item->setToolTip(Sanguosha->translate("bonus_unlocked"));
-            } else if (Sanguosha->translate("VERSION_NEW_CHARACTER").contains(general_name)) {
-                nickname_item->setIcon(new_word_icon);
-                nickname_item->setTextAlignment(Qt::AlignCenter);
-                nickname_item->setToolTip(Sanguosha->translate("NEW_CHARACTER_TOOLTIP"));
+            } else {
+                QStringList new_character_names = Sanguosha->translate("VERSION_NEW_CHARACTER").split("|");
+                if (new_character_names.contains(general_name)) {
+                    nickname_item->setIcon(new_word_icon);
+                    nickname_item->setTextAlignment(Qt::AlignCenter);
+                    nickname_item->setToolTip(Sanguosha->translate("NEW_CHARACTER_TOOLTIP"));
+                }
             }
 
             QTableWidgetItem *name_item = new QTableWidgetItem(name);

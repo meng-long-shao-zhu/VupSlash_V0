@@ -264,6 +264,10 @@ public:
     {
         this->can_recast = can_recast;
     }
+    inline void setDamageCard(bool damage_card)
+    {
+        this->damage_card = damage_card;
+    }
 
     // member functions that do not expose to Lua interpreter
     void pushSelf(lua_State *L) const;
@@ -323,6 +327,10 @@ public:
     inline void setCanRecast(bool can_recast)
     {
         this->can_recast = can_recast;
+    }
+    inline void setDamageCard(bool damage_card)
+    {
+        this->damage_card = damage_card;
     }
 
     // member functions that do not expose to Lua interpreter

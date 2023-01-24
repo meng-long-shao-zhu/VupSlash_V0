@@ -866,6 +866,7 @@ enum TriggerEvent {
 	DyingToDeath,
     DiscardNCards,
     AfterDiscardNCards,
+    IceFireDebut,
 
 	Appear, // For yinni only
 
@@ -922,7 +923,6 @@ public:
 	bool isGift() const;
     void setGift(bool flag);
 	bool isDamageCard() const;
-	void setDamageCard(bool flag);
 
     bool isVirtualCard() const;
     virtual bool match(const char *pattern) const;
@@ -966,6 +966,7 @@ public:
     void setIndicatorHide(bool can);
     void setCopy(bool can);
     void setUnknownCard(bool can);
+	void setDamageCard(bool flag);
 
     void setFlags(const char *flag) const;
     bool hasFlag(const char *flag) const;
