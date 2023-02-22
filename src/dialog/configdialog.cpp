@@ -50,6 +50,7 @@ ConfigDialog::ConfigDialog(QWidget *parent)
     ui->checkBoxRecorderAutoSave->setChecked(Config.value("recorder/autosave", true).toBool());
     ui->checkBoxRecorderNetworkOnly->setChecked(Config.value("recorder/networkonly", true).toBool());
     ui->hideRecordBubble->setChecked(Config.HideRecordBubble);
+    ui->safeLiveCheckBox->setChecked(Config.SafeLive);
     ui->noInteractiveCheckBox->setChecked(Config.NoInteractive);
 
     connect(this, SIGNAL(accepted()), this, SLOT(saveConfig()));
@@ -165,6 +166,8 @@ void ConfigDialog::saveConfig()
     Config.setValue("recorder/networkonly", enabled);
     Config.HideRecordBubble = ui->hideRecordBubble->isChecked();
     Config.setValue("HideRecordBubble", Config.HideRecordBubble);
+    Config.SafeLive = ui->safeLiveCheckBox->isChecked();
+    Config.setValue("SafeLive", Config.SafeLive);
 
     Config.NoInteractive = ui->noInteractiveCheckBox->isChecked();
     Config.setValue("NoInteractive", Config.NoInteractive);

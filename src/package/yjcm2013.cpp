@@ -390,23 +390,25 @@ class QiaoshuiUse : public TriggerSkill
 public:
     QiaoshuiUse() : TriggerSkill("#qiaoshui-use")
     {
-        events << PreCardUsed;
+        events << TargetSpecifying;
         view_as_skill = new QiaoshuiViewAsSkill;
+        global = true;
     }
 
     bool trigger(TriggerEvent, Room *room, ServerPlayer *jianyong, QVariant &data) const
     {
         if (!jianyong->hasFlag("QiaoshuiSuccess")) return false;
+        jianyong->setFlags("-QiaoshuiSuccess");
 
         CardUseStruct use = data.value<CardUseStruct>();
-        if (use.card->isNDTrick() || use.card->isKindOf("BasicCard")) {
-            jianyong->setFlags("-QiaoshuiSuccess");
-            if (Sanguosha->currentRoomState()->getCurrentCardUseReason() != CardUseStruct::CARD_USE_REASON_PLAY)
-                return false;
+
+        if ((use.card->isNDTrick() || use.card->isKindOf("BasicCard")) && !use.card->isKindOf("Collateral")) {
+            //if (Sanguosha->currentRoomState()->getCurrentCardUseReason() != CardUseStruct::CARD_USE_REASON_PLAY)
+            //    return false;
 
             QList<ServerPlayer *> available_targets;
             if (!use.card->isKindOf("AOE") && !use.card->isKindOf("GlobalEffect")) {
-                room->setPlayerFlag(jianyong, "QiaoshuiExtraTarget");
+                //room->setPlayerFlag(jianyong, "QiaoshuiExtraTarget");
                 foreach (ServerPlayer *p, room->getAlivePlayers()) {
                     if (use.to.contains(p) || room->isProhibited(jianyong, p, use.card)) continue;
                     if (use.card->targetFixed()) {
@@ -417,7 +419,7 @@ public:
                             available_targets << p;
                     }
                 }
-                room->setPlayerFlag(jianyong, "-QiaoshuiExtraTarget");
+                //room->setPlayerFlag(jianyong, "-QiaoshuiExtraTarget");
             }
             QStringList choices;
             choices << "cancel";
@@ -433,7 +435,7 @@ public:
                 if (!use.card->isKindOf("Collateral"))
                     extra = room->askForPlayerChosen(jianyong, available_targets, "qiaoshui", "@qiaoshui-add:::" + use.card->objectName());
                 else {
-                    QStringList tos;
+                    /*QStringList tos;
                     foreach(ServerPlayer *t, use.to)
                         tos.append(t->objectName());
                     room->setPlayerProperty(jianyong, "extra_collateral", use.card->toString());
@@ -459,13 +461,14 @@ public:
                         }
                         Q_ASSERT(!victims.isEmpty());
                         extra->tag["collateralVictim"] = QVariant::fromValue((victims.at(qrand() % victims.length())));
-                    }
+                    }*/
                 }
                 use.to.append(extra);
                 room->sortByActionOrder(use.to);
 
                 LogMessage log;
-                log.type = "#QiaoshuiAdd";
+                //log.type = "#QiaoshuiAdd";
+                log.type = "#HunlianAdd";
                 log.from = jianyong;
                 log.to << extra;
                 log.card_str = use.card->toString();
@@ -473,7 +476,7 @@ public:
                 room->sendLog(log);
                 room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, jianyong->objectName(), extra->objectName());
 
-                if (use.card->isKindOf("Collateral")) {
+                /*if (use.card->isKindOf("Collateral")) {
                     ServerPlayer *victim = extra->tag["collateralVictim"].value<ServerPlayer *>();
                     if (victim) {
                         LogMessage log;
@@ -483,18 +486,20 @@ public:
                         room->sendLog(log);
                         room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, extra->objectName(), victim->objectName());
                     }
-                }
+                }*/
             } else {
                 ServerPlayer *removed = room->askForPlayerChosen(jianyong, use.to, "qiaoshui", "@qiaoshui-remove:::" + use.card->objectName());
-                use.to.removeOne(removed);
+                use.to.removeAll(removed);
 
                 LogMessage log;
-                log.type = "#QiaoshuiRemove";
+                //log.type = "#QiaoshuiRemove";
+                log.type = "#HunlianRemove";
                 log.from = jianyong;
                 log.to << removed;
                 log.card_str = use.card->toString();
                 log.arg = "qiaoshui";
                 room->sendLog(log);
+                room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, jianyong->objectName(), removed->objectName());
             }
         }
         data = QVariant::fromValue(use);

@@ -138,6 +138,7 @@ void Settings::init()
     BGMVolume = value("BGMVolume", 1.0f).toFloat();
     EffectVolume = value("EffectVolume", 1.0f).toFloat();
     HideRecordBubble = value("HideRecordBubble", false).toBool();
+    SafeLive = value("SafeLive", false).toBool();
     NoInteractive = value("NoInteractive", false).toBool();
 
     BackgroundImage = value("BackgroundImage", "image/system/backdrop/new-version.jpg").toString();

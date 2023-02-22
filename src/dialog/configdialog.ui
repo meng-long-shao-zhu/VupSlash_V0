@@ -591,6 +591,19 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="safeLiveCheckBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>安全直播模式（隐藏玩家昵称、气泡消息）</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
     <widget class="QGroupBox" name="groupBoxRecorder">

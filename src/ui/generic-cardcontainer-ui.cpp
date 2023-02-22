@@ -232,10 +232,12 @@ void PlayerCardContainer::updateAvatar()
     const General *general = NULL;
     if (m_player) {
         general = m_player->getAvatarGeneral();
-        _m_layout->m_screenNameFont.paintText(_m_screenNameItem,
-            _m_layout->m_screenNameArea,
-            Qt::AlignCenter,
-            m_player->screenName());
+        if (!Config.SafeLive) {
+            _m_layout->m_screenNameFont.paintText(_m_screenNameItem,
+                _m_layout->m_screenNameArea,
+                Qt::AlignCenter,
+                m_player->screenName());
+        }
     }
     if (general != NULL) {
         _m_avatarArea->setToolTip(m_player->getSkillDescription());
@@ -621,6 +623,26 @@ void PlayerCardContainer::updateMarks()
         _m_markItem->setPos(newRect.topLeft());
     else
         _m_markItem->setPos(newRect.left(), newRect.top() + newRect.height() / 2);
+
+    if (m_player) {
+        QString textDoc = _m_markItem->document()->toHtml();
+        QString tooltip;
+        foreach (QString mark_name, m_player->getMarkNames()) {
+            if (textDoc.contains("image/mark/"+mark_name+".png")) {
+                int num = m_player->getMark(mark_name);
+                if (Sanguosha->translate(":"+mark_name+QString::number(num)) != ":"+mark_name+QString::number(num)) {
+                    tooltip.append("<img src='image/mark/"+mark_name+".png' />"+Sanguosha->translate(":"+mark_name+QString::number(num))+"<br/>");
+                } else if (Sanguosha->translate(":"+mark_name) != ":"+mark_name) {
+                    tooltip.append("<img src='image/mark/"+mark_name+".png' />"+Sanguosha->translate(":"+mark_name)+"<br/>");
+                } else if (Sanguosha->translate(mark_name) != mark_name) {
+                    tooltip.append("<img src='image/mark/"+mark_name+".png' /><b>"+Sanguosha->translate(mark_name)+"<b><br/>");
+                }
+            }
+        }
+        if (!tooltip.isEmpty()) {
+            _m_markItem->setToolTip(tooltip);
+        }
+    }
 }
 
 void PlayerCardContainer::_updateEquips()

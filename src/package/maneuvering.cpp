@@ -45,6 +45,14 @@ IceSlash::IceSlash(Suit suit, int number)
     damage_card = true;
 }
 
+DarkSlash::DarkSlash(Suit suit, int number)
+    : NatureSlash(suit, number, DamageStruct::Dark)
+{
+    setObjectName("dark_slash");
+    nature = DamageStruct::Dark;
+    damage_card = true;
+}
+
 Analeptic::Analeptic(Card::Suit suit, int number)
     : BasicCard(suit, number)
 {
@@ -584,7 +592,8 @@ ManeuveringPackage::ManeuveringPackage()
         << new IronChain(Card::Club, 10)
         << new IronChain(Card::Club, 11)
         << new IronChain(Card::Club, 12)
-        << new IronChain(Card::Club, 13);
+        << new IronChain(Card::Club, 13)
+        << new DarkSlash(Card::Club, 13);
 
     // heart
     cards << new Nullification(Card::Heart, 1)

@@ -137,7 +137,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
 
     change_general_menu = new QMenu(main_window);
     QAction *action = change_general_menu->addAction(tr("Change general ..."));
-    FreeChooseDialog *general_changer = new FreeChooseDialog(main_window);
+    FreeChooseDialog *general_changer = new FreeChooseDialog("all", main_window);
     connect(action, SIGNAL(triggered()), general_changer, SLOT(exec()));
     connect(general_changer, SIGNAL(general_chosen(QString)), this, SLOT(changeGeneral(QString)));
     to_change = NULL;
@@ -1163,7 +1163,7 @@ void RoomScene::arrangeSeats(const QList<const ClientPlayer *> &seats)
             break;
         }
     }
-    if (all_robot || (is_replay && Config.HideRecordBubble))
+    if (all_robot || (is_replay && Config.HideRecordBubble) || Config.SafeLive)
         setChatBoxVisible(false);
 
     //update the positions of bubbles after setting seats
@@ -1645,7 +1645,7 @@ void RoomScene::chooseGeneral(const QStringList &generals)
 
     QDialog *dialog;
     if (generals.isEmpty())
-        dialog = new FreeChooseDialog(main_window);
+        dialog = new FreeChooseDialog("all", main_window);
     else
         dialog = new ChooseGeneralDialog(generals, main_window);
 
@@ -3414,11 +3414,37 @@ void ScriptExecutor::doScript()
     if (box == NULL) return;
 
     QString script = box->toPlainText();
-    QByteArray data = script.toLatin1();
-    data = qCompress(data);
-    script = data.toBase64();
+    //自动删去开头的“密语”
+    bool can_cheat = false;
+    if (script.startsWith(Sanguosha->translate("CHEAT_PASS_WORD"))) {
+        script = script.right(script.size() - Sanguosha->translate("CHEAT_PASS_WORD").size());
+        can_cheat = true;
+    }
+    //禁止作弊模式下，只接受以“密语”开头的脚本
+    if (!ServerInfo.EnableCheat && !can_cheat) {
+        QMessageBox::warning(this, Sanguosha->translate("GAME_NAME"), Sanguosha->translate("NO_PERMISSION"));
+        return;
+    }
+    //排除危险的禁止词
+    bool banned = false;
+    QStringList dangerous_words;
+    dangerous_words << "os." << "windows" << "system";
+    foreach (QString word, dangerous_words) {
+        if (script.contains(word)) {
+            banned = true;
+            break;
+        }
+    }
+    if (banned) {
+        QMessageBox::warning(this, Sanguosha->translate("GAME_NAME"), Sanguosha->translate("DANGEROUS_SCRIPT"));
+        return;
+    } else {
+        QByteArray data = script.toLatin1();
+        data = qCompress(data);
+        script = data.toBase64();
 
-    ClientInstance->requestCheatRunScript(script);
+        ClientInstance->requestCheatRunScript(script);
+    }
 }
 
 DeathNoteDialog::DeathNoteDialog(QWidget *parent)
@@ -5244,6 +5270,7 @@ void RoomScene::showBubbleChatBox(const QString &who, const QString &line)
 {
     if (Config.BubbleChatBoxKeepTime == 0) return;
     if (is_replay && Config.HideRecordBubble) return;
+    if (Config.SafeLive) return;
     if (!bubbleChatBoxes.keys().contains(who)) {
         BubbleChatBox *bubbleChatBox = new BubbleChatBox(getBubbleChatBoxShowArea(who));
         addItem(bubbleChatBox);

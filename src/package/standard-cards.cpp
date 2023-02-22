@@ -73,6 +73,12 @@ bool Slash::IsAvailable(const Player *player, const Card *slash, bool considerSp
                         return true;
                 }
             }
+            if (player->hasSkill("guiyong")) {
+                foreach (const Player *p, player->getAliveSiblings()) {
+                    if (p->getMark("guiyong_slashed") == 0 && player->canSlash(p, THIS_SLASH))
+                        return true;
+                }
+            }
         }
         return false;
     } else {
@@ -293,6 +299,7 @@ bool Slash::IsSpecificAssignee(const Player *player, const Player *from, const C
         QStringList chixin_list = from->property("chixin").toString().split("+");
         if (from->hasSkill("chixin") && from->inMyAttackRange(player) && !chixin_list.contains(player->objectName())) return true;
         if (from->hasSkill("limu") && !from->getJudgingArea().isEmpty() && from->inMyAttackRange(player) && from != player) return true;
+        if (from->hasSkill("guiyong") && player->getMark("guiyong_slashed") == 0) return true;
     } else {
         const Slash *s = qobject_cast<const Slash *>(slash);
         if (s && s->hasSpecificAssignee(player))

@@ -36,6 +36,14 @@ public:
     Q_INVOKABLE IceSlash(Card::Suit suit, int number);
 };
 
+class DarkSlash : public NatureSlash
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE DarkSlash(Card::Suit suit, int number);
+};
+
 class Analeptic : public BasicCard
 {
     Q_OBJECT

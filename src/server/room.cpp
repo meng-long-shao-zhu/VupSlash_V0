@@ -4288,7 +4288,8 @@ void Room::loseMaxHp(ServerPlayer *victim, int lose, bool keep_hp)
     doBroadcastNotify(S_COMMAND_CHANGE_MAXHP, arg);
 
     if (victim->getMaxHp() <= 0 && victim->getHp() <= 0)
-        killPlayer(victim);
+        //killPlayer(victim);
+        enterDying(victim);
     else
         thread->trigger(MaxHpChanged, this, victim);
 }

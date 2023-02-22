@@ -86,6 +86,7 @@ public:
     float BGMVolume;
     float EffectVolume;
     bool HideRecordBubble;
+    bool SafeLive;
     bool NoInteractive;
 
     QString BackgroundImage;

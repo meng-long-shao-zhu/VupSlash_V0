@@ -160,12 +160,14 @@ ChooseGeneralDialog::ChooseGeneralDialog(const QStringList &general_names, QWidg
     }
 
     QString default_name = generals.first()->objectName();
+    QStringList _generals;
     for (int i = 0; i < buttons.size(); i++) {
-        if (buttons.at(i)->isEnabled()) {
-            default_name = generals.at(i)->objectName();
-            break;
-        }
+        if (buttons.at(i)->isEnabled())
+            _generals << generals.at(i)->objectName();
     }
+    if (!_generals.isEmpty())
+        default_name = _generals.at(qrand() % _generals.length());
+
 
     if (!view_only) {
         mapper->setMapping(this, default_name);
@@ -209,9 +211,15 @@ ChooseGeneralDialog::ChooseGeneralDialog(const QStringList &general_names, QWidg
         || ServerInfo.GameMode.startsWith("_mini_") || ServerInfo.GameMode == "custom_scenario";
 
     if (!view_only && free_choose) {
+        //QLabel *name_edit_label = new QLabel(Sanguosha->translate("SEARCH_CHARACTER_NAME"));
+        name_edit = new QLineEdit;
+        name_edit->clear();
+        name_edit->setPlaceholderText(Sanguosha->translate("SEARCH_CHARACTER_NAME"));
         QPushButton *free_choose_button = new QPushButton(tr("Free choose ..."));
         connect(free_choose_button, SIGNAL(clicked()), this, SLOT(freeChoose()));
+        //last_layout->addWidget(name_edit_label);
         last_layout->addWidget(free_choose_button);
+        last_layout->addWidget(name_edit);
     }
 
     last_layout->addStretch();
@@ -235,7 +243,24 @@ void ChooseGeneralDialog::done(int result)
 
 void ChooseGeneralDialog::freeChoose()
 {
-    QDialog *dialog = new FreeChooseDialog(this);
+    QString name = name_edit->text();
+    bool ok = false;
+    QList<const General *> all_generals = Sanguosha->findChildren<const General *>();
+    foreach (const General *general, all_generals) {
+        if (general->isTotallyHidden())
+            continue;
+        QString g_name = general->objectName();
+        if (name.isEmpty() || (g_name.contains(name) || Sanguosha->translate(g_name).contains(name))) {
+            ok = true;
+            break;
+        }
+    }
+    if (!ok) {
+        QMessageBox::warning(this, Sanguosha->translate("GAME_NAME"), Sanguosha->translate("CHARACTER_NOTFOUND"));
+        return;
+    }
+
+    QDialog *dialog = new FreeChooseDialog(name, this);
 
     connect(dialog, SIGNAL(accepted()), this, SLOT(accept()));
     connect(dialog, SIGNAL(general_chosen(QString)), ClientInstance, SLOT(onPlayerChooseGeneral(QString)));
@@ -245,7 +270,7 @@ void ChooseGeneralDialog::freeChoose()
     dialog->exec();
 }
 
-FreeChooseDialog::FreeChooseDialog(QWidget *parent, ButtonGroupType type)
+FreeChooseDialog::FreeChooseDialog(const QString &name, QWidget *parent, ButtonGroupType type)
     : QDialog(parent), type(type)
 {
     setWindowTitle(tr("Free choose generals"));
@@ -261,7 +286,14 @@ FreeChooseDialog::FreeChooseDialog(QWidget *parent, ButtonGroupType type)
         if (general->isTotallyHidden())
             continue;
 
-        map[general->getKingdom()] << general;
+        QString g_name = general->objectName();
+        if (name.isEmpty() || name == "all" || (g_name.contains(name) || Sanguosha->translate(g_name).contains(name))) {
+            map[general->getKingdom()] << general;
+            //QStringList kins = general->getKingdoms().split("+");
+            //foreach (QString kingd, kins)
+            //    map[kingd] << general;
+        }
+        //map[general->getKingdom()] << general;
     }
 
     QStringList kingdoms = Sanguosha->getKingdoms();

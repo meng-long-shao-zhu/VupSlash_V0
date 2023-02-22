@@ -642,7 +642,7 @@ void BanlistDialog::doAddButton()
         if (!pattern.isEmpty())
             addGeneral(pattern);
     } else {
-        FreeChooseDialog *chooser = new FreeChooseDialog(this,
+        FreeChooseDialog *chooser = new FreeChooseDialog("all", this,
             (list->objectName() == "Pairs") ? FreeChooseDialog::Pair : FreeChooseDialog::Multi);
         connect(chooser, SIGNAL(general_chosen(QString)), this, SLOT(addGeneral(QString)));
         connect(chooser, SIGNAL(pair_chosen(QString, QString)), this, SLOT(addPair(QString, QString)));
@@ -652,7 +652,7 @@ void BanlistDialog::doAddButton()
 
 void BanlistDialog::doAdd2ndButton()
 {
-    FreeChooseDialog *chooser = new FreeChooseDialog(this, FreeChooseDialog::Multi);
+    FreeChooseDialog *chooser = new FreeChooseDialog("all", this, FreeChooseDialog::Multi);
     connect(chooser, SIGNAL(general_chosen(QString)), this, SLOT(add2ndGeneral(QString)));
     chooser->exec();
 }

@@ -1098,7 +1098,8 @@ int Player::getSlashCount() const
     return history.value("Slash", 0)
         + history.value("ThunderSlash", 0)
         + history.value("FireSlash", 0)
-        + history.value("IceSlash", 0);
+        + history.value("IceSlash", 0)
+        + history.value("DarkSlash", 0);
 }
 
 void Player::clearHistory(const QString &name)
